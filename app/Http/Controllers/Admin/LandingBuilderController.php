@@ -20,10 +20,8 @@ class LandingBuilderController extends Controller
     {
         $sections = LandingSection::orderBy('order', 'asc')->get();
 
-        // Seed default sections if database is empty
-        if ($sections->isEmpty()) {
-            $sections = $this->seedDefaultSections();
-        }
+        // Seed & sync default UNU Purwokerto sections if missing
+        $sections = $this->seedDefaultSections();
 
         $themeSettings = LandingSiteSetting::get('theme_config', [
             'primaryColor' => '#6366f1',
@@ -182,22 +180,9 @@ class LandingBuilderController extends Controller
      */
     public function publish()
     {
-        $sections = LandingSection::all();
+        LandingSection::query()->update(['status' => 'published']);
 
-        foreach ($sections as $section) {
-            $section->update(['status' => 'published']);
-
-            // Save version snapshot
-            LandingSectionVersion::create([
-                'landing_section_id' => $section->id,
-                'version_name' => 'Version ' . date('Y-m-d H:i:s'),
-                'content' => $section->content,
-                'settings' => $section->settings,
-                'created_by' => auth()->id(),
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Seluruh perubahan landing page berhasil dipublikasikan ke live site!');
+        return redirect()->back()->with('success', 'Semua perubahan berhasil dipublikasikan ke halaman utama');
     }
 
     /**
@@ -205,15 +190,20 @@ class LandingBuilderController extends Controller
      */
     public function updateSettings(Request $request)
     {
-        if ($request->has('theme')) {
-            LandingSiteSetting::set('theme_config', $request->input('theme'));
+        $validated = $request->validate([
+            'themeSettings' => ['nullable', 'array'],
+            'seoSettings' => ['nullable', 'array'],
+        ]);
+
+        if (isset($validated['themeSettings'])) {
+            LandingSiteSetting::set('theme_config', $validated['themeSettings']);
         }
 
-        if ($request->has('seo')) {
-            LandingSiteSetting::set('seo_config', $request->input('seo'));
+        if (isset($validated['seoSettings'])) {
+            LandingSiteSetting::set('seo_config', $validated['seoSettings']);
         }
 
-        return redirect()->back()->with('success', 'Pengaturan global berhasil diperbarui');
+        return redirect()->back()->with('success', 'Pengaturan tampilan & SEO berhasil diperbarui');
     }
 
     /**
@@ -222,21 +212,19 @@ class LandingBuilderController extends Controller
     public function uploadMedia(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:jpeg,png,jpg,webp,svg,gif,mp4,pdf|max:10240',
-            'alt_text' => 'nullable|string',
+            'file' => ['required', 'file', 'mimes:png,jpg,jpeg,webp,svg,mp4', 'max:5120'], // Max 5MB
         ]);
 
         $file = $request->file('file');
         $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs('uploads', $filename, 'public');
+        $path = $file->storeAs('landing', $filename, 'public');
 
-        $media = MediaFile::create([
-            'name' => $file->getClientOriginalName(),
+        MediaFile::create([
+            'filename' => $filename,
+            'original_name' => $file->getClientOriginalName(),
             'file_path' => '/storage/' . $path,
-            'mime_type' => $file->getMimeType(),
-            'size_bytes' => $file->getSize(),
-            'alt_text' => $request->input('alt_text', $file->getClientOriginalName()),
-            'folder' => 'general',
+            'file_type' => $file->getClientMimeType(),
+            'file_size' => $file->getSize(),
             'uploaded_by' => auth()->id(),
         ]);
 
@@ -244,64 +232,56 @@ class LandingBuilderController extends Controller
     }
 
     /**
-     * Default content structure helper.
+     * Default content structure helper for UNU Purwokerto Kemahasiswaan.
      */
     private function getDefaultContentForType(string $type): array
     {
         switch ($type) {
             case 'hero':
                 return [
-                    'badge' => 'Build SaaS Enterprise in Record Time',
-                    'heading' => 'Starter Kit Fullstack Laravel 13 + Svelte 5',
-                    'highlight_text' => 'Terkeren untuk SaaS Anda',
-                    'description' => 'Nikmati kekuatan Svelte 5 Runes berpadu dengan arsitektur Laravel 13, Inertia v2, RBAC granular, dan Tailwind CSS v4.',
-                    'primary_btn_text' => 'Coba Demo Aplikasi',
-                    'primary_btn_url' => '/login',
-                    'secondary_btn_text' => 'Panduan Instalasi',
-                    'secondary_btn_url' => '#quickstart',
-                    'hero_image' => '/images/hero-hijab.png',
+                    'badge' => 'Portal Resmi UNU Purwokerto',
+                    'heading' => 'Kemahasiswaan & Alumni UNU Purwokerto',
+                    'highlight_text' => 'Pusat Layanan Terpadu',
+                    'description' => 'Pusat Informasi, Layanan, Dokumentasi, & Media Komunikasi Kemahasiswaan & Alumni Universitas Nahdlatul Ulama Purwokerto.',
+                    'primary_btn_text' => 'Jelajahi Fitur',
+                    'primary_btn_url' => '/informasi',
+                    'secondary_btn_text' => 'Program Belmawa',
+                    'secondary_btn_url' => '/belmawa',
+                    'hero_image' => '/images/branding/unu_purwokerto_logo.png',
                 ];
             case 'features':
                 return [
                     'items' => [
-                        ['title' => 'Performa Kilat Svelte 5', 'desc' => 'Svelte 5 Runes untuk reaktivitas tingkat granular.', 'icon' => 'Zap'],
-                        ['title' => 'Sistem RBAC Presisi', 'desc' => 'Super Admin, Admin, dan User dengan hak akses granular.', 'icon' => 'ShieldCheck'],
-                        ['title' => 'UI Components & Dark Mode', 'desc' => 'Data Table, Modal, Toast, Dialog, Avatar, File Upload.', 'icon' => 'Layers'],
+                        ['title' => 'Beasiswa & Kesejahteraan', 'desc' => 'Informasi KIP Kuliah, Beasiswa Yayasan, Baznas, & Pemda.', 'icon' => 'Coins'],
+                        ['title' => 'Program Belmawa', 'desc' => 'Pendampingan PKM, P2MW, Pilmapres, & PPK Ormawa.', 'icon' => 'Sparkles'],
+                        ['title' => 'Hall of Achievement', 'desc' => 'Pendataan dan apresiasi kejuaraan mahasiswa nasional & internasional.', 'icon' => 'Trophy'],
                     ]
                 ];
             case 'stats':
                 return [
                     'items' => [
-                        ['value' => '100%', 'label' => 'Svelte 5 Runes Native'],
-                        ['value' => '0.05s', 'label' => 'Rata-rata Response Time'],
-                        ['value' => '10+', 'label' => 'Komponen UI Siap Pakai'],
-                        ['value' => '100%', 'label' => 'Open Source & Royalty Free'],
+                        ['value' => '3,850+', 'label' => 'Total Alumni Terdata'],
+                        ['value' => '89.4%', 'label' => 'Serapan Kerja Alumni'],
+                        ['value' => '100+', 'label' => 'Prestasi Mahasiswa'],
+                        ['value' => '100%', 'label' => 'Layanan Kemahasiswaan Digital'],
                     ]
                 ];
             case 'testimonials':
                 return [
                     'items' => [
-                        ['name' => 'Fairuz Tech', 'role' => 'CTO at TechSaaS', 'comment' => 'FairuzKit memangkas waktu pengembangan proyek kami dari 3 bulan menjadi hanya 1 minggu!', 'avatar' => '/images/hero-hijab.png'],
-                        ['name' => 'Budi Santoso', 'role' => 'Lead Developer', 'comment' => 'Arsitektur Laravel 13 + Svelte 5 paling rapi dan mudah digunakan.', 'avatar' => ''],
-                    ]
-                ];
-            case 'pricing':
-                return [
-                    'plans' => [
-                        ['name' => 'Community', 'price' => 'Gratis', 'period' => 'selamanya', 'features' => ['Laravel 13 & Svelte 5', 'RBAC System', 'Community Support'], 'button_text' => 'Download Free'],
-                        ['name' => 'Pro Lifetime', 'price' => 'Rp 499.000', 'period' => 'sekali bayar', 'features' => ['Semua Fitur Community', 'Landing Builder Studio', 'Full Source Code & Updates'], 'button_text' => 'Beli Lisensi Pro', 'is_popular' => true],
+                        ['name' => 'M. Rizky Pratama, S.Kom.', 'role' => 'Alumni Informatika 2022', 'comment' => 'Pendidikan dan organisasi di UNU Purwokerto membentuk fondasi kepemimpinan dan karir profesional saya.', 'avatar' => ''],
                     ]
                 ];
             case 'faq':
                 return [
                     'items' => [
-                        ['question' => 'Apakah FairuzKit menggunakan Svelte 5 Runes?', 'answer' => 'Ya! FairuzKit menggunakan Svelte 5 terbaru dengan sintaks $state, $derived, dan $effect.'],
-                        ['question' => 'Apakah mendukung Dark Mode?', 'answer' => 'Tentu saja, Dark Mode terintegrasi penuh secara otomatis di seluruh komponen.'],
+                        ['question' => 'Bagaimana cara mengajukan Beasiswa di UNU Purwokerto?', 'answer' => 'Pengajuan beasiswa dapat dilakukan melalui menu Informasi Beasiswa dan melengkapi berkas di Bagian Kemahasiswaan.'],
+                        ['question' => 'Dimana alumni dapat mengisi Kuesioner Tracer Study?', 'answer' => 'Alumni dapat mengisi kuesioner pada menu Tracer Study atau melalui tracer.unupurwokerto.ac.id.'],
                     ]
                 ];
             default:
                 return [
-                    'html_content' => '<div class="p-8 bg-slate-900 rounded-2xl text-center"><h3 class="text-xl font-bold">Custom Content</h3><p class="text-slate-400 mt-2">Edit konten ini sesuai kebutuhan Anda.</p></div>'
+                    'html_content' => '<div class="p-8 bg-slate-900 rounded-2xl text-center"><h3 class="text-xl font-bold">Informasi Tambahan</h3><p class="text-slate-400 mt-2">Konten Kemahasiswaan & Alumni UNU Purwokerto.</p></div>'
                 ];
         }
     }
@@ -313,61 +293,83 @@ class LandingBuilderController extends Controller
     {
         $defaultSectionsData = [
             [
-                'section_id' => 'hero-main',
+                'section_id' => 'hero-banner',
                 'type' => 'hero',
-                'name' => 'Hero Banner Utama',
-                'title' => 'Starter Kit Fullstack Laravel 13 + Svelte 5',
-                'subtitle' => 'Terkeren untuk SaaS Anda',
-                'description' => 'Nikmati kekuatan Svelte 5 Runes ($state, $derived) berpadu dengan arsitektur Laravel 13, Inertia v2, RBAC granular, dan Tailwind CSS v4. Siap dideploy hari ini!',
+                'name' => 'Banner Header Utama Kampus',
+                'title' => 'Kemahasiswaan & Alumni UNU Purwokerto',
+                'subtitle' => 'Pusat Layanan Terpadu Mahasiswa & Alumni',
+                'description' => 'Pusat Informasi, Layanan, Dokumentasi, & Media Komunikasi Kemahasiswaan & Alumni Universitas Nahdlatul Ulama Purwokerto.',
                 'content' => $this->getDefaultContentForType('hero'),
-                'settings' => ['background' => 'transparent', 'paddingTop' => 'py-20', 'containerWidth' => '7xl', 'alignment' => 'left', 'animation' => 'fade-in', 'hideMobile' => false],
+                'settings' => ['background' => 'transparent', 'paddingTop' => 'py-16', 'containerWidth' => '7xl', 'alignment' => 'left', 'animation' => 'none', 'hideMobile' => false],
                 'order' => 1,
                 'is_active' => true,
                 'status' => 'published',
             ],
             [
-                'section_id' => 'stats-bar',
-                'type' => 'stats',
-                'name' => 'Statistik Performa',
-                'title' => 'Metrik FairuzKit',
-                'subtitle' => '',
-                'description' => '',
-                'content' => $this->getDefaultContentForType('stats'),
-                'settings' => ['background' => 'slate-900/50', 'paddingTop' => 'py-12', 'containerWidth' => '7xl', 'alignment' => 'center', 'animation' => 'none', 'hideMobile' => false],
+                'section_id' => 'fitur-layanan',
+                'type' => 'features',
+                'name' => 'Akses Fitur & Layanan Utama',
+                'title' => 'Layanan & Program Keunggulan Kemahasiswaan',
+                'subtitle' => 'Akses langsung modul layanan kemahasiswaan dan jaringan alumni',
+                'description' => 'Fasilitas beasiswa, kompetisi Belmawa, pendataan kejuaraan, bursa karir, dan ikatan alumni.',
+                'content' => [
+                    'items' => [
+                        ['title' => 'Pusat Informasi & Pengumuman', 'desc' => 'Edaran akademik, agenda kegiatan, seminar, dan workshop resmi.', 'icon' => 'ShieldCheck'],
+                        ['title' => 'Program Belmawa Kemendiktisaintek', 'desc' => 'Pendampingan dan pendanaan proposal PKM, P2MW, Pilmapres, & PPK Ormawa.', 'icon' => 'Sparkles'],
+                        ['title' => 'Hall of Achievement', 'desc' => 'Pendataan dan apresiasi kejuaraan mahasiswa tingkat nasional & internasional.', 'icon' => 'Trophy'],
+                        ['title' => 'Beasiswa KIP & Internal Yayasan', 'desc' => 'Informasi pembebasan UKT, KIP-Kuliah, Baznas, BI, dan Pemda Banyumas.', 'icon' => 'Coins'],
+                        ['title' => 'Karir Alumni & Bursa Kerja', 'desc' => 'Info lowongan kerja mitra industri, magang kerja, dan jejaring alumni.', 'icon' => 'Zap'],
+                        ['title' => 'Sistem Tracer Study Alumni', 'desc' => 'Kuesioner penjaminan mutu dan pelacakan jejak karir alumni UNU Purwokerto.', 'icon' => 'Layers'],
+                    ]
+                ],
+                'settings' => ['background' => 'slate-900/30', 'paddingTop' => 'py-16', 'containerWidth' => '7xl', 'alignment' => 'center', 'animation' => 'none', 'hideMobile' => false],
                 'order' => 2,
                 'is_active' => true,
                 'status' => 'published',
             ],
             [
-                'section_id' => 'features-grid',
-                'type' => 'features',
-                'name' => 'Fitur Unggulan',
-                'title' => 'Semua Fitur Esensial SaaS dalam Satu Kit',
-                'subtitle' => 'Anda tidak perlu membuang waktu berminggu-minggu membuat fitur dari nol.',
-                'description' => '',
-                'content' => $this->getDefaultContentForType('features'),
-                'settings' => ['background' => 'transparent', 'paddingTop' => 'py-24', 'containerWidth' => '7xl', 'alignment' => 'center', 'animation' => 'fade-in', 'hideMobile' => false],
+                'section_id' => 'stats-kemahasiswaan',
+                'type' => 'stats',
+                'name' => 'Statistik Kemahasiswaan & Alumni',
+                'title' => 'Capaian & Indikator Kinerja Utama (IKU 1)',
+                'subtitle' => 'Pencapaian Kemahasiswaan UNU Purwokerto',
+                'description' => 'Rekapitulasi pencapaian serapan kerja alumni, prestasi mahasiswa, serta keaktifan ormawa.',
+                'content' => [
+                    'items' => [
+                        ['value' => '3,850+', 'label' => 'Total Alumni Terdata'],
+                        ['value' => '89.4%', 'label' => 'Serapan Kerja Alumni (IKU 1)'],
+                        ['value' => '100+', 'label' => 'Prestasi Kejuaraan 2026'],
+                        ['value' => '100%', 'label' => 'Layanan Kemahasiswaan Digital'],
+                    ]
+                ],
+                'settings' => ['background' => 'slate-900/50', 'paddingTop' => 'py-12', 'containerWidth' => '7xl', 'alignment' => 'center', 'animation' => 'none', 'hideMobile' => false],
                 'order' => 3,
                 'is_active' => true,
                 'status' => 'published',
             ],
             [
-                'section_id' => 'faq-accordion',
+                'section_id' => 'faq-kemahasiswaan',
                 'type' => 'faq',
-                'name' => 'Pertanyaan Umum (FAQ)',
-                'title' => 'Pertanyaan Sering Diajukan',
-                'subtitle' => 'Jawaban lengkap mengenai FairuzKit',
-                'description' => '',
-                'content' => $this->getDefaultContentForType('faq'),
-                'settings' => ['background' => 'slate-900/30', 'paddingTop' => 'py-20', 'containerWidth' => '4xl', 'alignment' => 'center', 'animation' => 'fade-in', 'hideMobile' => false],
+                'name' => 'Pertanyaan Sering Diajukan (FAQ)',
+                'title' => 'Pertanyaan Sering Diajukan (FAQ)',
+                'subtitle' => 'Informasi Seputar Layanan & Administrasi Mahasiswa',
+                'description' => 'Jawaban atas pertanyaan umum seputar Beasiswa KIP, Program Belmawa, dan Kuesioner Tracer Study.',
+                'content' => [
+                    'items' => [
+                        ['question' => 'Bagaimana cara pendaftaran Beasiswa KIP Kuliah di UNU Purwokerto?', 'answer' => 'Pendaftaran KIP-Kuliah dilakukan bersamaan dengan alur PMB UNU Purwokerto pada semester gasal.'],
+                        ['question' => 'Dimana alumni dapat mengisi Kuesioner Tracer Study?', 'answer' => 'Alumni dapat mengisi kuesioner pada menu Tracer Study atau melalui tracer.unupurwokerto.ac.id.'],
+                        ['question' => 'Bagaimana alur pendataan prestasi mahasiswa?', 'answer' => 'Mahasiswa mengunggah sertifikat kejuaraan melalui Form Pendataan Prestasi di menu Prestasi.'],
+                    ]
+                ],
+                'settings' => ['background' => 'transparent', 'paddingTop' => 'py-16', 'containerWidth' => '7xl', 'alignment' => 'center', 'animation' => 'none', 'hideMobile' => false],
                 'order' => 4,
                 'is_active' => true,
                 'status' => 'published',
-            ]
+            ],
         ];
 
         foreach ($defaultSectionsData as $sec) {
-            LandingSection::create($sec);
+            LandingSection::updateOrCreate(['section_id' => $sec['section_id']], $sec);
         }
 
         return LandingSection::orderBy('order', 'asc')->get();

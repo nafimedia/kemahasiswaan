@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\Cms\MenuController;
 use App\Http\Controllers\Admin\Cms\MediaController;
 use App\Http\Controllers\Admin\FormBuilderController;
 use App\Http\Controllers\Admin\Cms\RedirectController;
+use App\Http\Controllers\PublicKemahasiswaanController;
 use Illuminate\Support\Facades\Route;
 
 // Home Route (Landing Page)
@@ -40,7 +41,7 @@ Route::get('/', function () {
         })
         ->with(['category', 'author'])
         ->latest('published_at')
-        ->take(3)
+        ->take(6)
         ->get();
 
     $navMenu = \App\Models\Menu::where('location', 'navbar')
@@ -59,11 +60,22 @@ Route::get('/', function () {
     ]);
 })->name('welcome');
 
+// Public Kemahasiswaan & Alumni Routes
+Route::get('/informasi', [PublicKemahasiswaanController::class, 'informasi'])->name('public.informasi');
+Route::get('/belmawa', [PublicKemahasiswaanController::class, 'belmawa'])->name('public.belmawa');
+Route::get('/prestasi', [PublicKemahasiswaanController::class, 'prestasi'])->name('public.prestasi');
+Route::get('/beasiswa', [PublicKemahasiswaanController::class, 'beasiswa'])->name('public.beasiswa');
+Route::get('/alumni', [PublicKemahasiswaanController::class, 'alumni'])->name('public.alumni');
+Route::get('/tracer-study', [PublicKemahasiswaanController::class, 'tracerStudy'])->name('public.tracer-study');
+Route::get('/download', [PublicKemahasiswaanController::class, 'download'])->name('public.download');
+Route::get('/kontak', [PublicKemahasiswaanController::class, 'kontak'])->name('public.kontak');
+
 // Public Blog Routes
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/preview/posts/{id}/{token}', [BlogController::class, 'preview'])->name('blog.preview');
 Route::post('/blog/{id}/comments', [BlogController::class, 'storeComment'])->name('blog.comments.store');
+
 
 // Guest Routes
 Route::middleware('guest')->group(function () {

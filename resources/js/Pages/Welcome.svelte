@@ -2,35 +2,34 @@
     import { Link, page } from '@inertiajs/svelte';
     import {
         Sparkles,
-        Zap,
-        ShieldCheck,
-        Layers,
-        Cpu,
-        Code2,
-        ArrowRight,
-        CheckCircle2,
-        Star,
-        Smartphone,
-        Lock,
-        Terminal,
-        Copy,
-        Check,
+        Megaphone,
+        Trophy,
+        Coins,
+        Users,
+        BarChart3,
+        Download,
+        MessageSquare,
+        ChevronLeft,
         ChevronRight,
-        Globe,
-        Rocket,
-        Sparkle,
-        LayoutDashboard,
-        UserCheck,
-        Newspaper,
+        ArrowRight,
         Calendar,
         Clock,
-        Eye,
+        CheckCircle2,
+        GraduationCap,
         BookOpen,
+        Award,
+        Building2,
+        UserCheck,
+        ShieldCheck,
+        Search,
+        Briefcase,
+        FileText,
+        Star,
+        Flame
     } from 'lucide-svelte';
 
     import DynamicSectionRenderer from '@/Components/Landing/DynamicSectionRenderer.svelte';
     import ThemeToggle from '@/Components/UI/ThemeToggle.svelte';
-
     import type { PageProps } from '@/lib/types';
 
     interface Props {
@@ -43,605 +42,567 @@
 
     let { dynamicSections = [], themeSettings = {}, seoSettings = {}, latestPosts = [], navMenu = null }: Props = $props();
 
-    let copied = $state(false);
-    const installCommand = 'npx create-fairuzkit my-app';
-
-    function copyCommand() {
-        navigator.clipboard.writeText(installCommand);
-        copied = true;
-        setTimeout(() => {
-            copied = false;
-        }, 2000);
-    }
-
     const pageProps = $derived(page.props as unknown as PageProps);
     const authUser = $derived(pageProps.auth?.user);
-    const site = $derived(pageProps.site || { name: 'LaraSvelte', description: '' });
+    const site = $derived(pageProps.site || { name: 'Kemahasiswaan & Alumni UNU Purwokerto' });
     const branding = $derived(pageProps.branding || {});
 
-    const techStack = [
+    // Hero Carousel Slides Data
+    const slides = [
         {
-            name: 'Laravel 13',
-            desc: 'Backend PHP Framework robust & aman',
-            color: 'from-rose-500 to-red-600',
-            tag: 'Backend',
+            title: 'Selamat Datang di Portal Kemahasiswaan & Alumni',
+            subtitle: 'UNIVERSITAS NAHDLATUL ULAMA PURWOKERTO',
+            desc: 'Pusat layanan digital terintegrasi untuk pengumuman resmi, beasiswa KIP-Kuliah, kompetisi Belmawa Kemendiktisaintek, pendataan prestasi, dan karir alumni.',
+            tag: 'PORTAL RESMI KAMPUS',
+            btnText: 'Jelajahi Layanan',
+            btnUrl: '#quickmenu',
+            secondaryBtnText: 'Program Belmawa',
+            secondaryBtnUrl: '/belmawa',
+            badgeBg: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+            bgGradientLight: 'from-emerald-50 via-teal-50/50 to-slate-50',
+            bgGradientDark: 'from-emerald-950/60 via-slate-900 to-slate-950',
+            accentGlow: 'from-emerald-500/20 via-teal-500/10 to-transparent',
+            icon: Sparkles,
+            statHighlight: '3,850+ Alumni Terdata',
+            statSub: 'Indikator Kinerja Utama (IKU 1)'
         },
         {
-            name: 'Svelte 5',
-            desc: 'Runes ($state, $derived) super cepat',
-            color: 'from-amber-500 to-orange-600',
-            tag: 'Frontend',
+            title: 'Dokumentasi & Pengembangan Ormawa',
+            subtitle: 'BEM, DPM, UKM & HIMPUNAN MAHASISWA',
+            desc: 'Wadah pembentukan karakter berlandaskan kebangsaan dan nilai-nilai Aswaja An-Nahdliyah melalui kegiatan organisasi kelembagaan mahasiswa.',
+            tag: 'ORGANISASI MAHASISWA',
+            btnText: 'Lihat Kegiatan',
+            btnUrl: '/informasi',
+            secondaryBtnText: 'Kontak Helpdesk',
+            secondaryBtnUrl: '/kontak',
+            badgeBg: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30',
+            bgGradientLight: 'from-blue-50 via-cyan-50/50 to-slate-50',
+            bgGradientDark: 'from-blue-950/60 via-slate-900 to-slate-950',
+            accentGlow: 'from-blue-500/20 via-cyan-500/10 to-transparent',
+            icon: Users,
+            statHighlight: '100% Ormawa Aktif',
+            statSub: 'Pembinaan Karakter & Kepemimpinan'
         },
         {
-            name: 'Inertia.js v2',
-            desc: 'Pengalaman SPA tanpa ribet bikin API',
-            color: 'from-purple-500 to-indigo-600',
-            tag: 'Adapter',
+            title: 'Capaian Prestasi Tingkat Nasional & Internasional',
+            subtitle: 'HALL OF ACHIEVEMENT UNU PURWOKERTO',
+            desc: 'Apresiasi dan fasilitasi tinggi bagi mahasiswa peraih kejuaraan di bidang riset, teknologi, olahraga, seni budaya, serta kompetisi ilmiah.',
+            tag: 'PRESTASI MAHASISWA',
+            btnText: 'Katalog Prestasi',
+            btnUrl: '/prestasi',
+            secondaryBtnText: 'Unggah Capaian',
+            secondaryBtnUrl: '/kontak',
+            badgeBg: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30',
+            bgGradientLight: 'from-amber-50 via-orange-50/50 to-slate-50',
+            bgGradientDark: 'from-amber-950/60 via-slate-900 to-slate-950',
+            accentGlow: 'from-amber-500/20 via-orange-500/10 to-transparent',
+            icon: Trophy,
+            statHighlight: '100+ Kejuaraan 2026',
+            statSub: 'Sains, Seni & Olahraga'
         },
         {
-            name: 'Tailwind CSS v4',
-            desc: 'Styling modern dengan CSS Engine baru',
-            color: 'from-cyan-500 to-blue-600',
-            tag: 'Styling',
+            title: 'Informasi Beasiswa KIP-K, Yayasan & Mitra 2026',
+            subtitle: 'DUKUNGAN BIAYA PENDIDIKAN MAHASISWA',
+            desc: 'Dukungan pembiayaan pendidikan berkelanjutan untuk menjamin akses kuliah bagi mahasiswa berprestasi dan berkebutuhan finansial.',
+            tag: 'BEASISWA KAMPUS',
+            btnText: 'Daftar Beasiswa',
+            btnUrl: '/beasiswa',
+            secondaryBtnText: 'Syarat & Berkas',
+            secondaryBtnUrl: '/beasiswa',
+            badgeBg: 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30',
+            bgGradientLight: 'from-teal-50 via-emerald-50/50 to-slate-50',
+            bgGradientDark: 'from-teal-950/60 via-slate-900 to-slate-950',
+            accentGlow: 'from-teal-500/20 via-emerald-500/10 to-transparent',
+            icon: Coins,
+            statHighlight: 'Ribuan Penerima Beasiswa',
+            statSub: 'KIP-K, Baznas, Pemda & Yayasan'
         },
         {
-            name: 'Vite 6',
-            desc: 'Bundler & Instant Hot Module Reload',
-            color: 'from-emerald-500 to-teal-600',
-            tag: 'Build Tool',
-        },
-        {
-            name: 'Spatie RBAC',
-            desc: 'Manajemen Peran & Izin Pengguna',
-            color: 'from-violet-500 to-purple-600',
-            tag: 'Security',
+            title: 'Tracer Study & Pusat Karir Alumni UNU Purwokerto',
+            subtitle: 'PEMETAAN KARIR LULUSAN & MAGANG KERJA',
+            desc: 'Memperkuat jejaring alumni antarangkatan, penyerapan kerja di industri nasional, dan pengisian survei kuesioner tracer study.',
+            tag: 'ALUMNI & CAREER CENTER',
+            btnText: 'Isi Tracer Study',
+            btnUrl: '/tracer-study',
+            secondaryBtnText: 'Lowongan Kerja',
+            secondaryBtnUrl: '/alumni',
+            badgeBg: 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/30',
+            bgGradientLight: 'from-purple-50 via-indigo-50/50 to-slate-50',
+            bgGradientDark: 'from-purple-950/60 via-slate-900 to-slate-950',
+            accentGlow: 'from-purple-500/20 via-indigo-500/10 to-transparent',
+            icon: BarChart3,
+            statHighlight: '89.4% Lulusan Bekerja',
+            statSub: 'Daya Serap Industri & Wirausaha'
         },
     ];
 
-    const features = [
-        {
-            icon: Zap,
-            title: 'Performa Kilat Svelte 5',
-            desc: 'Memanfaatkan Svelte 5 Runes untuk reaktivitas tingkat granular tanpa overhead Virtual DOM.',
-            color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-        },
-        {
-            icon: ShieldCheck,
-            title: 'Sistem RBAC Presisi',
-            desc: 'Fitur Super Admin, Admin, dan User dengan hak akses granular hingga level tombol & route.',
-            color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-        },
-        {
-            icon: Layers,
-            title: 'UI Components & Dark Mode',
-            desc: 'Dilengkapi komponen Data Table, Modal, Toast, Dialog, Avatar, dan File Upload siap pakai.',
-            color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
-        },
-        {
-            icon: Lock,
-            title: 'Keamanan Tingkat Tinggi',
-            desc: 'Terintegrasi proteksi CSRF, Sanitasi Input, Hashing Bcrypt, dan Audit Activity Logging.',
-            color: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
-        },
-        {
-            icon: Smartphone,
-            title: '100% Responsif & Mobile Native',
-            desc: 'Desain adaptif penuh yang terlihat menawan di semua ukuran layar dari ponsel hingga 4K.',
-            color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
-        },
-        {
-            icon: Code2,
-            title: 'Clean Architecture & Type Safety',
-            desc: 'Kode terstruktur rapi dengan TypeScript penuh, siap dikembangkan untuk skala enterprise.',
-            color: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
-        },
+    let currentSlide = $state(0);
+
+    function nextSlide() {
+        currentSlide = (currentSlide + 1) % slides.length;
+    }
+
+    function prevSlide() {
+        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+    }
+
+    // Quick Menu Icons
+    const quickMenus = [
+        { title: 'Informasi', desc: 'Pengumuman & Berita', url: '/informasi', icon: Megaphone, color: 'from-emerald-500 to-teal-600' },
+        { title: 'Program Belmawa', desc: 'PKM, P2MW, PPK Ormawa', url: '/belmawa', icon: Sparkles, color: 'from-amber-500 to-orange-600' },
+        { title: 'Prestasi', desc: 'Hall of Achievement', url: '/prestasi', icon: Trophy, color: 'from-purple-500 to-indigo-600' },
+        { title: 'Beasiswa', desc: 'KIP-K & Yayasan', url: '/beasiswa', icon: Coins, color: 'from-cyan-500 to-blue-600' },
+        { title: 'Alumni', desc: 'Lowongan & Ikatan Alumni', url: '/alumni', icon: Users, color: 'from-rose-500 to-pink-600' },
+        { title: 'Tracer Study', desc: 'Kuesioner Alumni', url: '/tracer-study', icon: BarChart3, color: 'from-emerald-600 to-green-700' },
+        { title: 'Download Center', desc: 'Buku Panduan & Form', url: '/download', icon: Download, color: 'from-blue-600 to-indigo-700' },
+        { title: 'Kontak', desc: 'Helpdesk & Alamat', url: '/kontak', icon: MessageSquare, color: 'from-teal-500 to-cyan-600' },
     ];
 
-    const stats = [
-        { value: '100%', label: 'Svelte 5 Runes Native' },
-        { value: '0.05s', label: 'Rata-rata Waktu Response' },
-        { value: '10+', label: 'Komponen UI Siap Pakai' },
-        { value: '100%', label: 'Bebas Royalty & Open Source' },
+    // Profil Tab State
+    let activeProfilTab = $state('profil');
+
+    // Agenda Items
+    const agendaItems = [
+        { title: 'Batas Akhir Unggah Proposal PKM Belmawa 2026', date: '25 Agustus 2026', category: 'Belmawa', color: 'border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/10' },
+        { title: 'Seleksi Berkas Beasiswa KIP Kuliah Semester Gasal', date: '05 September 2026', category: 'Beasiswa', color: 'border-emerald-500/40 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10' },
+        { title: 'Wisuda Gelombang II Universitas Nahdlatul Ulama Purwokerto', date: '20 September 2026', category: 'Wisuda', color: 'border-purple-500/40 text-purple-600 dark:text-purple-400 bg-purple-500/10' },
+        { title: 'Coaching Clinic Wirausaha Mahasiswa P2MW', date: '28 September 2026', category: 'Workshop', color: 'border-cyan-500/40 text-cyan-600 dark:text-cyan-400 bg-cyan-500/10' },
     ];
 </script>
 
 <svelte:head>
-    <title>{site.name} — Modern CMS Platform</title>
-    <meta name="description" content={site.description} />
-    {#if branding?.public_favicon}
-        <link rel="icon" href={branding.public_favicon} />
-    {/if}
-    {#if branding?.public_apple_touch_icon}
-        <link rel="apple-touch-icon" href={branding.public_apple_touch_icon} />
-    {/if}
+    <title>Website Kemahasiswaan & Alumni UNU Purwokerto</title>
 </svelte:head>
 
-<div
-    class="relative min-h-screen overflow-x-hidden bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 selection:bg-indigo-500 selection:text-white transition-colors duration-300"
->
-    <!-- Background Dynamic Glow FX -->
-    <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div class="absolute -top-40 -left-40 h-96 w-96 animate-pulse rounded-full bg-indigo-600/20 dark:bg-indigo-600/30 blur-[128px]"></div>
-        <div class="absolute top-1/3 -right-40 h-96 w-96 rounded-full bg-purple-600/15 dark:bg-purple-600/20 blur-[140px]"></div>
-        <div class="absolute bottom-10 left-1/4 h-[500px] w-[500px] rounded-full bg-emerald-600/10 dark:bg-emerald-600/15 blur-[160px]"></div>
-    </div>
-
-    <!-- Navigation Header -->
-    <header class="sticky top-0 z-50 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/75 backdrop-blur-xl transition-all">
-        <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-            <!-- Brand Logo -->
-            <Link href="/" class="group flex items-center gap-3">
-                {#if branding?.public_logo_dark || branding?.public_logo_light}
-                    <div class="h-10 flex items-center">
-                        {#if branding.public_logo_dark}
-                            <img src={branding.public_logo_dark} alt={site.name} class="h-9 object-contain hidden dark:block" />
-                        {/if}
-                        <img src={branding.public_logo_light || branding.public_logo_dark} alt={site.name} class={`h-9 object-contain ${branding.public_logo_dark ? 'dark:hidden' : ''}`} />
-                    </div>
-                {:else}
-                    <div
-                        class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-0.5 shadow-lg shadow-indigo-500/30 transition-transform duration-300 group-hover:scale-105"
-                    >
-                        <div class="flex h-full w-full items-center justify-center rounded-[10px] bg-white dark:bg-slate-950">
-                            <Sparkles
-                                class="h-5 w-5 text-indigo-500 dark:text-indigo-400 transition-transform duration-300 group-hover:rotate-12"
-                            />
-                        </div>
+<div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-500 selection:text-white transition-colors duration-300">
+    <!-- Top Header Navigation -->
+    <header class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo & Brand -->
+                <Link href="/" class="flex items-center gap-3.5 group">
+                    <div class="p-2 rounded-2xl bg-gradient-to-b from-emerald-500/10 to-teal-500/20 dark:from-emerald-500/20 dark:to-teal-500/30 border border-emerald-500/30 shadow-md group-hover:scale-105 transition-all">
+                        <img
+                            src={branding.public_logo_light || '/images/branding/unu_purwokerto_logo.png'}
+                            alt={site.name || 'UNU Purwokerto'}
+                            class="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_12px_rgba(16,185,129,0.35)]"
+                        />
                     </div>
                     <div>
-                        <span
-                            class="bg-gradient-to-r from-slate-900 dark:from-white via-slate-700 dark:via-slate-100 to-slate-500 dark:to-slate-400 bg-clip-text text-xl font-black tracking-tight text-transparent"
-                        >
-                            {site.name}
+                        <span class="text-base sm:text-lg font-black bg-gradient-to-r from-emerald-700 via-teal-600 to-cyan-600 dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-300 bg-clip-text text-transparent block leading-tight">
+                            Kemahasiswaan & Alumni
+                        </span>
+                        <span class="text-[10px] sm:text-[11px] font-extrabold tracking-widest text-slate-500 dark:text-slate-400 uppercase block">
+                            UNIVERSITAS NAHDLATUL ULAMA PURWOKERTO
                         </span>
                     </div>
-                {/if}
-            </Link>
+                </Link>
 
-            <!-- Navigation Links (Dynamic from Menu Management) -->
-            <nav class="hidden items-center gap-8 text-sm font-medium text-slate-700 dark:text-slate-300 md:flex">
-                {#if navMenu && navMenu.items && navMenu.items.length > 0}
-                    {#each navMenu.items as item}
-                        {#if item.url.startsWith('/')}
-                            <Link href={item.url} target={item.target || '_self'} class="transition-colors hover:text-indigo-400">
-                                {item.title}
-                            </Link>
-                        {:else}
-                            <a href={item.url} target={item.target || '_self'} class="transition-colors hover:text-indigo-400">
-                                {item.title}
-                            </a>
-                        {/if}
-                    {/each}
-                {:else}
-                    <a href="#features" class="transition-colors hover:text-indigo-400">Fitur Unggulan</a>
-                    <a href="#tech-stack" class="transition-colors hover:text-indigo-400">Tech Stack</a>
-                    <a href="#quickstart" class="transition-colors hover:text-indigo-400">Quick Start</a>
-                    <a href="#stats" class="transition-colors hover:text-indigo-400">Statistik</a>
-                    <Link href="/blog" class="transition-colors hover:text-indigo-400 font-semibold text-indigo-300 flex items-center gap-1">
-                        <Newspaper class="w-4 h-4 text-indigo-400" />
-                        <span>Blog</span>
-                    </Link>
-                {/if}
-            </nav>
+                <!-- Navigation Menu -->
+                <nav class="hidden lg:flex items-center gap-1 text-xs font-semibold">
+                    <Link href="/" class="px-3.5 py-2 rounded-xl font-extrabold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/30 shadow-sm">Beranda</Link>
+                    <Link href="/informasi" class="px-3.5 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Informasi</Link>
+                    <Link href="/belmawa" class="px-3.5 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Belmawa</Link>
+                    <Link href="/prestasi" class="px-3.5 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Prestasi</Link>
+                    <Link href="/beasiswa" class="px-3.5 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Beasiswa</Link>
+                    <Link href="/alumni" class="px-3.5 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Alumni</Link>
+                    <Link href="/tracer-study" class="px-3.5 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Tracer Study</Link>
+                    <Link href="/download" class="px-3.5 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Download</Link>
+                    <Link href="/kontak" class="px-3.5 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Kontak</Link>
+                </nav>
 
-            <!-- Auth / Action Buttons & Theme Switcher -->
-            <div class="flex items-center gap-3">
-                <ThemeToggle />
-
-                {#if authUser}
-                    <Link
-                        href="/admin/dashboard"
-                        class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-indigo-500/25 transition-all duration-300 hover:from-indigo-500 hover:to-violet-500 active:scale-95"
-                    >
-                        <LayoutDashboard class="h-4 w-4" />
-                        <span>Buka Dashboard</span>
-                    </Link>
-                {:else}
-                    <Link
-                        href="/login"
-                        class="px-4 py-2 text-xs font-semibold text-slate-300 transition-colors hover:text-white"
-                    >
-                        Masuk
-                    </Link>
-                    <Link
-                        href="/register"
-                        class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-indigo-500/25 transition-all duration-300 hover:from-indigo-500 hover:to-violet-500 active:scale-95"
-                    >
-                        <span>Daftar Sekarang</span>
-                        <ArrowRight class="h-3.5 w-3.5" />
-                    </Link>
-                {/if}
+                <!-- Action Controls -->
+                <div class="flex items-center gap-3">
+                    <ThemeToggle />
+                    {#if authUser}
+                        <Link href="/admin/dashboard" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/25 border border-emerald-400/30 hover:scale-105 transition-all">
+                            <ShieldCheck class="w-4 h-4 text-emerald-200 animate-pulse" />
+                            <span>Dashboard Admin</span>
+                        </Link>
+                    {:else}
+                        <Link href="/login" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-extrabold text-xs border border-slate-200 dark:border-slate-800 shadow-md hover:border-emerald-500/50 hover:scale-105 transition-all">
+                            <UserCheck class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                            <span>Login Admin</span>
+                        </Link>
+                    {/if}
+                </div>
             </div>
         </div>
     </header>
 
-    {#if dynamicSections && dynamicSections.length > 0}
-        {#each dynamicSections as sec (sec.id)}
-            <DynamicSectionRenderer section={sec} />
-        {/each}
-    {:else}
-        <!-- Hero Section -->
-        <section class="relative z-10 pt-12 pb-20 lg:pt-20 lg:pb-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
-                <!-- Hero Left Content -->
-                <div class="space-y-8 text-center lg:col-span-7 lg:text-left">
-                    <!-- Top Pill Tag -->
-                    <div
-                        class="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3.5 py-1.5 text-xs font-medium text-indigo-300 shadow-inner backdrop-blur-md"
-                    >
-                        <Sparkle class="h-3.5 w-3.5 animate-spin text-amber-400" style="animation-duration: 4s;" />
-                        <span>Build SaaS Enterprise in Record Time</span>
-                        <ChevronRight class="h-3.5 w-3.5 text-indigo-400" />
-                    </div>
+    <!-- ULTRA-PREMIUM HERO BANNER CAROUSEL SLIDER -->
+    <section class="relative overflow-hidden bg-slate-50 dark:bg-slate-950 border-b border-slate-200/80 dark:border-slate-800 transition-colors">
+        <!-- Radial Blur Glow Blob Background -->
+        <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[450px] bg-gradient-to-tr from-emerald-500/20 via-teal-500/15 to-transparent blur-[140px] rounded-full pointer-events-none animate-pulse-glow"></div>
 
-                    <!-- Main Headline -->
-                    <h1 class="text-4xl leading-[1.15] font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
-                        Starter Kit Fullstack <br class="hidden sm:inline" />
-                        <span
-                            class="bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent"
-                        >
-                            Laravel 13 + Svelte 5
-                        </span>
-                        <br /> Terkeren untuk SaaS Anda.
-                    </h1>
+        <div class="relative min-h-[580px] lg:min-h-[640px] flex items-center">
+            {#each slides as slide, idx}
+                {#if idx === currentSlide}
+                    <div class={`absolute inset-0 bg-gradient-to-r ${slide.bgGradientLight} dark:${slide.bgGradientDark} transition-opacity duration-700 flex items-center bg-grid-pattern`}>
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 lg:py-16">
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+                                
+                                <!-- Left Content Area -->
+                                <div class="lg:col-span-7 space-y-6 text-left">
+                                    <div class={`inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase border ${slide.badgeBg} shadow-sm animate-float`}>
+                                        <slide.icon class="w-4 h-4 text-emerald-500" />
+                                        <span>{slide.tag}</span>
+                                    </div>
 
-                    <!-- Description -->
-                    <p class="mx-auto max-w-2xl text-base leading-relaxed text-slate-400 sm:text-lg lg:mx-0">
-                        Nikmati kekuatan Svelte 5 Runes (<code
-                            class="rounded bg-slate-900 px-1.5 py-0.5 text-indigo-300">$state</code
-                        >, <code class="rounded bg-slate-900 px-1.5 py-0.5 text-indigo-300">$derived</code>) berpadu
-                        dengan arsitektur Laravel 13, Inertia v2, RBAC granular, dan Tailwind CSS v4. Siap dideploy hari
-                        ini!
-                    </p>
+                                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.12]">
+                                        {slide.title}
+                                        <span class="block mt-2 text-xl sm:text-2xl lg:text-3xl font-extrabold bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-300 bg-clip-text text-transparent">
+                                            {slide.subtitle}
+                                        </span>
+                                    </h1>
 
-                    <!-- CTA Buttons -->
-                    <div class="flex flex-col items-center justify-center gap-4 pt-2 sm:flex-row lg:justify-start">
-                        <Link
-                            href="/login"
-                            class="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-7 py-3.5 text-sm font-semibold text-white shadow-xl shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:from-indigo-500 hover:to-pink-500 hover:shadow-indigo-500/50 sm:w-auto"
-                        >
-                            <Rocket class="h-4 w-4" />
-                            <span>Coba Demo Aplikasi</span>
-                        </Link>
-                        <a
-                            href="#quickstart"
-                            class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-7 py-3.5 text-sm font-semibold text-slate-300 transition-all duration-300 hover:bg-slate-800 hover:text-white sm:w-auto"
-                        >
-                            <Terminal class="h-4 w-4 text-indigo-400" />
-                            <span>Panduan Instalasi</span>
-                        </a>
-                    </div>
+                                    <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl font-normal">
+                                        {slide.desc}
+                                    </p>
 
-                    <!-- Tech Stack Badges Small -->
-                    <div
-                        class="flex flex-wrap items-center justify-center gap-6 border-t border-slate-800/60 pt-4 text-xs text-slate-400 lg:justify-start"
-                    >
-                        <span class="flex items-center gap-2 font-medium">
-                            <CheckCircle2 class="h-4 w-4 text-emerald-400" />
-                            Laravel 13 Backend
-                        </span>
-                        <span class="flex items-center gap-2 font-medium">
-                            <CheckCircle2 class="h-4 w-4 text-emerald-400" />
-                            Svelte 5 Runes Engine
-                        </span>
-                        <span class="flex items-center gap-2 font-medium">
-                            <CheckCircle2 class="h-4 w-4 text-emerald-400" />
-                            Role-Based RBAC
-                        </span>
-                    </div>
-                </div>
+                                    <div class="pt-2 flex flex-wrap items-center gap-4">
+                                        <a
+                                            href={slide.btnUrl}
+                                            class="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-extrabold text-sm shadow-xl shadow-emerald-500/25 border border-emerald-400/20 transition-all hover:-translate-y-0.5 hover:scale-105"
+                                        >
+                                            <span>{slide.btnText}</span>
+                                            <ArrowRight class="w-4 h-4" />
+                                        </a>
 
-                <!-- Hero Right Content: Feature Graphic with Hijab Mascot -->
-                <div class="relative flex justify-center lg:col-span-5">
-                    <!-- Glowing Aura behind image -->
-                    <div
-                        class="absolute inset-0 scale-95 transform animate-pulse rounded-3xl bg-gradient-to-tr from-indigo-600/30 via-purple-600/30 to-pink-500/30 blur-3xl filter"
-                    ></div>
-
-                    <!-- Main Image Frame with Glassmorphism -->
-                    <div
-                        class="relative w-full max-w-md rounded-3xl border border-slate-700/60 bg-gradient-to-b from-indigo-500/20 via-slate-800/40 to-slate-900/80 p-3 shadow-2xl backdrop-blur-2xl"
-                    >
-                        <div class="group relative overflow-hidden rounded-2xl">
-                            <img
-                                src="/images/hero-hijab.png"
-                                alt="FairuzKit Developer Hijab Mascot"
-                                class="h-auto w-full transform object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                            />
-                            <div
-                                class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60"
-                            ></div>
-
-                            <!-- Overlay Label -->
-                            <div
-                                class="absolute right-4 bottom-4 left-4 flex items-center justify-between rounded-xl border border-slate-700/50 bg-slate-900/80 p-3 backdrop-blur-md"
-                            >
-                                <div class="flex items-center gap-3">
-                                    <div class="h-2.5 w-2.5 animate-ping rounded-full bg-emerald-400"></div>
-                                    <span class="text-xs font-semibold text-white">FairuzKit Engine v1.0</span>
+                                        {#if slide.secondaryBtnText}
+                                            <a
+                                                href={slide.secondaryBtnUrl}
+                                                class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-sm border border-slate-200/80 dark:border-slate-800 shadow-sm transition-all hover:scale-105"
+                                            >
+                                                <span>{slide.secondaryBtnText}</span>
+                                            </a>
+                                        {/if}
+                                    </div>
                                 </div>
-                                <span
-                                    class="rounded-full border border-indigo-500/30 bg-indigo-500/20 px-2 py-0.5 text-[10px] font-semibold text-indigo-300"
-                                >
-                                    Active
-                                </span>
+
+                                <!-- Right Feature Card Showcase -->
+                                <div class="lg:col-span-5 relative hidden lg:flex justify-center">
+                                    <div class="relative w-full max-w-md p-6 rounded-3xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 shadow-2xl backdrop-blur-2xl space-y-6">
+                                        
+                                        <!-- Header Badge inside Card -->
+                                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                                    <slide.icon class="w-5 h-5" />
+                                                </div>
+                                                <div>
+                                                    <h3 class="text-xs font-black uppercase text-slate-800 dark:text-slate-200">Status Terverifikasi</h3>
+                                                    <p class="text-[10px] text-slate-400 font-semibold">Tahun Akademik 2026/2027</p>
+                                                </div>
+                                            </div>
+                                            <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                                <Flame class="w-3 h-3 text-amber-500 animate-bounce" /> Official
+                                            </span>
+                                        </div>
+
+                                        <!-- Card Main Stat -->
+                                        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/80 space-y-2">
+                                            <span class="text-2xl font-black bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-300 bg-clip-text text-transparent">
+                                                {slide.statHighlight}
+                                            </span>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                                {slide.statSub}
+                                            </p>
+                                        </div>
+
+                                        <!-- Highlights Grid -->
+                                        <div class="grid grid-cols-2 gap-3 text-xs">
+                                            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                                                <div class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
+                                                    <CheckCircle2 class="w-4 h-4" /> Integrated
+                                                </div>
+                                                <p class="text-[11px] text-slate-500 dark:text-slate-400">Layanan Digital SIM-Kemahasiswaan</p>
+                                            </div>
+                                            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                                                <div class="flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400 font-bold">
+                                                    <Star class="w-4 h-4 text-amber-400" /> Unggul
+                                                </div>
+                                                <p class="text-[11px] text-slate-500 dark:text-slate-400">Aswaja An-Nahdliyah Character</p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
-
-                        <!-- Floating Micro Badges -->
-                        <div
-                            class="absolute -top-4 -left-4 flex animate-bounce items-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/90 px-4 py-2 text-xs font-semibold text-indigo-300 shadow-xl backdrop-blur-md"
-                            style="animation-duration: 3s;"
-                        >
-                            <Zap class="h-4 w-4 fill-amber-400 text-amber-400" />
-                            <span>100% Svelte 5 Runes</span>
-                        </div>
-
-                        <div
-                            class="absolute -right-4 -bottom-4 flex animate-bounce items-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/90 px-4 py-2 text-xs font-semibold text-emerald-300 shadow-xl backdrop-blur-md"
-                            style="animation-duration: 4s;"
-                        >
-                            <ShieldCheck class="h-4 w-4 text-emerald-400" />
-                            <span>Spatie RBAC Auth</span>
-                        </div>
                     </div>
-                </div>
+                {/if}
+            {/each}
+
+            <!-- Slide Navigation Controls -->
+            <button
+                onclick={prevSlide}
+                aria-label="Previous Slide"
+                class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-white/90 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-white flex items-center justify-center backdrop-blur-md transition-all shadow-lg z-10 hover:scale-110"
+            >
+                <ChevronLeft class="w-6 h-6" />
+            </button>
+            <button
+                onclick={nextSlide}
+                aria-label="Next Slide"
+                class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-white/90 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-white flex items-center justify-center backdrop-blur-md transition-all shadow-lg z-10 hover:scale-110"
+            >
+                <ChevronRight class="w-6 h-6" />
+            </button>
+
+            <!-- Slide Dots Indicator -->
+            <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+                {#each slides as _, idx}
+                    <button
+                        onclick={() => currentSlide = idx}
+                        aria-label={`Go to slide ${idx + 1}`}
+                        class={`h-2.5 rounded-full transition-all ${idx === currentSlide ? 'w-8 bg-emerald-500 shadow-md' : 'w-2.5 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400'}`}
+                    ></button>
+                {/each}
             </div>
         </div>
     </section>
 
-    <!-- Stats Bar Section -->
-    <section id="stats" class="relative z-10 border-y border-slate-800/80 bg-slate-900/50 py-12 backdrop-blur-md">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
-                {#each stats as item}
-                    <div class="space-y-1">
-                        <p
-                            class="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-3xl font-extrabold text-transparent sm:text-4xl"
-                        >
-                            {item.value}
-                        </p>
-                        <p class="text-xs font-medium tracking-wider text-slate-400 uppercase">
-                            {item.label}
-                        </p>
-                    </div>
-                {/each}
-            </div>
-        </div>
-    </section>    <!-- Key Features Grid -->
-    <section id="features" class="relative z-10 py-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-16 max-w-3xl space-y-4 text-center">
-                <span
-                    class="rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-xs font-semibold tracking-widest text-indigo-500 dark:text-indigo-400 uppercase"
-                >
-                    Kelebihan Utama
-                </span>
-                <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white sm:text-4xl">Semua Fitur Esensial SaaS dalam Satu Kit</h2>
-                <p class="text-sm text-slate-600 dark:text-slate-400 sm:text-base">
-                    Anda tidak perlu membuang waktu berminggu-minggu membuat fitur otentikasi, perizinan, tabel data,
-                    dan UI dari nol.
+    <!-- QUICK MENU GRID -->
+    <section id="quickmenu" class="py-16 bg-slate-50 dark:bg-slate-950 bg-grid-pattern transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+                    Akses Fitur & Layanan Utama
+                </h2>
+                <p class="mt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                    Pintasan layanan digital terintegrasi Kemahasiswaan & Alumni UNU Purwokerto
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {#each features as f}
-                    <div
-                        class="group rounded-2xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-900/60 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/40 shadow-xs dark:shadow-none"
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+                {#each quickMenus as menu}
+                    <Link
+                        href={menu.url}
+                        class="bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 shadow-md hover:shadow-xl hover:border-emerald-500/50 hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between"
                     >
-                        <div
-                            class={`mb-6 flex h-12 w-12 items-center justify-center rounded-xl border transition-transform group-hover:scale-110 ${f.color}`}
-                        >
-                            <f.icon class="h-6 w-6" />
-                        </div>
-                        <h3 class="mb-2 text-lg font-bold text-slate-900 dark:text-white transition-colors group-hover:text-indigo-600 dark:group-hover:text-indigo-300">
-                            {f.title}
-                        </h3>
-                        <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400 sm:text-sm">
-                            {f.desc}
-                        </p>
-                    </div>
-                {/each}
-            </div>
-        </div>
-    </section>
-
-    <!-- Tech Stack Showcase -->
-    <section id="tech-stack" class="relative z-10 border-y border-slate-200/80 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/30 py-20">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-2xl space-y-3 text-center">
-                <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white">Teknologi Cutting-Edge Terbaru</h2>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Ditingkatkan dengan standar ekosistem web modern paling stabil</p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {#each techStack as tech}
-                    <div class="flex items-start gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 p-5 shadow-xs dark:shadow-none">
-                        <div class={`h-12 w-3 rounded-full bg-gradient-to-b ${tech.color} shrink-0`}></div>
                         <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-base font-bold text-slate-900 dark:text-white">{tech.name}</h3>
-                                <span
-                                    class="rounded border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:text-slate-300"
-                                >
-                                    {tech.tag}
-                                </span>
+                            <div class={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${menu.color} flex items-center justify-center text-white shadow-lg mb-4 group-hover:scale-110 transition-transform`}>
+                                <menu.icon class="w-6 h-6" />
                             </div>
-                            <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">{tech.desc}</p>
+                            <h3 class="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                {menu.title}
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-1">
+                                {menu.desc}
+                            </p>
                         </div>
-                    </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-end">
+                            <ArrowRight class="w-4 h-4 text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
+                        </div>
+                    </Link>
                 {/each}
             </div>
         </div>
     </section>
 
-    <!-- Quickstart & Installation Section -->
-    <section id="quickstart" class="relative z-10 py-24">
-        <div class="mx-auto max-w-4xl px-4 sm:px-6">
-            <div
-                class="space-y-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950 p-8 shadow-2xl sm:p-12"
-            >
-                <div class="space-y-3 text-center">
-                    <span class="text-xs font-semibold tracking-widest text-indigo-600 dark:text-indigo-400 uppercase"
-                        >Siap dalam 2 Menit</span
-                    >
-                    <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white">Instalasi Instan FairuzKit</h2>
-                    <p class="text-sm text-slate-600 dark:text-slate-400">
-                        Cukup jalankan satu perintah di terminal Anda untuk memulai proyek baru.
-                    </p>
+    <!-- PROFIL SINGKAT KEMAHASISWAAN -->
+    <section id="profil" class="py-16 bg-slate-100/60 dark:bg-slate-900/40 border-y border-slate-200 dark:border-slate-800 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <!-- Sambutan Warek III -->
+                <div class="lg:col-span-5 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 space-y-6 shadow-lg">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-slate-800 overflow-hidden border border-emerald-500/30">
+                            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80" alt="Sambutan Warek III" class="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 dark:text-slate-100">Wakil Rektor III</h3>
+                            <p class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Bidang Kemahasiswaan & Alumni</p>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">UNU Purwokerto</p>
+                        </div>
+                    </div>
+                    <blockquote class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 italic leading-relaxed border-l-2 border-emerald-500 pl-4">
+                        "Website ini dirancang untuk mewujudkan pelayanan kemahasiswaan dan alumni yang responsif, transparan, serta terintegrasi secara digital dalam rangka meningkatkan prestasi mahasiswa dan indikator kinerja utama PT."
+                    </blockquote>
                 </div>
 
-                <!-- Terminal Card -->
-                <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 shadow-inner text-white">
-                    <div class="flex items-center justify-between border-b border-slate-800 bg-slate-900 px-4 py-3">
-                        <div class="flex items-center gap-2">
-                            <div class="h-3 w-3 rounded-full bg-rose-500/80"></div>
-                            <div class="h-3 w-3 rounded-full bg-amber-500/80"></div>
-                            <div class="h-3 w-3 rounded-full bg-emerald-500/80"></div>
-                            <span class="ml-2 font-mono text-xs text-slate-400">bash ~ fairuzkit-cli</span>
-                        </div>
+                <!-- Profil Tabs -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
                         <button
-                            onclick={copyCommand}
-                            class="flex items-center gap-1.5 rounded-lg bg-slate-800 px-2.5 py-1 text-xs text-slate-300 transition-colors hover:bg-slate-700 hover:text-white"
+                            onclick={() => activeProfilTab = 'profil'}
+                            class={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeProfilTab === 'profil' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                         >
-                            {#if copied}
-                                <Check class="h-3.5 w-3.5 text-emerald-400" />
-                                <span class="text-emerald-400">Tersalin!</span>
-                            {:else}
-                                <Copy class="h-3.5 w-3.5" />
-                                <span>Salin Perintah</span>
-                            {/if}
+                            Profil Bidang
+                        </button>
+                        <button
+                            onclick={() => activeProfilTab = 'visi'}
+                            class={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeProfilTab === 'visi' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+                        >
+                            Visi & Misi
+                        </button>
+                        <button
+                            onclick={() => activeProfilTab = 'fungsi'}
+                            class={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeProfilTab === 'fungsi' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+                        >
+                            Fungsi & Tugas
                         </button>
                     </div>
 
-                    <div class="space-y-3 p-6 font-mono text-sm">
-                        <div class="flex items-center gap-3 text-indigo-300">
-                            <span class="text-emerald-400">$</span>
-                            <span>{installCommand}</span>
+                    {#if activeProfilTab === 'profil'}
+                        <div class="space-y-4">
+                            <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Profil Bidang Kemahasiswaan & Alumni</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">
+                                Bidang Kemahasiswaan dan Alumni UNU Purwokerto bertugas membina, mengarahkan, serta mendampingi kegiatan penalaran, keorganisasian, kewirausahaan, serta fasilitasi karir alumni secara berkelanjutan.
+                            </p>
                         </div>
-                        <div class="space-y-1 border-t border-slate-900 pt-2 text-xs text-slate-400">
-                            <p>✔ Cloning repository FairuzKit...</p>
-                            <p>✔ Installing composer & npm dependencies...</p>
-                            <p>✔ Migrating database tables & seeders...</p>
-                            <p class="font-semibold text-emerald-400">✨ Server running on http://localhost:8000</p>
+                    {:else if activeProfilTab === 'visi'}
+                        <div class="space-y-4">
+                            <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">Visi & Misi</h3>
+                            <div class="bg-white dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2 shadow-sm">
+                                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Visi:</span>
+                                <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">Menjadi pusat pembinaan mahasiswa yang unggul, berprestasi, berkarakter Aswaja An-Nahdliyah, serta melahirkan alumni berdaya saing global.</p>
+                            </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Action CTA -->
-                <div class="pt-2 text-center">
-                    <Link
-                        href="/register"
-                        class="inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-8 py-4 text-sm font-bold text-white shadow-xl shadow-indigo-500/30 transition-all duration-300 hover:scale-105 hover:from-indigo-500 hover:to-pink-500"
-                    >
-                        <span>Mulai Sekarang (Gratis)</span>
-                        <ArrowRight class="h-4 w-4" />
-                    </Link>
+                    {:else if activeProfilTab === 'fungsi'}
+                        <div class="space-y-3">
+                            <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">Fungsi Utama</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-700 dark:text-slate-300">
+                                <div class="flex items-center gap-2 p-3 bg-white dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                    <CheckCircle2 class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                    <span>Layanan Beasiswa & Kesejahteraan</span>
+                                </div>
+                                <div class="flex items-center gap-2 p-3 bg-white dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                    <CheckCircle2 class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                    <span>Pembinaan Belmawa & PKM</span>
+                                </div>
+                                <div class="flex items-center gap-2 p-3 bg-white dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                    <CheckCircle2 class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                    <span>Pendataan Prestasi Mahasiswa</span>
+                                </div>
+                                <div class="flex items-center gap-2 p-3 bg-white dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                    <CheckCircle2 class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                    <span>Pelaksanaan Tracer Study Alumni</span>
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
                 </div>
             </div>
         </div>
     </section>
-    {/if}
 
-    <!-- Latest Blog Articles Section -->
-    {#if latestPosts && latestPosts.length > 0}
-    <section class="relative z-10 border-t border-slate-200/80 dark:border-slate-900 bg-white/60 dark:bg-slate-950 py-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div class="space-y-3 max-w-xl">
-                    <div class="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-50 dark:bg-indigo-950/60 px-3.5 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-300">
-                        <Newspaper class="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" />
-                        <span>Kabar & Artikel Terbaru</span>
-                    </div>
-                    <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white sm:text-4xl tracking-tight">
-                        Wawasan & Tutorial Teknologi Terkini
+    <!-- BERITA TERBARU & AGENDA -->
+    <section class="py-16 bg-slate-50 dark:bg-slate-950 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+                        Berita & Pengumuman Terbaru
                     </h2>
-                    <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
-                        Pelajari tips pengembangan aplikasi, tren AI, strategi bisnis digital, dan berita pembaruan platform dari para ahli.
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                        Informasi terkini kegiatan kemahasiswaan, beasiswa, dan alumni UNU Purwokerto
                     </p>
                 </div>
-
-                <Link
-                    href="/blog"
-                    class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-3 text-xs font-bold text-indigo-600 dark:text-indigo-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-all shadow-xs shrink-0"
-                >
-                    <span>Lihat Semua Artikel</span>
-                    <ArrowRight class="h-4 w-4" />
+                <Link href="/informasi" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:scale-105">
+                    Lihat Semua Berita <ArrowRight class="w-4 h-4" />
                 </Link>
             </div>
 
-            <!-- Articles Grid Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {#each latestPosts as post}
-                    <article class="group relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 overflow-hidden hover:border-indigo-500/40 transition-all duration-300 flex flex-col justify-between shadow-xs hover:shadow-xl dark:hover:shadow-indigo-500/10">
-                        <div class="space-y-4">
-                            <Link href={`/blog/${post.slug}`} class="relative block overflow-hidden h-48">
-                                <img
-                                    src={post.featured_image || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800'}
-                                    alt={post.title}
-                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                />
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Posts Grid (8 cols) -->
+                <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {#each latestPosts as post}
+                        <div class="bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-md hover:shadow-xl hover:border-emerald-500/40 transition-all flex flex-col justify-between group hover:-translate-y-1">
+                            <div class="space-y-3">
                                 {#if post.category}
-                                    <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/90 dark:bg-slate-950/80 backdrop-blur-md text-indigo-600 dark:text-indigo-300 border border-slate-200 dark:border-slate-700 shadow-xs">
+                                    <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                                         {post.category.name}
                                     </span>
                                 {/if}
-                            </Link>
-
-                            <div class="px-5 space-y-2">
-                                <h3 class="font-bold text-base text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug">
+                                <h3 class="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
                                     <Link href={`/blog/${post.slug}`}>{post.title}</Link>
                                 </h3>
-                                <p class="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                                    {post.summary || post.content?.replace(/<[^>]*>?/gm, '').slice(0, 110)}...
+                                <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed line-clamp-3">
+                                    {post.summary || post.excerpt}
                                 </p>
                             </div>
-                        </div>
-
-                        <div class="p-5 pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 font-mono mt-4">
-                            <div class="flex items-center gap-2">
-                                <img src={post.author?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'} alt={post.author?.name} class="w-5 h-5 rounded-full object-cover border border-slate-200 dark:border-slate-700" />
-                                <span class="truncate max-w-[90px]">{post.author?.name || 'Admin'}</span>
-                            </div>
-
-                            <div class="flex items-center gap-3">
-                                <span class="flex items-center gap-1" title="Tanggal Terbit">
-                                    <Calendar class="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
-                                    {post.published_at ? new Date(post.published_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : 'Draft'}
+                            <div class="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-500">
+                                <span class="flex items-center gap-1.5">
+                                    <Clock class="w-3.5 h-3.5 text-slate-400" />
+                                    {new Date(post.published_at || post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                                 </span>
-                                <span class="flex items-center gap-1" title="Waktu Baca">
-                                    <Clock class="w-3 h-3 text-amber-500 dark:text-amber-400" />
-                                    {post.reading_time || 3}m
-                                </span>
+                                <Link href={`/blog/${post.slug}`} class="text-emerald-600 dark:text-emerald-400 font-semibold hover:underline flex items-center gap-1">
+                                    Baca <ArrowRight class="w-3.5 h-3.5" />
+                                </Link>
                             </div>
                         </div>
-                    </article>
-                {/each}
+                    {/each}
+                </div>
+
+                <!-- Agenda Widget (4 cols) -->
+                <div class="lg:col-span-4 bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 space-y-6 shadow-md">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                            <Calendar class="w-5 h-5 text-amber-500" /> Agenda Kemahasiswaan
+                        </h3>
+                    </div>
+
+                    <div class="space-y-4">
+                        {#each agendaItems as item}
+                            <div class="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-2">
+                                <span class={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded border ${item.color}`}>
+                                    {item.category}
+                                </span>
+                                <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 leading-snug">{item.title}</h4>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                    <Clock class="w-3 h-3 text-amber-500" /> {item.date}
+                                </p>
+                            </div>
+                        {/each}
+                    </div>
+                </div>
             </div>
         </div>
     </section>
+
+    <!-- DYNAMIC BUILDER SECTIONS RENDERER (IF ANY) -->
+    {#if dynamicSections && dynamicSections.length > 0}
+        {#each dynamicSections as sec}
+            <DynamicSectionRenderer section={sec} />
+        {/each}
     {/if}
 
-    <!-- Footer -->
-    <footer class="relative z-10 border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-950 py-12 text-xs text-slate-600 dark:text-slate-500">
-        <div
-            class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6 lg:px-8"
-        >
-            <div class="flex items-center gap-3">
-                {#if branding?.public_logo_footer}
-                    <img src={branding.public_logo_footer} alt={site.name} class="h-7 object-contain" />
-                {:else}
-                    <div
-                        class="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-sm font-black text-white"
-                    >
-                        {site.name.charAt(0).toUpperCase()}
-                    </div>
-                    <span class="font-semibold text-slate-900 dark:text-slate-300">{site.name}</span>
-                {/if}
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 py-12 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8 text-xs text-slate-600 dark:text-slate-400">
+            <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                    <img src={branding.public_logo_light || '/images/branding/unu_purwokerto_logo.png'} alt="UNU Purwokerto Logo" class="h-10 w-auto object-contain" />
+                    <span class="font-bold text-slate-900 dark:text-slate-200 text-sm">Kemahasiswaan & Alumni UNU Purwokerto</span>
+                </div>
+                <p class="leading-relaxed">
+                    Pusat Informasi, Layanan, Dokumentasi, & Media Komunikasi Kemahasiswaan & Alumni Universitas Nahdlatul Ulama Purwokerto.
+                </p>
             </div>
 
-            <p>© {new Date().getFullYear()} {site.name}. All rights reserved.</p>
+            <div class="space-y-2">
+                <h4 class="font-bold text-slate-900 dark:text-slate-200 text-xs uppercase tracking-wider mb-3">Menu Pintas</h4>
+                <ul class="space-y-2">
+                    <li><Link href="/informasi" class="hover:text-emerald-600 dark:hover:text-emerald-400">Pusat Informasi & Pengumuman</Link></li>
+                    <li><Link href="/belmawa" class="hover:text-emerald-600 dark:hover:text-emerald-400">Program Belmawa (PKM / P2MW)</Link></li>
+                    <li><Link href="/prestasi" class="hover:text-emerald-600 dark:hover:text-emerald-400">Prestasi Mahasiswa</Link></li>
+                    <li><Link href="/beasiswa" class="hover:text-emerald-600 dark:hover:text-emerald-400">Informasi Beasiswa</Link></li>
+                    <li><Link href="/tracer-study" class="hover:text-emerald-600 dark:hover:text-emerald-400">Tracer Study Alumni</Link></li>
+                </ul>
+            </div>
+
+            <div class="space-y-2">
+                <h4 class="font-bold text-slate-900 dark:text-slate-200 text-xs uppercase tracking-wider mb-3">Kontak Resmi</h4>
+                <p>Jl. Sultan Agung No. 42, Karangklesem, Purwokerto Selatan, Kab. Banyumas, Jawa Tengah 53144</p>
+                <p>Email: kemahasiswaan@unupurwokerto.ac.id</p>
+                <p>WhatsApp: +62 812-3456-7890</p>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 dark:text-slate-500 pt-8 mt-8 border-t border-slate-100 dark:border-slate-800/60">
+            <p>© {new Date().getFullYear()} Kemahasiswaan & Alumni Universitas Nahdlatul Ulama Purwokerto. All Rights Reserved.</p>
         </div>
     </footer>
 </div>

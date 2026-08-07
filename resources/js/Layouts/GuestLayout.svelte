@@ -17,6 +17,13 @@
     const branding = $derived(pageProps.branding);
     const flash = $derived(pageProps.flash);
 
+    function getBrandingUrl(asset: any): string {
+        if (!asset) return '/images/branding/unu_purwokerto_logo.png';
+        if (typeof asset === 'string') return asset;
+        if (typeof asset === 'object' && asset.url) return asset.url;
+        return '/images/branding/unu_purwokerto_logo.png';
+    }
+
     $effect(() => {
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);
@@ -27,10 +34,10 @@
 <svelte:head>
     <title>{title} - {site.name}</title>
     {#if branding?.admin_favicon || branding?.public_favicon}
-        <link rel="icon" href={branding?.admin_favicon || branding?.public_favicon} />
+        <link rel="icon" href={getBrandingUrl(branding?.admin_favicon) || getBrandingUrl(branding?.public_favicon)} />
     {/if}
     {#if branding?.public_apple_touch_icon}
-        <link rel="apple-touch-icon" href={branding.public_apple_touch_icon} />
+        <link rel="apple-touch-icon" href={getBrandingUrl(branding.public_apple_touch_icon)} />
     {/if}
 </svelte:head>
 
@@ -39,18 +46,23 @@
 
     <!-- Top Bar -->
     <div class="flex items-center justify-between max-w-md w-full mx-auto">
-        <div class="flex items-center gap-2">
-            {#if branding?.admin_login_logo}
-                <img src={branding.admin_login_logo} alt={site.name} class="h-8 object-contain" />
-            {:else if branding?.admin_logo_dark || branding?.admin_logo_light}
-                <img src={branding.admin_logo_dark} alt={site.name} class="h-8 object-contain hidden dark:block" />
-                <img src={branding.admin_logo_light || branding.admin_logo_dark} alt={site.name} class={`h-8 object-contain ${branding.admin_logo_dark ? 'dark:hidden' : ''}`} />
-            {:else}
-                <div class="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-indigo-500/20">
-                    LS
-                </div>
-                <span class="font-bold text-slate-900 dark:text-slate-100">{site.name}</span>
-            {/if}
+        <div class="flex items-center gap-3">
+            <div class="p-2 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 shadow-sm">
+                <img
+                    src={getBrandingUrl(branding?.admin_login_logo) || getBrandingUrl(branding?.admin_logo_light)}
+                    alt="UNU Purwokerto"
+                    onerror={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/branding/unu_purwokerto_logo.png'; }}
+                    class="h-9 w-auto object-contain"
+                />
+            </div>
+            <div class="leading-tight">
+                <span class="font-black text-sm bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-300 bg-clip-text text-transparent block">
+                    Kemahasiswaan & Alumni
+                </span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400 font-extrabold tracking-widest uppercase block">
+                    UNU PURWOKERTO
+                </span>
+            </div>
         </div>
         <ThemeToggle />
     </div>

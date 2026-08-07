@@ -17,6 +17,13 @@
     const user = $derived(pageProps.auth.user);
     const site = $derived(pageProps.site);
     const branding = $derived(pageProps.branding);
+
+    function getBrandingUrl(asset: any): string {
+        if (!asset) return '/images/branding/unu_purwokerto_logo.png';
+        if (typeof asset === 'string') return asset;
+        if (typeof asset === 'object' && asset.url) return asset.url;
+        return '/images/branding/unu_purwokerto_logo.png';
+    }
 </script>
 
 <header class="sticky top-0 z-30 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 flex items-center justify-between transition-colors">
@@ -31,22 +38,23 @@
             <Menu class="w-5 h-5" />
         </button>
 
-        <div class="flex items-center gap-2">
-            {#if branding?.admin_logo_dark || branding?.admin_logo_light}
-                <div class="h-8 flex items-center">
-                    {#if branding.admin_logo_dark}
-                        <img src={branding.admin_logo_dark} alt={site.name} class="h-7 object-contain hidden dark:block" />
-                    {/if}
-                    <img src={branding.admin_logo_light || branding.admin_logo_dark} alt={site.name} class={`h-7 object-contain ${branding.admin_logo_dark ? 'dark:hidden' : ''}`} />
-                </div>
-            {:else}
-                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-indigo-500/20">
-                    {site.name.substring(0, 2).toUpperCase()}
-                </div>
-                <span class="font-bold text-base text-slate-900 dark:text-slate-100 tracking-tight hidden sm:inline-block">
-                    {site.name}
+        <div class="flex items-center gap-3">
+            <div class="p-1.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 shadow-xs shrink-0">
+                <img
+                    src={getBrandingUrl(branding?.admin_logo_light) || getBrandingUrl(branding?.admin_logo_dark)}
+                    alt="UNU Purwokerto"
+                    onerror={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/branding/unu_purwokerto_logo.png'; }}
+                    class="h-7 w-auto object-contain"
+                />
+            </div>
+            <div class="hidden sm:block leading-tight">
+                <span class="font-extrabold text-xs bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-300 bg-clip-text text-transparent block">
+                    Kemahasiswaan & Alumni
                 </span>
-            {/if}
+                <span class="text-[9px] text-slate-500 dark:text-slate-400 font-bold tracking-wider uppercase block">
+                    UNU Purwokerto
+                </span>
+            </div>
         </div>
     </div>
 

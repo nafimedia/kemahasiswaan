@@ -50,7 +50,7 @@ class BrandingController extends Controller
         }
 
         return Inertia::render('Admin/Settings/Branding', [
-            'branding' => $branding,
+            'brandingAssets' => $branding,
         ]);
     }
 

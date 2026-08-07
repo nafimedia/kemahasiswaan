@@ -39,28 +39,31 @@ class RolePermissionSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Create Super Admin Role & Assign all permissions
+        // 1. Super Admin Role
         $superAdminRole = Role::firstOrCreate(['name' => 'Super Admin']);
         $superAdminRole->givePermissionTo(Permission::all());
 
-        // Create Admin Role & Assign specific permissions
-        $adminRole = Role::firstOrCreate(['name' => 'Admin']);
-        $adminRole->givePermissionTo([
-            'users.view',
-            'users.create',
-            'users.edit',
-            'activity_logs.view',
-            'settings.view',
-        ]);
+        // 2. Admin Kemahasiswaan Role
+        $adminKemahasiswaanRole = Role::firstOrCreate(['name' => 'Admin Kemahasiswaan']);
+        $adminKemahasiswaanRole->givePermissionTo(['activity_logs.view', 'settings.view']);
 
-        // Create User Role
+        // 3. Admin Prestasi Role
+        $adminPrestasiRole = Role::firstOrCreate(['name' => 'Admin Prestasi']);
+
+        // 4. Admin Alumni Role
+        $adminAlumniRole = Role::firstOrCreate(['name' => 'Admin Alumni']);
+
+        // 5. Operator Fakultas Role
+        $operatorFakultasRole = Role::firstOrCreate(['name' => 'Operator Fakultas']);
+
+        // Standard User Role
         $userRole = Role::firstOrCreate(['name' => 'User']);
 
         // Create Super Admin User
         $superAdminUser = User::firstOrCreate(
-            ['email' => 'admin@example.com'],
+            ['email' => 'admin@unupurwokerto.ac.id'],
             [
-                'name' => 'Super Admin',
+                'name' => 'Super Admin Kemahasiswaan',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'is_active' => true,
@@ -68,16 +71,17 @@ class RolePermissionSeeder extends Seeder
         );
         $superAdminUser->assignRole($superAdminRole);
 
-        // Create Standard User
-        $normalUser = User::firstOrCreate(
-            ['email' => 'user@example.com'],
+        // Create Admin Kemahasiswaan User
+        $adminKemahasiswaanUser = User::firstOrCreate(
+            ['email' => 'kemahasiswaan@unupurwokerto.ac.id'],
             [
-                'name' => 'John Doe',
+                'name' => 'Admin Kemahasiswaan UNUPU',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'is_active' => true,
             ]
         );
-        $normalUser->assignRole($userRole);
+        $adminKemahasiswaanUser->assignRole($adminKemahasiswaanRole);
     }
 }
+

@@ -6,10 +6,10 @@
     import type { BrandingAsset } from '@/lib/types';
 
     interface Props {
-        branding: Record<string, BrandingAsset>;
+        brandingAssets?: Record<string, BrandingAsset>;
     }
 
-    let { branding = {} }: Props = $props();
+    let { brandingAssets = {} }: Props = $props();
 
     let activeTab = $state<'public' | 'admin' | 'preview'>('public');
     let previewTheme = $state<'light' | 'dark'>('light');
@@ -107,8 +107,8 @@
             <Card title="Public Website Branding" description="Pengaturan logo dan favicon untuk tampilan pengguna pengunjung website">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {#each publicAssetsKeys as key}
-                        {#if branding[key]}
-                            <BrandingUploader asset={branding[key]} recommendedSize={recommendedSizes[key]} />
+                        {#if brandingAssets[key]}
+                            <BrandingUploader asset={brandingAssets[key]} recommendedSize={recommendedSizes[key]} />
                         {/if}
                     {/each}
                 </div>
@@ -122,8 +122,8 @@
             <Card title="Admin Dashboard Branding" description="Pengaturan logo khusus untuk sidebar, loading screen, dan halaman login admin">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {#each adminAssetsKeys as key}
-                        {#if branding[key]}
-                            <BrandingUploader asset={branding[key]} recommendedSize={recommendedSizes[key]} />
+                        {#if brandingAssets[key]}
+                            <BrandingUploader asset={brandingAssets[key]} recommendedSize={recommendedSizes[key]} />
                         {/if}
                     {/each}
                 </div>
@@ -170,8 +170,8 @@
                 <Card title="Pratinjau Browser Tab & Favicon" description="Simulasi tampilan judul halaman dan favicon di tab Google Chrome / Firefox">
                     <div class="p-4 rounded-xl bg-slate-200 dark:bg-slate-950 border border-slate-300 dark:border-slate-800">
                         <div class="flex items-center gap-2 px-3 py-2 rounded-t-lg bg-slate-100 dark:bg-slate-900 border-b border-slate-300 dark:border-slate-800 max-w-xs shadow-xs">
-                            {#if branding.public_favicon?.url}
-                                <img src={branding.public_favicon.url} alt="Favicon" class="w-4 h-4 object-contain" />
+                            {#if brandingAssets.public_favicon?.url}
+                                <img src={brandingAssets.public_favicon.url} alt="Favicon" class="w-4 h-4 object-contain" />
                             {:else}
                                 <Globe class="w-4 h-4 text-indigo-500" />
                             {/if}
@@ -189,10 +189,10 @@
                 <Card title="Pratinjau Icon Mobile / iOS Bookmark" description="Simulasi tampilan icon aplikasi saat disimpan ke layar utama smartphone">
                     <div class="p-6 rounded-xl bg-slate-900 text-white flex flex-col items-center justify-center space-y-3">
                         <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 p-0.5 shadow-xl flex items-center justify-center overflow-hidden">
-                            {#if branding.public_apple_touch_icon?.url}
-                                <img src={branding.public_apple_touch_icon.url} alt="Apple Touch Icon" class="w-full h-full object-cover rounded-2xl" />
-                            {:else if branding.public_favicon?.url}
-                                <img src={branding.public_favicon.url} alt="Favicon" class="w-10 h-10 object-contain" />
+                            {#if brandingAssets.public_apple_touch_icon?.url}
+                                <img src={brandingAssets.public_apple_touch_icon.url} alt="Apple Touch Icon" class="w-full h-full object-cover rounded-2xl" />
+                            {:else if brandingAssets.public_favicon?.url}
+                                <img src={brandingAssets.public_favicon.url} alt="Favicon" class="w-10 h-10 object-contain" />
                             {:else}
                                 <Smartphone class="w-8 h-8 text-white" />
                             {/if}
@@ -208,10 +208,10 @@
                     }`}>
                         <div class="flex items-center justify-between border-b border-slate-200/40 dark:border-slate-800/40 pb-4">
                             <div class="h-10 flex items-center">
-                                {#if previewTheme === 'dark' && branding.public_logo_dark?.url}
-                                    <img src={branding.public_logo_dark.url} alt="Logo Dark" class="h-8 object-contain" />
-                                {:else if branding.public_logo_light?.url}
-                                    <img src={branding.public_logo_light.url} alt="Logo Light" class="h-8 object-contain" />
+                                {#if previewTheme === 'dark' && brandingAssets.public_logo_dark?.url}
+                                    <img src={brandingAssets.public_logo_dark.url} alt="Logo Dark" class="h-8 object-contain" />
+                                {:else if brandingAssets.public_logo_light?.url}
+                                    <img src={brandingAssets.public_logo_light.url} alt="Logo Light" class="h-8 object-contain" />
                                 {:else}
                                     <div class="flex items-center gap-2 font-bold text-lg text-indigo-600 dark:text-indigo-400">
                                         <Globe class="w-6 h-6" />
@@ -235,10 +235,10 @@
                     }`}>
                         <div class="w-60 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 space-y-4">
                             <div class="h-8 flex items-center">
-                                {#if previewTheme === 'dark' && branding.admin_logo_dark?.url}
-                                    <img src={branding.admin_logo_dark.url} alt="Admin Logo Dark" class="h-7 object-contain" />
-                                {:else if branding.admin_logo_light?.url}
-                                    <img src={branding.admin_logo_light.url} alt="Admin Logo Light" class="h-7 object-contain" />
+                                {#if previewTheme === 'dark' && brandingAssets.admin_logo_dark?.url}
+                                    <img src={brandingAssets.admin_logo_dark.url} alt="Admin Logo Dark" class="h-7 object-contain" />
+                                {:else if brandingAssets.admin_logo_light?.url}
+                                    <img src={brandingAssets.admin_logo_light.url} alt="Admin Logo Light" class="h-7 object-contain" />
                                 {:else}
                                     <div class="flex items-center gap-2 font-bold text-base text-indigo-600 dark:text-indigo-400">
                                         <LayoutDashboard class="w-5 h-5" />

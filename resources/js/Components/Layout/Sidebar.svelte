@@ -42,6 +42,13 @@
     const modules = $derived(pageProps.modules);
     const currentUrl = $derived(page.url);
 
+    function getBrandingUrl(asset: any): string {
+        if (!asset) return '/images/branding/unu_purwokerto_logo.png';
+        if (typeof asset === 'string') return asset;
+        if (typeof asset === 'object' && asset.url) return asset.url;
+        return '/images/branding/unu_purwokerto_logo.png';
+    }
+
     function isModuleActive(key?: string): boolean {
         if (!key) return true;
         if (!modules) return true;
@@ -302,33 +309,34 @@
     <!-- Top Part: Logo Banner & Nav Groups -->
     <div class="flex flex-col flex-1 min-h-0">
         <!-- Brand Banner -->
-        <div class={`h-16 border-b border-slate-200 dark:border-slate-800 flex items-center px-4 justify-between shrink-0 ${isCollapsed ? 'justify-center' : 'px-6'}`}>
-            <Link href="/admin/dashboard" class="flex items-center gap-3 max-w-full overflow-hidden">
+        <div class={`h-20 border-b border-slate-200 dark:border-slate-800 flex items-center px-4 justify-between shrink-0 ${isCollapsed ? 'justify-center' : 'px-5'}`}>
+            <Link href="/admin/dashboard" class="flex items-center gap-3 max-w-full overflow-hidden group">
                 {#if isCollapsed}
-                    {#if branding?.admin_logo_collapsed}
-                        <img src={branding.admin_logo_collapsed} alt="Logo" class="w-8 h-8 object-contain shrink-0" />
-                    {:else}
-                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-indigo-500/25 shrink-0">
-                            FK
-                        </div>
-                    {/if}
+                    <div class="p-1.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 shadow-xs shrink-0">
+                        <img
+                            src={getBrandingUrl(branding?.admin_logo_collapsed) || getBrandingUrl(branding?.admin_logo_light)}
+                            alt="UNU Purwokerto"
+                            onerror={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/branding/unu_purwokerto_logo.png'; }}
+                            class="w-7 h-7 object-contain drop-shadow-sm"
+                        />
+                    </div>
                 {:else}
-                    {#if branding?.admin_logo_dark || branding?.admin_logo_light}
-                        <div class="h-9 flex items-center">
-                            {#if branding.admin_logo_dark}
-                                <img src={branding.admin_logo_dark} alt={site?.name || 'Admin Logo'} class="h-8 object-contain hidden dark:block" />
-                            {/if}
-                            <img src={branding.admin_logo_light || branding.admin_logo_dark} alt={site?.name || 'Admin Logo'} class={`h-8 object-contain ${branding.admin_logo_dark ? 'dark:hidden' : ''}`} />
-                        </div>
-                    {:else}
-                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-indigo-500/25 shrink-0">
-                            FK
-                        </div>
-                        <div class="truncate">
-                            <h1 class="font-bold text-sm text-slate-900 dark:text-slate-100 leading-none">{site?.name || 'LaraSvelte'}</h1>
-                            <span class="text-[10px] text-indigo-500 font-semibold tracking-wider uppercase">Enterprise CMS</span>
-                        </div>
-                    {/if}
+                    <div class="p-1.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 shadow-xs shrink-0 group-hover:scale-105 transition-all">
+                        <img
+                            src={getBrandingUrl(branding?.admin_logo_light) || getBrandingUrl(branding?.admin_logo_dark)}
+                            alt="UNU Purwokerto"
+                            onerror={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/branding/unu_purwokerto_logo.png'; }}
+                            class="h-8 sm:h-9 w-auto object-contain drop-shadow-sm"
+                        />
+                    </div>
+                    <div class="truncate leading-tight">
+                        <h1 class="font-black text-xs sm:text-sm bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-300 bg-clip-text text-transparent truncate">
+                            Kemahasiswaan & Alumni
+                        </h1>
+                        <span class="text-[9px] text-slate-500 dark:text-slate-400 font-extrabold tracking-widest uppercase block truncate">
+                            UNU PURWOKERTO
+                        </span>
+                    </div>
                 {/if}
             </Link>
         </div>
