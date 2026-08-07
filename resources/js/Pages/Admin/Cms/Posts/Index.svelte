@@ -84,7 +84,7 @@
             key: 'category',
             options: [
                 { label: 'Semua Kategori', value: '' },
-                ...categories.map(c => ({ label: c.name, value: String(c.id) }))
+                ...categories.map(c => ({ label: c.name, value: c.slug }))
             ]
         },
         {

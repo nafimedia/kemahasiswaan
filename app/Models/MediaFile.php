@@ -10,6 +10,11 @@ class MediaFile extends Model
     use HasFactory;
 
     protected $fillable = [
+        'name',
+        'file_path',
+        'size_bytes',
+        'folder',
+        'uploaded_by',
         'filename',
         'original_name',
         'path',

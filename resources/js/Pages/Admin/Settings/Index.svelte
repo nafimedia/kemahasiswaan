@@ -4,7 +4,7 @@
     import Card from '@/Components/UI/Card.svelte';
     import Input from '@/Components/UI/Input.svelte';
     import Button from '@/Components/UI/Button.svelte';
-    import { Save, Sliders, Globe, ShieldAlert } from 'lucide-svelte';
+    import { Save, Sliders } from 'lucide-svelte';
     import type { SettingItem } from '@/lib/types';
 
     interface Props {
@@ -43,14 +43,17 @@
 <AppLayout title="Pengaturan Situs">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">Pengaturan Situs & Aplikasi</h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Konfigurasi nama aplikasi, email kontak, dan sistem secara global</p>
+            <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Sliders class="w-5 h-5 text-indigo-500" />
+                <span>Pengaturan Umum Situs</span>
+            </h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Konfigurasi nama aplikasi, deskripsi SEO, dan kontrol fitur sistem global</p>
         </div>
     </div>
 
     <form onsubmit={submit} class="space-y-6 max-w-4xl">
-        <!-- General Identity -->
-        <Card title="Identitas Aplikasi" description="Informasi umum yang ditampilkan di header dan title">
+        <!-- Identitas Aplikasi -->
+        <Card title="Identitas Aplikasi" description="Informasi umum yang ditampilkan di header dan title tag website">
             <div class="space-y-4">
                 {#if getSetting('site_name')}
                     <Input
@@ -122,7 +125,7 @@
         <div class="flex justify-end">
             <Button type="submit" variant="primary" size="md" disabled={form.processing}>
                 <Save class="w-4 h-4" />
-                <span>{form.processing ? 'Menyimpan...' : 'Simpan Seluruh Pengaturan'}</span>
+                <span>{form.processing ? 'Menyimpan...' : 'Simpan Pengaturan Umum'}</span>
             </Button>
         </div>
     </form>

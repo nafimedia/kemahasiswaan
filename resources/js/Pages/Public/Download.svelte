@@ -17,13 +17,27 @@
     const site = $derived(pageProps.site || { name: 'Kemahasiswaan & Alumni UNU Purwokerto' });
     const branding = $derived(pageProps.branding || {});
 
-    const downloads = [
+    const downloadPosts = $derived((pageProps as any).downloadPosts || []);
+
+    const defaultDownloads = [
         { title: 'Buku Panduan Organisasi Mahasiswa (Ormawa) 2026', type: 'PDF', size: '2.4 MB', cat: 'Panduan' },
         { title: 'Formulir Pengajuan Beasiswa Internal Yayasan', type: 'DOCX', size: '450 KB', cat: 'Beasiswa' },
         { title: 'Panduan Penulisan Proposal PKM Belmawa 2026', type: 'PDF', size: '3.1 MB', cat: 'Belmawa' },
         { title: 'Form Pendataan Capaian Prestasi Mahasiswa', type: 'DOCX', size: '320 KB', cat: 'Prestasi' },
         { title: 'Pedoman Pelaksanaan Wisuda & Bebas Pustaka', type: 'PDF', size: '1.8 MB', cat: 'Wisuda' },
     ];
+
+    const downloads = $derived(
+        downloadPosts.length > 0
+            ? downloadPosts.map((p: any) => ({
+                title: p.title,
+                type: p.meta?.file_type || 'PDF',
+                size: p.meta?.file_size || 'Dokumen',
+                cat: p.category?.name || 'Panduan',
+                url: p.meta?.file_url || `/informasi?kategori=${p.category?.slug || 'download-center'}`
+            }))
+            : defaultDownloads
+    );
 </script>
 
 <svelte:head>

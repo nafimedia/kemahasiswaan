@@ -25,6 +25,13 @@
         PanelLeftClose,
         PanelLeftOpen,
         Layers,
+        GraduationCap,
+        Megaphone,
+        Trophy,
+        Coins,
+        Briefcase,
+        Download,
+        PhoneCall
     } from 'lucide-svelte';
     import type { PageProps } from '@/lib/types';
 
@@ -77,6 +84,7 @@
 
     // Group Accordion State
     let openGroups = $state<Record<string, boolean>>({
+        kemahasiswaan: true,
         content: true,
         builder: true,
         seo: true,
@@ -87,9 +95,11 @@
     $effect(() => {
         if (currentUrl.startsWith('/admin/cms/posts') || currentUrl.startsWith('/admin/cms/pages') || currentUrl.startsWith('/admin/cms/categories') || currentUrl.startsWith('/admin/cms/tags') || currentUrl.startsWith('/admin/cms/calendar') || currentUrl.startsWith('/admin/cms/comments')) {
             openGroups.content = true;
+            openGroups.kemahasiswaan = true;
         }
-        if (currentUrl.startsWith('/admin/landing-builder') || currentUrl.startsWith('/admin/cms/menus') || currentUrl.startsWith('/admin/cms/forms')) {
+        if (currentUrl.startsWith('/admin/landing-builder') || currentUrl.startsWith('/admin/cms/menus') || currentUrl.startsWith('/admin/cms/forms') || currentUrl.startsWith('/admin/tracer-study')) {
             openGroups.builder = true;
+            openGroups.kemahasiswaan = true;
         }
         if (currentUrl.startsWith('/admin/cms/redirects') || currentUrl.startsWith('/admin/cms/analytics')) {
             openGroups.seo = true;
@@ -119,18 +129,80 @@
             ],
         },
         {
+            key: 'kemahasiswaan',
+            title: 'Halaman & Modul Layanan',
+            items: [
+                {
+                    name: 'Informasi & Berita',
+                    href: '/admin/cms/posts?category=pengumuman',
+                    icon: Megaphone,
+                    active: currentUrl.includes('category=pengumuman') || currentUrl.includes('category=informasi'),
+                    show: isModuleActive('posts'),
+                },
+                {
+                    name: 'Program Belmawa',
+                    href: '/admin/cms/posts?category=program-belmawa',
+                    icon: Sparkles,
+                    active: currentUrl.includes('category=program-belmawa'),
+                    show: isModuleActive('posts'),
+                },
+                {
+                    name: 'Prestasi Mahasiswa',
+                    href: '/admin/cms/posts?category=prestasi-mahasiswa',
+                    icon: Trophy,
+                    active: currentUrl.includes('category=prestasi-mahasiswa'),
+                    show: isModuleActive('posts'),
+                },
+                {
+                    name: 'Portal Beasiswa',
+                    href: '/admin/cms/posts?category=beasiswa',
+                    icon: Coins,
+                    active: currentUrl.includes('category=beasiswa'),
+                    show: isModuleActive('posts'),
+                },
+                {
+                    name: 'Alumni & Karir',
+                    href: '/admin/cms/posts?category=alumni-karir',
+                    icon: Briefcase,
+                    active: currentUrl.includes('category=alumni-karir'),
+                    show: isModuleActive('posts'),
+                },
+                {
+                    name: 'Tracer Study Alumni',
+                    href: '/admin/tracer-study',
+                    icon: GraduationCap,
+                    active: currentUrl.startsWith('/admin/tracer-study'),
+                    show: true,
+                },
+                {
+                    name: 'Download Center',
+                    href: '/admin/cms/posts?category=download-center',
+                    icon: Download,
+                    active: currentUrl.includes('category=download-center') || currentUrl.includes('category=download'),
+                    show: isModuleActive('posts'),
+                },
+                {
+                    name: 'Pengaturan Kontak',
+                    href: '/admin/settings/contact',
+                    icon: PhoneCall,
+                    active: currentUrl.startsWith('/admin/settings/contact'),
+                    show: hasPermission('settings.view'),
+                },
+            ],
+        },
+        {
             key: 'content',
             title: 'Content Management',
             items: [
                 {
-                    name: 'Artikel & Blog',
+                    name: 'Semua Artikel & Blog',
                     href: '/admin/cms/posts',
                     icon: Newspaper,
-                    active: currentUrl.startsWith('/admin/cms/posts'),
+                    active: currentUrl === '/admin/cms/posts',
                     show: isModuleActive('posts'),
                 },
                 {
-                    name: 'Halaman Web',
+                    name: 'Halaman Web (Pages)',
                     href: '/admin/cms/pages',
                     icon: FileText,
                     active: currentUrl.startsWith('/admin/cms/pages'),
@@ -255,163 +327,125 @@
                     name: 'Pengaturan Situs',
                     href: '/admin/settings',
                     icon: Settings,
-                    active: currentUrl === '/admin/settings',
-                    show: hasPermission('settings.view') && isModuleActive('settings'),
+                    active: currentUrl.startsWith('/admin/settings'),
+                    show: hasPermission('settings.view'),
                 },
                 {
-                    name: 'Branding & Logo',
+                    name: 'Manajemen Branding',
                     href: '/admin/settings/branding',
                     icon: Sparkles,
                     active: currentUrl.startsWith('/admin/settings/branding'),
-                    show: hasPermission('settings.view') && isModuleActive('settings'),
-                },
-                {
-                    name: 'Manajemen Modul',
-                    href: '/admin/settings/modules',
-                    icon: Layers,
-                    active: currentUrl.startsWith('/admin/settings/modules'),
-                    show: hasPermission('modules.view') && isModuleActive('modules'),
-                },
-            ],
-        },
-        {
-            key: 'account',
-            title: 'Account',
-            items: [
-                {
-                    name: 'Profil Saya',
-                    href: '/profile',
-                    icon: User,
-                    active: currentUrl === '/profile',
-                    show: true,
+                    show: hasPermission('settings.view'),
                 },
             ],
         },
     ]);
 </script>
 
-<!-- Mobile Overlay Backdrop -->
-{#if isOpen}
-    <button
-        type="button"
-        aria-label="Tutup sidebar"
-        class="fixed inset-0 z-40 w-full h-full bg-slate-950/60 backdrop-blur-xs lg:hidden transition-opacity border-none outline-none cursor-default"
-        onclick={onClose}
-    ></button>
-{/if}
-
-<!-- Sidebar Container -->
 <aside
-    class={`fixed top-0 bottom-0 left-0 z-40 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 lg:translate-x-0 flex flex-col justify-between ${
-        isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
-    } ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}`}
+    class={`fixed inset-y-0 left-0 z-40 bg-slate-900 text-slate-300 border-r border-slate-800/80 transition-all duration-300 flex flex-col shadow-2xl ${
+        isCollapsed ? 'w-20' : 'w-64'
+    } ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
 >
-    <!-- Top Part: Logo Banner & Nav Groups -->
-    <div class="flex flex-col flex-1 min-h-0">
-        <!-- Brand Banner -->
-        <div class={`h-20 border-b border-slate-200 dark:border-slate-800 flex items-center px-4 justify-between shrink-0 ${isCollapsed ? 'justify-center' : 'px-5'}`}>
-            <Link href="/admin/dashboard" class="flex items-center gap-3 max-w-full overflow-hidden group">
-                {#if isCollapsed}
-                    <div class="p-1.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 shadow-xs shrink-0">
-                        <img
-                            src={getBrandingUrl(branding?.admin_logo_collapsed) || getBrandingUrl(branding?.admin_logo_light)}
-                            alt="UNU Purwokerto"
-                            onerror={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/branding/unu_purwokerto_logo.png'; }}
-                            class="w-7 h-7 object-contain drop-shadow-sm"
-                        />
-                    </div>
-                {:else}
-                    <div class="p-1.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 shadow-xs shrink-0 group-hover:scale-105 transition-all">
-                        <img
-                            src={getBrandingUrl(branding?.admin_logo_light) || getBrandingUrl(branding?.admin_logo_dark)}
-                            alt="UNU Purwokerto"
-                            onerror={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/branding/unu_purwokerto_logo.png'; }}
-                            class="h-8 sm:h-9 w-auto object-contain drop-shadow-sm"
-                        />
-                    </div>
-                    <div class="truncate leading-tight">
-                        <h1 class="font-black text-xs sm:text-sm bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-300 bg-clip-text text-transparent truncate">
-                            Kemahasiswaan & Alumni
-                        </h1>
-                        <span class="text-[9px] text-slate-500 dark:text-slate-400 font-extrabold tracking-widest uppercase block truncate">
-                            UNU PURWOKERTO
-                        </span>
-                    </div>
-                {/if}
-            </Link>
-        </div>
+    <!-- Sidebar Header -->
+    <div class="h-20 flex items-center justify-between px-4 border-b border-slate-800/80 shrink-0">
+        <Link href="/admin/dashboard" class="flex items-center gap-3 overflow-hidden">
+            <img
+                src={getBrandingUrl(branding?.public_logo_dark || branding?.public_logo_light)}
+                alt={site?.name || 'UNU Purwokerto'}
+                class="h-9 w-auto shrink-0 object-contain"
+            />
+            {#if !isCollapsed}
+                <div class="flex flex-col min-w-0">
+                    <span class="font-black text-sm text-white truncate tracking-tight">Kemahasiswaan</span>
+                    <span class="text-[10px] font-extrabold text-blue-400 tracking-widest uppercase truncate">UNU PURWOKERTO</span>
+                </div>
+            {/if}
+        </Link>
 
-        <!-- Navigation Scrollable Body -->
-        <nav class="flex-1 overflow-y-auto p-3 space-y-4 pr-1">
-            {#each menuGroups as group}
-                {#if group.items.some(i => i.show)}
-                    <div class="space-y-1">
-                        <!-- Group Header (Accordion Toggle) -->
-                        {#if group.title && !isCollapsed}
-                            <button
-                                type="button"
-                                onclick={() => toggleGroup(group.key)}
-                                class="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 hover:text-slate-300 transition-colors"
-                            >
-                                <span>{group.title}</span>
-                                {#if openGroups[group.key]}
-                                    <ChevronDown class="w-3 h-3 text-slate-500" />
-                                {:else}
-                                    <ChevronRight class="w-3 h-3 text-slate-500" />
-                                {/if}
-                            </button>
-                        {:else if group.title && isCollapsed}
-                            <div class="my-2 border-t border-slate-200 dark:border-slate-800/80"></div>
-                        {/if}
-
-                        <!-- Group Items List -->
-                        {#if !group.title || openGroups[group.key] || isCollapsed}
-                            <div class="space-y-1">
-                                {#each group.items as item}
-                                    {#if item.show}
-                                        <Link
-                                            href={item.href}
-                                            onclick={onClose}
-                                            title={isCollapsed ? item.name : undefined}
-                                            class={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group ${
-                                                item.active
-                                                    ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/60 shadow-xs'
-                                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
-                                            } ${isCollapsed ? 'justify-center px-0' : ''}`}
-                                        >
-                                            <item.icon
-                                                class={`w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                                                    item.active ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'
-                                                }`}
-                                            />
-                                            {#if !isCollapsed}
-                                                <span class="truncate">{item.name}</span>
-                                            {/if}
-                                        </Link>
-                                    {/if}
-                                {/each}
-                            </div>
-                        {/if}
-                    </div>
-                {/if}
-            {/each}
-        </nav>
-    </div>
-
-    <!-- Bottom Part: Collapse Toggle Button (Desktop Only) -->
-    <div class="hidden lg:block border-t border-slate-200 dark:border-slate-800 p-3 shrink-0">
         <button
-            type="button"
             onclick={toggleCollapse}
-            class="w-full flex items-center justify-center gap-2 p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 transition-all text-xs font-semibold"
-            title={isCollapsed ? 'Perluas Sidebar' : 'Kecilkan Sidebar'}
+            class="hidden lg:flex items-center justify-center p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all shrink-0"
+            title={isCollapsed ? 'Perluas Sidebar' : 'Ciutkan Sidebar'}
         >
             {#if isCollapsed}
-                <PanelLeftOpen class="w-4 h-4 text-indigo-400" />
+                <PanelLeftOpen class="w-5 h-5 text-blue-400" />
             {:else}
-                <PanelLeftClose class="w-4 h-4 text-slate-400" />
-                <span>Kecilkan Sidebar</span>
+                <PanelLeftClose class="w-5 h-5 text-slate-400" />
             {/if}
         </button>
+    </div>
+
+    <!-- Navigation Menu Items -->
+    <div class="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-800">
+        {#each menuGroups as group}
+            {#if group.items.some((i) => i.show)}
+                <div class="space-y-1">
+                    {#if group.title && !isCollapsed}
+                        <button
+                            type="button"
+                            onclick={() => toggleGroup(group.key)}
+                            class="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-extrabold tracking-widest uppercase text-slate-500 hover:text-slate-300 transition-colors"
+                        >
+                            <span>{group.title}</span>
+                            {#if openGroups[group.key]}
+                                <ChevronDown class="w-3.5 h-3.5" />
+                            {:else}
+                                <ChevronRight class="w-3.5 h-3.5" />
+                            {/if}
+                        </button>
+                    {/if}
+
+                    {#if !group.title || openGroups[group.key] || isCollapsed}
+                        <div class="space-y-1">
+                            {#each group.items as item}
+                                {#if item.show}
+                                    <Link
+                                        href={item.href}
+                                        onclick={onClose}
+                                        class={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative group ${
+                                            item.active
+                                                ? 'bg-blue-600/90 text-white shadow-lg shadow-blue-600/30'
+                                                : 'text-slate-400 hover:text-white hover:bg-slate-800/80'
+                                        }`}
+                                        title={isCollapsed ? item.name : undefined}
+                                    >
+                                        <item.icon class={`w-4 h-4 shrink-0 transition-colors ${item.active ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'}`} />
+                                        {#if !isCollapsed}
+                                            <span class="truncate">{item.name}</span>
+                                        {/if}
+
+                                        {#if isCollapsed}
+                                            <!-- Tooltip when collapsed -->
+                                            <div class="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-950 text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                                                {item.name}
+                                            </div>
+                                        {/if}
+                                    </Link>
+                                {/if}
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
+            {/if}
+        {/each}
+    </div>
+
+    <!-- User Profile Footer -->
+    <div class="p-3 border-t border-slate-800/80 shrink-0">
+        {#if user}
+            <div class={`flex items-center gap-3 p-2 rounded-xl bg-slate-950/60 border border-slate-800 ${isCollapsed ? 'justify-center' : ''}`}>
+                <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-xs shrink-0 border border-blue-500/30">
+                    {user.name.charAt(0).toUpperCase()}
+                </div>
+
+                {#if !isCollapsed}
+                    <div class="flex flex-col min-w-0 flex-1">
+                        <span class="text-xs font-bold text-white truncate">{user.name}</span>
+                        <span class="text-[10px] text-slate-500 truncate">{user.roles?.[0] || 'Admin'}</span>
+                    </div>
+                {/if}
+            </div>
+        {/if}
     </div>
 </aside>

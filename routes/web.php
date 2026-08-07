@@ -23,6 +23,8 @@ use App\Http\Controllers\Admin\Cms\MediaController;
 use App\Http\Controllers\Admin\FormBuilderController;
 use App\Http\Controllers\Admin\Cms\RedirectController;
 use App\Http\Controllers\PublicKemahasiswaanController;
+use App\Http\Controllers\TracerStudyController;
+use App\Http\Controllers\Admin\TracerAdminController;
 use Illuminate\Support\Facades\Route;
 
 // Home Route (Landing Page)
@@ -66,7 +68,14 @@ Route::get('/belmawa', [PublicKemahasiswaanController::class, 'belmawa'])->name(
 Route::get('/prestasi', [PublicKemahasiswaanController::class, 'prestasi'])->name('public.prestasi');
 Route::get('/beasiswa', [PublicKemahasiswaanController::class, 'beasiswa'])->name('public.beasiswa');
 Route::get('/alumni', [PublicKemahasiswaanController::class, 'alumni'])->name('public.alumni');
-Route::get('/tracer-study', [PublicKemahasiswaanController::class, 'tracerStudy'])->name('public.tracer-study');
+
+// Public Tracer Study Module Routes
+Route::get('/tracer-study', [TracerStudyController::class, 'index'])->name('public.tracer-study');
+Route::post('/tracer-study/verify', [TracerStudyController::class, 'verify'])->name('public.tracer-study.verify');
+Route::get('/tracer-study/kuesioner', [TracerStudyController::class, 'form'])->name('public.tracer-study.form');
+Route::post('/tracer-study/submit', [TracerStudyController::class, 'submit'])->name('public.tracer-study.submit');
+Route::get('/tracer-study/sukses', [TracerStudyController::class, 'success'])->name('public.tracer-study.sukses');
+
 Route::get('/download', [PublicKemahasiswaanController::class, 'download'])->name('public.download');
 Route::get('/kontak', [PublicKemahasiswaanController::class, 'kontak'])->name('public.kontak');
 
@@ -236,6 +245,10 @@ Route::middleware('module:forms')->group(function () {
             Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
             Route::put('/settings', [SettingController::class, 'update'])->middleware('permission:settings.edit')->name('settings.update');
 
+            // Dedicated Contact Settings
+            Route::get('/settings/contact', [SettingController::class, 'contactIndex'])->name('settings.contact.index');
+            Route::put('/settings/contact', [SettingController::class, 'contactUpdate'])->middleware('permission:settings.edit')->name('settings.contact.update');
+
             // Branding Management
             Route::get('/settings/branding', [BrandingController::class, 'index'])->name('settings.branding.index');
             Route::post('/settings/branding/upload', [BrandingController::class, 'upload'])->middleware('permission:settings.edit')->name('settings.branding.upload');
@@ -245,5 +258,10 @@ Route::middleware('module:forms')->group(function () {
             Route::get('/settings/modules', [ModuleController::class, 'index'])->middleware('permission:modules.view')->name('settings.modules.index');
             Route::patch('/settings/modules/{key}/toggle', [ModuleController::class, 'toggle'])->middleware('permission:modules.edit')->name('settings.modules.toggle');
         });
+
+        // Admin Tracer Study Management
+        Route::get('/tracer-study', [TracerAdminController::class, 'index'])->name('tracer-study.index');
+        Route::get('/tracer-study/export', [TracerAdminController::class, 'exportCsv'])->name('tracer-study.export');
+        Route::get('/tracer-study/template', [TracerAdminController::class, 'downloadTemplate'])->name('tracer-study.template');
     });
 });

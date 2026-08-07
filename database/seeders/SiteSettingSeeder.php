@@ -59,6 +59,14 @@ class SiteSettingSeeder extends Seeder
                 'description' => 'URL Embed Google Maps lokasi kampus UNU Purwokerto.',
             ],
             [
+                'key' => 'contact_hours',
+                'value' => 'Senin - Jumat: 08.00 - 16.00 WIB',
+                'group' => 'contact',
+                'type' => 'string',
+                'label' => 'Jam Operasional Kantor',
+                'description' => 'Jam layanan operasional kantor helpdesk kemahasiswaan.',
+            ],
+            [
                 'key' => 'enable_registration',
                 'value' => 'true',
                 'group' => 'system',

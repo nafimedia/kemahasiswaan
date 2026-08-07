@@ -120,7 +120,16 @@ class PublicKemahasiswaanController extends Controller
      */
     public function download(): Response
     {
-        return Inertia::render('Public/Download');
+        $downloadPosts = Post::where('status', 'published')
+            ->whereHas('category', function ($q) {
+                $q->whereIn('slug', ['download-center', 'download', 'dokumen-pedoman', 'pengumuman']);
+            })
+            ->latest('published_at')
+            ->get();
+
+        return Inertia::render('Public/Download', [
+            'downloadPosts' => $downloadPosts,
+        ]);
     }
 
     /**
@@ -132,6 +141,7 @@ class PublicKemahasiswaanController extends Controller
             'email' => SiteSetting::get('contact_email', 'kemahasiswaan@unupurwokerto.ac.id'),
             'phone' => SiteSetting::get('contact_phone', '+62 812-3456-7890'),
             'address' => SiteSetting::get('contact_address', 'Jl. Sultan Agung No. 42, Karangklesem, Purwokerto Selatan, Kab. Banyumas, Jawa Tengah 53144'),
+            'hours' => SiteSetting::get('contact_hours', 'Senin - Jumat: 08.00 - 16.00 WIB'),
             'maps' => SiteSetting::get('google_maps_embed', 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3956.195825700778!2d109.2458!3d-7.4436!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e655c47a5089f53%3A0x64e7c7e974e6f477!2sUniversitas%20Nahdlatul%20Ulama%20Purwokerto!5e0!3m2!1sid!2sid!4v1700000000000'),
         ];
 

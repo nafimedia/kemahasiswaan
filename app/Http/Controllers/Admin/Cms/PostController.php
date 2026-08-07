@@ -26,7 +26,14 @@ class PostController extends Controller
         }
 
         if ($request->filled('category')) {
-            $query->where('category_id', $request->input('category'));
+            $catParam = $request->input('category');
+            $query->whereHas('category', function ($q) use ($catParam) {
+                if (is_numeric($catParam)) {
+                    $q->where('id', $catParam);
+                } else {
+                    $q->where('slug', $catParam);
+                }
+            });
         }
 
         if ($request->filled('status')) {

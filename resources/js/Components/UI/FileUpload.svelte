@@ -14,10 +14,10 @@
     let {
         file = $bindable(null),
         previewUrl = '',
-        label = 'Upload Image',
+        label = 'Upload File / Dokumen',
         error = '',
-        accept = 'image/*',
-        maxSizeMB = 2,
+        accept = '*',
+        maxSizeMB = 100,
         onchange
     }: Props = $props();
 

@@ -20,6 +20,7 @@ class CategorySeeder extends Seeder
             ['name' => 'Alumni & Karir', 'description' => 'Berita ikatan alumni, tracer study, lowongan pekerjaan, dan program magang.', 'icon' => 'Briefcase'],
             ['name' => 'Beasiswa', 'description' => 'Informasi beasiswa internal KIP-Kuliah, Yayasan, Baznas, Pemda & Swasta.', 'icon' => 'Coins'],
             ['name' => 'Program Belmawa', 'description' => 'Program Kementerian: PKM, P2MW, Pilmapres, dan PPK Ormawa.', 'icon' => 'Sparkles'],
+            ['name' => 'Download Center', 'description' => 'Dokumen, panduan, pedoman, dan formulir kemahasiswaan & alumni.', 'icon' => 'Download'],
         ];
 
         foreach ($categories as $cat) {
