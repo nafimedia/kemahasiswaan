@@ -28,16 +28,28 @@
     const site = $derived(pageProps.site || { name: 'Kemahasiswaan & Alumni UNU Purwokerto' });
     const branding = $derived(pageProps.branding || {});
     const prodiList = $derived(pageProps.prodiList || [
-        'S1 Teknik Informatika',
-        'S1 Teknik Sipil',
+        'S1 Matematika',
+        'S1 Agribisnis',
         'S1 Agroteknologi',
         'S1 Teknologi Pangan',
+        'S1 Pendidikan Ilmu Pengetahuan Alam',
+        'S1 Biologi',
+        'S1 Sains Lingkungan',
+        'S1 Teknik Pertanian dan Biosistem',
+        'S1 Ilmu Keolahragaan',
+        'S1 Ilmu Perikanan',
+        'S1 Informatika',
+        'S1 Peternakan',
+        'S1 Administrasi Publik',
+        'S1 Ilmu Hukum',
+        'S1 Hukum Syariah',
         'S1 Manajemen',
         'S1 Akuntansi',
-        'S1 Hukum Syariah (Hukum Keluarga)',
         'S1 Pendidikan Bahasa Inggris',
         'S1 Pendidikan Agama Islam',
-        'S1 Pendidikan Guru MI'
+        'S1 Pendidikan Bahasa Arab',
+        'S1 Pendidikan Guru Madrasah Ibtidaiyah',
+        'S1 Pendidikan Islam Anak Usia Dini'
     ]);
 
     // Form Inertia untuk Verifikasi Alumni

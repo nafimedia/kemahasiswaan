@@ -10,6 +10,7 @@
     "moduleResolution": "bundler",
     "strict": true,
     "noEmit": true,
+    "types": ["vite/client"],
     "paths": {
       "@/*": ["./resources/js/*"]
     }

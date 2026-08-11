@@ -31,19 +31,28 @@ class TracerSampleSeeder extends Seeder
         }
 
         $prodiMap = [
-            '55201' => 'S1 Teknik Informatika',
-            '22201' => 'S1 Teknik Sipil',
-            '54201' => 'S1 Agroteknologi',
-            '54211' => 'S1 Teknologi Pangan',
+            '44201' => 'S1 Matematika',
+            '54201' => 'S1 Agribisnis',
+            '54211' => 'S1 Agroteknologi',
+            '41221' => 'S1 Teknologi Pangan',
+            '84208' => 'S1 Pendidikan Ilmu Pengetahuan Alam',
+            '46201' => 'S1 Biologi',
+            '95202' => 'S1 Sains Lingkungan',
+            '41201' => 'S1 Teknik Pertanian dan Biosistem',
+            '89201' => 'S1 Ilmu Keolahragaan',
+            '54247' => 'S1 Ilmu Perikanan',
+            '55200' => 'S1 Informatika',
+            '54231' => 'S1 Peternakan',
+            '63201' => 'S1 Administrasi Publik',
+            '74201' => 'S1 Ilmu Hukum',
+            '74234' => 'S1 Hukum Syariah',
             '61201' => 'S1 Manajemen',
             '62201' => 'S1 Akuntansi',
-            '74201' => 'S1 Hukum Syariah (Hukum Keluarga)',
             '88203' => 'S1 Pendidikan Bahasa Inggris',
-            '86201' => 'S1 Pendidikan Agama Islam',
-            '86202' => 'S1 Pendidikan Guru MI',
-            '63201' => 'S1 Manajemen',
-            '44201' => 'S1 Agroteknologi',
-            '88201' => 'S1 Pendidikan Bahasa Inggris',
+            '86230' => 'S1 Pendidikan Agama Islam',
+            '88204' => 'S1 Pendidikan Bahasa Arab',
+            '86232' => 'S1 Pendidikan Guru Madrasah Ibtidaiyah',
+            '86236' => 'S1 Pendidikan Islam Anak Usia Dini',
         ];
 
         foreach ($data as $row) {
@@ -74,7 +83,7 @@ class TracerSampleSeeder extends Seeder
 
             // Construct 86-field detail_jawaban map
             $detail = [
-                'Kode Pt' => '061030',
+                'Kode Pt' => '061045',
                 'Kode Prodi' => $kodeProdi,
                 'Nomor Mhs' => $nim,
                 'Nama' => $nama,
@@ -158,7 +167,8 @@ class TracerSampleSeeder extends Seeder
                     'status_saat_ini' => $statusSlug,
                     'nama_instansi' => $row['F5b'] ?? ($row['F18b'] ?? null),
                     'jabatan' => $row['F5c'] ?? ($row['F18c'] ?? null),
-                    'pendapatan_bulanan' => $row['F502'] ?? null,
+                    'waktu_tunggu_bulan' => isset($row['F502']) && is_numeric($row['F502']) ? (int)$row['F502'] : null,
+                    'pendapatan_bulanan' => isset($row['F505']) ? (string)$row['F505'] : null,
                     'detail_jawaban' => $detail,
                     'completed_at' => now()->subDays(rand(1, 60)),
                 ]

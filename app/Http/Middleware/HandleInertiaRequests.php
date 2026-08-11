@@ -54,6 +54,8 @@ class HandleInertiaRequests extends Middleware
                     'permissions' => $user->getAllPermissions()->pluck('name'),
                 ] : null,
             ],
+            'app_env' => config('app.env', 'production'),
+            'is_production' => app()->environment('production'),
             'site' => [
                 'name' => $settings['site_name'] ?? config('app.name', 'LaraSvelte'),
                 'description' => $settings['site_description'] ?? '',
