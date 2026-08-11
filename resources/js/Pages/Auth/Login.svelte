@@ -6,15 +6,14 @@
     import { LogIn, KeyRound } from 'lucide-svelte';
 
     const pageProps = page.props as any;
-    const isProduction = Boolean(
-        pageProps?.is_production === true ||
-        pageProps?.app_env === 'production' ||
-        (import.meta as any).env?.PROD
+    const showDemo = Boolean(
+        pageProps?.show_demo_credentials ??
+        (!pageProps?.is_production && pageProps?.app_env !== 'production' && !(import.meta as any).env?.PROD)
     );
 
     const form = useForm({
-        email: isProduction ? '' : 'admin@example.com',
-        password: isProduction ? '' : 'password',
+        email: showDemo ? 'admin@example.com' : '',
+        password: showDemo ? 'password' : '',
         remember: true,
     });
 
@@ -82,8 +81,8 @@
         </Link>
     </div>
 
-    <!-- Quick Demo Credentials Box (Hanya Tampil Jika BUKAN Mode Production) -->
-    {#if !isProduction}
+    <!-- Quick Demo Credentials Box (Hanya Tampil Jika Mode Demo Aktif) -->
+    {#if showDemo}
         <div class="mt-6 p-3 bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/60 rounded-xl text-xs space-y-1">
             <p class="font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-1.5">
                 <KeyRound class="w-3.5 h-3.5" /> Akun Demo Bawaan:

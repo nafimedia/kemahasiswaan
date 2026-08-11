@@ -56,6 +56,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'app_env' => config('app.env', 'production'),
             'is_production' => app()->environment('production'),
+            'show_demo_credentials' => filter_var(env('SHOW_DEMO_CREDENTIALS', !app()->environment('production')), FILTER_VALIDATE_BOOLEAN),
             'site' => [
                 'name' => $settings['site_name'] ?? config('app.name', 'LaraSvelte'),
                 'description' => $settings['site_description'] ?? '',
