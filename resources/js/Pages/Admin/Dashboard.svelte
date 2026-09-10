@@ -3,7 +3,7 @@
     import Card from '@/Components/UI/Card.svelte';
     import Badge from '@/Components/UI/Badge.svelte';
     import Avatar from '@/Components/UI/Avatar.svelte';
-    import { Users, ShieldCheck, Activity, CheckCircle2, ArrowUpRight, Zap, Code, Shield } from 'lucide-svelte';
+    import { Users, ShieldCheck, Activity, CheckCircle2 } from 'lucide-svelte';
     import type { ActivityItem } from '@/lib/types';
 
     interface Props {
@@ -21,20 +21,6 @@
 </script>
 
 <AppLayout title="Dashboard Utama">
-    <!-- Header Hero Banner -->
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-800 p-6 sm:p-8 text-white shadow-xl shadow-indigo-500/10">
-        <div class="relative z-10 space-y-2 max-w-2xl">
-            <Badge variant="primary" class="bg-white/10 text-white border-white/20 backdrop-blur-xs">
-                Laravel 13 &bull; Svelte 5 &bull; Tailwind v4
-            </Badge>
-            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Selamat Datang di LaraSvelte Starterkit!</h1>
-            <p class="text-xs sm:text-sm text-indigo-100/90 leading-relaxed">
-                Fondasi starter kit tingkat produksi lengkap dengan Role-Based Access Control (RBAC), Spatie Media Library, Audit Logs, Data Table, dan API Sanctum Siap Pakai.
-            </p>
-        </div>
-        <div class="absolute -right-8 -bottom-8 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-    </div>
-
     <!-- Stats Grid Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card class="hover:border-indigo-300 dark:hover:border-indigo-800">
