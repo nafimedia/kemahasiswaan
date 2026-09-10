@@ -66,14 +66,14 @@
     }
 
     const tracerBenefits = [
-        { title: 'Peningkatan Akreditasi Kampus', desc: 'Memenuhi indikator IKU 1 Kemendiktisaintek untuk penjaminan mutu program studi.' },
-        { title: 'Evaluasi Kurikulum Pembelajaran', desc: 'Masukan alumni menjadi bahan penyelarasan kurikulum dengan kebutuhan industri.' },
-        { title: 'Penguatan Jejaring Alumni', desc: 'Mempermudah sinergi karir, rekrutmen magang, dan kolaborasi alumni UNU Purwokerto.' },
+        { title: 'Peningkatan Kualitas Kampus', desc: 'Membantu meningkatkan akreditasi program studi dan mutu pembelajaran bagi adik-adik tingkat.' },
+        { title: 'Penyelarasan Materi Kuliah', desc: 'Masukan berharga Anda menjadi bahan evaluasi agar perkuliahan semakin sesuai dengan kebutuhan dunia kerja.' },
+        { title: 'Penguatan Jejaring Alumni', desc: 'Mempererat tali silaturahmi alumni, info lowongan kerja, dan peluang kolaborasi karir di masa depan.' },
     ];
 </script>
 
 <svelte:head>
-    <title>Isi Kuesioner Tracer Study Alumni - UNU Purwokerto</title>
+    <title>Tracer Study Alumni - UNU Purwokerto</title>
 </svelte:head>
 
 <div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-500 selection:text-white transition-colors duration-300">
@@ -136,15 +136,15 @@
     <div class="relative py-12 bg-gradient-to-b from-blue-500/10 via-slate-50 to-slate-50 dark:from-blue-950/40 dark:via-slate-950 dark:to-slate-950 border-b border-slate-200/80 dark:border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
             <div class="max-w-3xl mx-auto space-y-3">
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 text-blue-700 dark:text-blue-300 text-xs font-extrabold uppercase tracking-wider">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 text-blue-700 dark:text-blue-300 text-xs font-extrabold tracking-wider">
                     <BarChart3 class="w-4 h-4 text-blue-500" />
-                    Sistem Tracer Study Alumni UNU Purwokerto 2026
+                    Penelusuran Jejak Alumni UNU Purwokerto
                 </div>
                 <h1 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-                    Pengisian Kuesioner Tracer Study
+                    Kuesioner Tracer Study Alumni
                 </h1>
                 <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
-                    Silakan isi data identifikasi awal alumni di bawah ini untuk melanjutkan ke kuesioner pelacakan kelulusan.
+                    Silakan masukkan data diri Anda di bawah ini untuk memulai pengisian survei penelusuran lulusan.
                 </p>
             </div>
         </div>
@@ -165,15 +165,15 @@
                 <div>
                     <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                         <GraduationCap class="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                        Identifikasi Data Alumni
+                        Data Diri Alumni
                     </h2>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        Masukkan data valid sesuai status kelulusan Anda di UNU Purwokerto.
+                        Masukkan data yang sesuai saat Anda menempuh perkuliahan di UNU Purwokerto.
                     </p>
                 </div>
                 <div class="hidden sm:block text-right">
-                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Target Pengisian</span>
-                    <span class="text-xs font-black text-blue-600 dark:text-blue-400">Lulusan UNU Purwokerto</span>
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Sasaran Pengisian</span>
+                    <span class="text-xs font-black text-blue-600 dark:text-blue-400">Alumni UNU Purwokerto</span>
                 </div>
             </div>
 
@@ -296,7 +296,7 @@
         <!-- Benefits Section -->
         <div class="mt-16 space-y-8">
             <h3 class="text-xl font-black text-slate-900 dark:text-slate-100 text-center">
-                Manfaat Partisipasi Kuesioner Tracer Study
+                Manfaat Pengisian Tracer Study bagi Kita Bersama
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {#each tracerBenefits as b}

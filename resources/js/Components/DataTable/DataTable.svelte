@@ -98,7 +98,7 @@
                 <div class="flex items-center gap-1.5">
                     <Filter class="w-3.5 h-3.5 text-slate-400" />
                     <select
-                        class="text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                        class="text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
                         value={filters[opt.key] ?? ''}
                         onchange={(e) => handleFilterChange(opt.key, (e.target as HTMLSelectElement).value)}
                     >
@@ -169,7 +169,7 @@
                             type="button"
                             class={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
                                 link.active
-                                    ? 'bg-indigo-600 text-white dark:bg-indigo-500'
+                                    ? 'bg-emerald-600 text-white dark:bg-emerald-500 shadow-xs'
                                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                             }`}
                             onclick={() => changePage(link.url)}

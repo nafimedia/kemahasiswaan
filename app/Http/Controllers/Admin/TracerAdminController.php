@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Alumni;
 use App\Models\TracerPeriod;
+use App\Models\TracerQuestion;
 use App\Models\TracerResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -14,6 +18,34 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class TracerAdminController extends Controller
 {
     /**
+     * Daftar 22 Program Studi Resmi & Kode Dikti UNU Purwokerto
+     */
+    protected array $prodiList = [
+        ['nama' => 'S1 Matematika', 'kode' => '44201'],
+        ['nama' => 'S1 Agribisnis', 'kode' => '54201'],
+        ['nama' => 'S1 Agroteknologi', 'kode' => '54211'],
+        ['nama' => 'S1 Teknologi Pangan', 'kode' => '41221'],
+        ['nama' => 'S1 Pendidikan Ilmu Pengetahuan Alam', 'kode' => '84208'],
+        ['nama' => 'S1 Biologi', 'kode' => '46201'],
+        ['nama' => 'S1 Sains Lingkungan', 'kode' => '95202'],
+        ['nama' => 'S1 Teknik Pertanian dan Biosistem', 'kode' => '41201'],
+        ['nama' => 'S1 Ilmu Keolahragaan', 'kode' => '89201'],
+        ['nama' => 'S1 Ilmu Perikanan', 'kode' => '54247'],
+        ['nama' => 'S1 Informatika', 'kode' => '55200'],
+        ['nama' => 'S1 Peternakan', 'kode' => '54231'],
+        ['nama' => 'S1 Administrasi Publik', 'kode' => '63201'],
+        ['nama' => 'S1 Ilmu Hukum', 'kode' => '74201'],
+        ['nama' => 'S1 Hukum Syariah', 'kode' => '74234'],
+        ['nama' => 'S1 Manajemen', 'kode' => '61201'],
+        ['nama' => 'S1 Akuntansi', 'kode' => '62201'],
+        ['nama' => 'S1 Pendidikan Bahasa Inggris', 'kode' => '88203'],
+        ['nama' => 'S1 Pendidikan Agama Islam', 'kode' => '86230'],
+        ['nama' => 'S1 Pendidikan Bahasa Arab', 'kode' => '88204'],
+        ['nama' => 'S1 Pendidikan Guru Madrasah Ibtidaiyah', 'kode' => '86232'],
+        ['nama' => 'S1 Pendidikan Islam Anak Usia Dini', 'kode' => '86236'],
+    ];
+
+    /**
      * Dashboard & List Jawaban Tracer Study untuk Admin
      */
     public function index(Request $request): Response
@@ -21,15 +53,16 @@ class TracerAdminController extends Controller
         $search = $request->query('search');
         $prodi = $request->query('prodi');
         $status = $request->query('status');
+        $periodId = $request->query('period_id');
 
         $query = TracerResponse::with(['period'])->latest('completed_at');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('nim', 'like', "%{$search}%")
-                  ->orWhere('nik', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('nim', 'like', "%{$search}%")
+                    ->orWhere('nik', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -41,28 +74,50 @@ class TracerAdminController extends Controller
             $query->where('status_saat_ini', $status);
         }
 
+        if ($periodId) {
+            $query->where('tracer_period_id', $periodId);
+        }
+
         $responses = $query->paginate(15)->withQueryString();
 
-        // Statistik Sederhana
+        // Statistik
+        $statsQuery = TracerResponse::query();
+        if ($periodId) {
+            $statsQuery->where('tracer_period_id', $periodId);
+        }
+
         $stats = [
-            'total' => TracerResponse::count(),
-            'bekerja' => TracerResponse::where('f8', 1)->orWhere('status_saat_ini', 'bekerja')->count(),
-            'wiraswasta' => TracerResponse::where('f8', 3)->orWhere('status_saat_ini', 'wiraswasta')->count(),
-            'studi_lanjut' => TracerResponse::where('f8', 4)->orWhere('status_saat_ini', 'studi_lanjut')->count(),
-            'mencari_kerja' => TracerResponse::whereIn('f8', [2, 5])->orWhere('status_saat_ini', 'mencari_kerja')->count(),
-            'avg_waktu_tunggu' => round((float) TracerResponse::whereNotNull('waktu_tunggu_bulan')->avg('waktu_tunggu_bulan'), 1),
+            'total' => (clone $statsQuery)->count(),
+            'bekerja' => (clone $statsQuery)->where(function ($q) {
+                $q->where('f8', 1)->orWhere('status_saat_ini', 'bekerja');
+            })->count(),
+            'wiraswasta' => (clone $statsQuery)->where(function ($q) {
+                $q->where('f8', 3)->orWhere('status_saat_ini', 'wiraswasta');
+            })->count(),
+            'studi_lanjut' => (clone $statsQuery)->where(function ($q) {
+                $q->where('f8', 4)->orWhere('status_saat_ini', 'studi_lanjut');
+            })->count(),
+            'mencari_kerja' => (clone $statsQuery)->where(function ($q) {
+                $q->whereIn('f8', [2, 5])->orWhere('status_saat_ini', 'mencari_kerja');
+            })->count(),
+            'avg_waktu_tunggu' => round((float) (clone $statsQuery)->whereNotNull('waktu_tunggu_bulan')->avg('waktu_tunggu_bulan'), 1),
         ];
 
         $activePeriod = TracerPeriod::where('is_active', true)->latest()->first();
+        $periods = TracerPeriod::withCount('responses')->orderBy('year', 'desc')->get();
 
         return Inertia::render('Admin/Tracer/Index', [
             'responses' => $responses,
             'stats' => $stats,
             'activePeriod' => $activePeriod,
+            'periods' => $periods,
+            'questions' => TracerQuestion::orderBy('order', 'asc')->get(),
+            'prodiList' => array_column($this->prodiList, 'nama'),
             'filters' => [
                 'search' => $search,
                 'prodi' => $prodi,
                 'status' => $status,
+                'period_id' => $periodId,
             ],
         ]);
     }
@@ -70,7 +125,7 @@ class TracerAdminController extends Controller
     /**
      * Unduh Template Polosan Dikti template_upload_data_responden.xlsx
      */
-    public function downloadTemplate(): BinaryFileResponse|\Illuminate\Http\RedirectResponse
+    public function downloadTemplate(): BinaryFileResponse|RedirectResponse
     {
         $filePath = base_path('template_upload_data_responden.xlsx');
 
@@ -84,16 +139,19 @@ class TracerAdminController extends Controller
     /**
      * Export Data Tracer Study ke format 86 Kolom Standar Kemendiktisaintek
      */
-    public function exportCsv(): StreamedResponse
+    public function exportCsv(Request $request): StreamedResponse
     {
+        $periodId = $request->query('period_id');
+        $fileName = 'data_responden_tracer_dikti_'.($periodId ? 'periode_'.$periodId.'_' : '').date('Ymd_His').'.csv';
+
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="data_responden_tracer_dikti_' . date('Ymd_His') . '.csv"',
+            'Content-Disposition' => 'attachment; filename="'.$fileName.'"',
         ];
 
-        $callback = function () {
+        $callback = function () use ($periodId) {
             $file = fopen('php://output', 'w');
-            
+
             // UTF-8 BOM for Microsoft Excel compatibility
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
@@ -107,25 +165,30 @@ class TracerAdminController extends Controller
                 'f301', 'f302', 'f303',
                 'f401', 'f402', 'f403', 'f404', 'f405', 'f406', 'f407', 'f408', 'f409', 'f410', 'f411', 'f412', 'f413', 'f414', 'f415', 'f416',
                 'f6', 'f7', 'f7a', 'f1001', 'f1002',
-                'f1601', 'f1602', 'f1603', 'f1604', 'f1605', 'f1606', 'f1607', 'f1608', 'f1609', 'f1610', 'f1611', 'f1612', 'f1613', 'f1614'
+                'f1601', 'f1602', 'f1603', 'f1604', 'f1605', 'f1606', 'f1607', 'f1608', 'f1609', 'f1610', 'f1611', 'f1612', 'f1613', 'f1614',
             ];
 
             fputcsv($file, $excelHeaders);
 
-            // Helper untuk menjaga angka nol di depan (Kode PT, Hp, NIK, NPWP, dsb) saat dibuka di MS Excel
+            // Helper untuk menjaga angka nol di depan saat dibuka di MS Excel
             $fmtText = function ($val) {
                 if ($val === null || $val === '') {
                     return '';
                 }
                 $str = (string) $val;
-                // Jika diawali '0' dan berupa digit (061045, 08123...) atau NIK 16 digit, format sebagai formula string ="..."
                 if ((strlen($str) > 1 && $str[0] === '0' && ctype_digit($str)) || (strlen($str) >= 15 && ctype_digit($str))) {
-                    return '="' . $str . '"';
+                    return '="'.$str.'"';
                 }
+
                 return $str;
             };
 
-            TracerResponse::chunk(200, function ($responses) use ($file, $fmtText) {
+            $query = TracerResponse::query();
+            if ($periodId) {
+                $query->where('tracer_period_id', $periodId);
+            }
+
+            $query->chunk(200, function ($responses) use ($file, $fmtText) {
                 foreach ($responses as $row) {
                     $d = $row->detail_jawaban ?? [];
 
@@ -146,6 +209,7 @@ class TracerAdminController extends Controller
                         $row->tahun_lulus ?? $d['Tahun Lulus'] ?? '',
                         $fmtText($nik),
                         $fmtText($npwp),
+                        $row->f8 ?? $d['f8'] ?? '',
                         $d['f502'] ?? $row->waktu_tunggu_bulan ?? '',
                         $d['f505'] ?? $row->pendapatan_bulanan ?? '',
                         $d['f5a1'] ?? '',
@@ -232,5 +296,526 @@ class TracerAdminController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Simpan Periode Baru Tracer Study
+     */
+    public function storePeriod(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'year' => 'required|integer|min:2000|max:2099',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'is_active' => 'boolean',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ], [
+            'year.required' => 'Tahun periode wajib diisi.',
+            'title.required' => 'Judul periode wajib diisi.',
+            'end_date.after_or_equal' => 'Tanggal berakhir harus sama atau setelah tanggal mulai.',
+        ]);
+
+        $isActive = ! empty($validated['is_active']);
+        if ($isActive) {
+            TracerPeriod::where('is_active', true)->update(['is_active' => false]);
+        }
+
+        $validated['is_active'] = $isActive;
+        TracerPeriod::create($validated);
+
+        return redirect()->back()->with('success', 'Periode tracer study berhasil ditambahkan.');
+    }
+
+    /**
+     * Perbarui Periode Tracer Study
+     */
+    public function updatePeriod(Request $request, $id): RedirectResponse
+    {
+        $period = TracerPeriod::findOrFail($id);
+
+        $validated = $request->validate([
+            'year' => 'required|integer|min:2000|max:2099',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'is_active' => 'boolean',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ], [
+            'year.required' => 'Tahun periode wajib diisi.',
+            'title.required' => 'Judul periode wajib diisi.',
+            'end_date.after_or_equal' => 'Tanggal berakhir harus sama atau setelah tanggal mulai.',
+        ]);
+
+        $isActive = ! empty($validated['is_active']);
+        if ($isActive && ! $period->is_active) {
+            TracerPeriod::where('id', '!=', $period->id)->update(['is_active' => false]);
+        }
+
+        $validated['is_active'] = $isActive;
+        $period->update($validated);
+
+        return redirect()->back()->with('success', 'Periode tracer study berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus Periode Tracer Study
+     */
+    public function destroyPeriod($id): RedirectResponse
+    {
+        $period = TracerPeriod::findOrFail($id);
+
+        if ($period->responses()->count() > 0) {
+            return redirect()->back()->with('error', 'Periode ini tidak dapat dihapus karena telah memiliki data respon.');
+        }
+
+        $period->delete();
+
+        return redirect()->back()->with('success', 'Periode tracer study berhasil dihapus.');
+    }
+
+    /**
+     * Toggle Keaktifan Periode Tracer Study
+     */
+    public function togglePeriodActive($id): RedirectResponse
+    {
+        $period = TracerPeriod::findOrFail($id);
+        $newStatus = ! $period->is_active;
+
+        if ($newStatus) {
+            TracerPeriod::where('id', '!=', $period->id)->update(['is_active' => false]);
+        }
+
+        $period->update(['is_active' => $newStatus]);
+
+        return redirect()->back()->with('success', 'Status keaktifan periode berhasil diubah.');
+    }
+
+    /**
+     * Tampilkan Form Input Respon Baru
+     */
+    public function createResponse(): Response
+    {
+        $periods = TracerPeriod::orderBy('year', 'desc')->get();
+        $activePeriod = TracerPeriod::where('is_active', true)->latest()->first();
+
+        return Inertia::render('Admin/Tracer/ResponseForm', [
+            'periods' => $periods,
+            'activePeriodId' => $activePeriod ? $activePeriod->id : null,
+            'prodiList' => $this->prodiList,
+            'response' => null,
+            'isEdit' => false,
+        ]);
+    }
+
+    /**
+     * Simpan Data Responden Baru
+     */
+    public function storeResponse(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'tracer_period_id' => 'required|exists:tracer_periods,id',
+            'nim' => 'required|string|max:30',
+            'nik' => 'nullable|string|max:20',
+            'nama' => 'required|string|max:255',
+            'prodi' => 'required|string|max:255',
+            'tanggal_lahir' => 'nullable|date',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:30',
+            'tahun_lulus' => 'required|integer|min:2000|max:'.(date('Y') + 1),
+            'npwp' => 'nullable|string|max:30',
+            'ipk' => 'nullable|numeric|between:0,4.00',
+            'f8' => 'nullable|integer|in:1,2,3,4,5',
+            'status_saat_ini' => 'required|string',
+            'nama_instansi' => 'nullable|string|max:255',
+            'jabatan' => 'nullable|string|max:255',
+            'kategori_instansi' => 'nullable|string|max:255',
+            'waktu_tunggu_bulan' => 'nullable|integer|min:0|max:120',
+            'pendapatan_bulanan' => 'nullable|string|max:255',
+            'keselarasan_horisontal' => 'nullable|string|max:255',
+            'keselarasan_vertikal' => 'nullable|string|max:255',
+            'detail_jawaban' => 'nullable|array',
+        ], [
+            'tracer_period_id.required' => 'Periode tracer study wajib dipilih.',
+            'nim.required' => 'NIM wajib diisi.',
+            'nama.required' => 'Nama lengkap wajib diisi.',
+            'prodi.required' => 'Program studi wajib dipilih.',
+            'tahun_lulus.required' => 'Tahun lulus wajib diisi.',
+            'status_saat_ini.required' => 'Status aktivitas karir wajib dipilih.',
+        ]);
+
+        // Cari kode prodi
+        $kodeProdi = '00000';
+        foreach ($this->prodiList as $item) {
+            if ($item['nama'] === $validated['prodi']) {
+                $kodeProdi = $item['kode'];
+                break;
+            }
+        }
+
+        // Tentukan f8 jika belum terisi
+        $f8 = $validated['f8'] ?? match ($validated['status_saat_ini']) {
+            'bekerja' => 1,
+            'mencari_kerja' => 2,
+            'wiraswasta' => 3,
+            'studi_lanjut' => 4,
+            default => 5,
+        };
+
+        // Buat atau hubungkan dengan Alumni
+        $alumni = Alumni::firstOrCreate(
+            ['nim' => strtoupper(trim($validated['nim']))],
+            [
+                'nik' => $validated['nik'] ?? null,
+                'nama' => $validated['nama'],
+                'prodi' => $validated['prodi'],
+                'tanggal_lahir' => $validated['tanggal_lahir'] ?? null,
+                'email' => $validated['email'] ?? null,
+                'phone' => $validated['phone'] ?? null,
+                'tahun_lulus' => $validated['tahun_lulus'],
+            ]
+        );
+
+        // Susun payload detail_jawaban (Dikti standard)
+        $detail = $validated['detail_jawaban'] ?? [];
+        $detail['Kode Pt'] = '061045';
+        $detail['Kode Prodi'] = $kodeProdi;
+        $detail['Nomor Mhs'] = strtoupper(trim($validated['nim']));
+        $detail['Nama'] = $validated['nama'];
+        $detail['Hp'] = $validated['phone'] ?? '';
+        $detail['Email'] = $validated['email'] ?? '';
+        $detail['Tahun Lulus'] = $validated['tahun_lulus'];
+        $detail['NIK'] = $validated['nik'] ?? '';
+        $detail['NPWP'] = $validated['npwp'] ?? '';
+        $detail['f8'] = $f8;
+        if (! empty($validated['nama_instansi'])) {
+            $detail['f5b'] = $validated['nama_instansi'];
+        }
+        if (! empty($validated['waktu_tunggu_bulan'])) {
+            $detail['f502'] = $validated['waktu_tunggu_bulan'];
+        }
+        if (! empty($validated['pendapatan_bulanan'])) {
+            $detail['f505'] = $validated['pendapatan_bulanan'];
+        }
+
+        TracerResponse::create([
+            'tracer_period_id' => $validated['tracer_period_id'],
+            'alumni_id' => $alumni->id,
+            'kode_pt' => '061045',
+            'kode_prodi' => $kodeProdi,
+            'nim' => strtoupper(trim($validated['nim'])),
+            'nik' => $validated['nik'] ?? null,
+            'nama' => $validated['nama'],
+            'prodi' => $validated['prodi'],
+            'tanggal_lahir' => $validated['tanggal_lahir'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'tahun_lulus' => $validated['tahun_lulus'],
+            'npwp' => $validated['npwp'] ?? null,
+            'ipk' => $validated['ipk'] ?? null,
+            'f8' => $f8,
+            'status_saat_ini' => $validated['status_saat_ini'],
+            'nama_instansi' => $validated['nama_instansi'] ?? null,
+            'jabatan' => $validated['jabatan'] ?? null,
+            'kategori_instansi' => $validated['kategori_instansi'] ?? null,
+            'waktu_tunggu_bulan' => $validated['waktu_tunggu_bulan'] ?? null,
+            'pendapatan_bulanan' => $validated['pendapatan_bulanan'] ?? null,
+            'keselarasan_horisontal' => $validated['keselarasan_horisontal'] ?? null,
+            'keselarasan_vertikal' => $validated['keselarasan_vertikal'] ?? null,
+            'detail_jawaban' => $detail,
+            'completed_at' => now(),
+        ]);
+
+        return redirect()->route('admin.tracer-study.index')->with('success', 'Data respon alumni berhasil disimpan.');
+    }
+
+    /**
+     * Tampilkan Form Edit Respon Alumni
+     */
+    public function editResponse($id): Response
+    {
+        $response = TracerResponse::with(['period', 'alumni'])->findOrFail($id);
+        $periods = TracerPeriod::orderBy('year', 'desc')->get();
+
+        return Inertia::render('Admin/Tracer/ResponseForm', [
+            'periods' => $periods,
+            'activePeriodId' => $response->tracer_period_id,
+            'prodiList' => $this->prodiList,
+            'response' => $response,
+            'isEdit' => true,
+        ]);
+    }
+
+    /**
+     * Perbarui Data Responden Tracer Study
+     */
+    public function updateResponse(Request $request, $id): RedirectResponse
+    {
+        $response = TracerResponse::findOrFail($id);
+
+        $validated = $request->validate([
+            'tracer_period_id' => 'required|exists:tracer_periods,id',
+            'nim' => 'required|string|max:30',
+            'nik' => 'nullable|string|max:20',
+            'nama' => 'required|string|max:255',
+            'prodi' => 'required|string|max:255',
+            'tanggal_lahir' => 'nullable|date',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:30',
+            'tahun_lulus' => 'required|integer|min:2000|max:'.(date('Y') + 1),
+            'npwp' => 'nullable|string|max:30',
+            'ipk' => 'nullable|numeric|between:0,4.00',
+            'f8' => 'nullable|integer|in:1,2,3,4,5',
+            'status_saat_ini' => 'required|string',
+            'nama_instansi' => 'nullable|string|max:255',
+            'jabatan' => 'nullable|string|max:255',
+            'kategori_instansi' => 'nullable|string|max:255',
+            'waktu_tunggu_bulan' => 'nullable|integer|min:0|max:120',
+            'pendapatan_bulanan' => 'nullable|string|max:255',
+            'keselarasan_horisontal' => 'nullable|string|max:255',
+            'keselarasan_vertikal' => 'nullable|string|max:255',
+            'detail_jawaban' => 'nullable|array',
+        ], [
+            'tracer_period_id.required' => 'Periode tracer study wajib dipilih.',
+            'nim.required' => 'NIM wajib diisi.',
+            'nama.required' => 'Nama lengkap wajib diisi.',
+            'prodi.required' => 'Program studi wajib dipilih.',
+            'tahun_lulus.required' => 'Tahun lulus wajib diisi.',
+            'status_saat_ini.required' => 'Status aktivitas karir wajib dipilih.',
+        ]);
+
+        $kodeProdi = '00000';
+        foreach ($this->prodiList as $item) {
+            if ($item['nama'] === $validated['prodi']) {
+                $kodeProdi = $item['kode'];
+                break;
+            }
+        }
+
+        $f8 = $validated['f8'] ?? match ($validated['status_saat_ini']) {
+            'bekerja' => 1,
+            'mencari_kerja' => 2,
+            'wiraswasta' => 3,
+            'studi_lanjut' => 4,
+            default => 5,
+        };
+
+        // Update alumni bila ada
+        if ($response->alumni_id) {
+            $alumni = Alumni::find($response->alumni_id);
+            if ($alumni) {
+                $alumni->update([
+                    'nik' => $validated['nik'] ?? $alumni->nik,
+                    'nama' => $validated['nama'],
+                    'prodi' => $validated['prodi'],
+                    'tanggal_lahir' => $validated['tanggal_lahir'] ?? $alumni->tanggal_lahir,
+                    'email' => $validated['email'] ?? $alumni->email,
+                    'phone' => $validated['phone'] ?? $alumni->phone,
+                    'tahun_lulus' => $validated['tahun_lulus'],
+                ]);
+            }
+        }
+
+        $detail = array_merge($response->detail_jawaban ?? [], $validated['detail_jawaban'] ?? []);
+        $detail['Kode Pt'] = '061045';
+        $detail['Kode Prodi'] = $kodeProdi;
+        $detail['Nomor Mhs'] = strtoupper(trim($validated['nim']));
+        $detail['Nama'] = $validated['nama'];
+        $detail['Hp'] = $validated['phone'] ?? '';
+        $detail['Email'] = $validated['email'] ?? '';
+        $detail['Tahun Lulus'] = $validated['tahun_lulus'];
+        $detail['NIK'] = $validated['nik'] ?? '';
+        $detail['NPWP'] = $validated['npwp'] ?? '';
+        $detail['f8'] = $f8;
+        if (! empty($validated['nama_instansi'])) {
+            $detail['f5b'] = $validated['nama_instansi'];
+        }
+        if (! empty($validated['waktu_tunggu_bulan'])) {
+            $detail['f502'] = $validated['waktu_tunggu_bulan'];
+        }
+        if (! empty($validated['pendapatan_bulanan'])) {
+            $detail['f505'] = $validated['pendapatan_bulanan'];
+        }
+
+        $response->update([
+            'tracer_period_id' => $validated['tracer_period_id'],
+            'kode_pt' => '061045',
+            'kode_prodi' => $kodeProdi,
+            'nim' => strtoupper(trim($validated['nim'])),
+            'nik' => $validated['nik'] ?? null,
+            'nama' => $validated['nama'],
+            'prodi' => $validated['prodi'],
+            'tanggal_lahir' => $validated['tanggal_lahir'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'tahun_lulus' => $validated['tahun_lulus'],
+            'npwp' => $validated['npwp'] ?? null,
+            'ipk' => $validated['ipk'] ?? null,
+            'f8' => $f8,
+            'status_saat_ini' => $validated['status_saat_ini'],
+            'nama_instansi' => $validated['nama_instansi'] ?? null,
+            'jabatan' => $validated['jabatan'] ?? null,
+            'kategori_instansi' => $validated['kategori_instansi'] ?? null,
+            'waktu_tunggu_bulan' => $validated['waktu_tunggu_bulan'] ?? null,
+            'pendapatan_bulanan' => $validated['pendapatan_bulanan'] ?? null,
+            'keselarasan_horisontal' => $validated['keselarasan_horisontal'] ?? null,
+            'keselarasan_vertikal' => $validated['keselarasan_vertikal'] ?? null,
+            'detail_jawaban' => $detail,
+        ]);
+
+        return redirect()->route('admin.tracer-study.index')->with('success', 'Data respon alumni berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus Data Responden Tracer Study
+     */
+    public function destroyResponse($id): RedirectResponse
+    {
+        $response = TracerResponse::findOrFail($id);
+        $response->delete();
+
+        return redirect()->back()->with('success', 'Data respon alumni berhasil dihapus.');
+    }
+
+    /**
+     * Tambah Pertanyaan Kuesioner Baru (Khusus Kustom UNU Purwokerto)
+     */
+    public function storeQuestion(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'section' => 'required|string|in:pembiayaan,karir,studi_lanjut,kompetensi,pembelajaran,evaluasi_kampus',
+            'question_text' => 'required|string|max:1000',
+            'help_text' => 'nullable|string|max:1000',
+            'type' => 'required|string|in:text,number,textarea,radio,checkbox,select,rating_scale',
+            'options' => 'nullable|array',
+            'options.*.value' => 'nullable|string',
+            'options.*.label' => 'nullable|string',
+            'is_required' => 'boolean',
+        ]);
+
+        $maxOrder = TracerQuestion::where('section', $validated['section'])->max('order') ?? 0;
+        $code = 'custom_'.strtolower(Str::random(8));
+
+        TracerQuestion::create([
+            'section' => $validated['section'],
+            'code' => $code,
+            'is_core_dikti' => false,
+            'question_text' => $validated['question_text'],
+            'help_text' => $validated['help_text'] ?? null,
+            'type' => $validated['type'],
+            'options' => $validated['options'] ?? null,
+            'order' => $maxOrder + 1,
+            'is_required' => $validated['is_required'] ?? false,
+            'is_active' => true,
+        ]);
+
+        return redirect()->back()->with('success', 'Pertanyaan kuesioner baru berhasil ditambahkan.');
+    }
+
+    /**
+     * Perbarui Pertanyaan Kuesioner (Dikti atau Kustom)
+     */
+    public function updateQuestion(Request $request, $id): RedirectResponse
+    {
+        $question = TracerQuestion::findOrFail($id);
+
+        if ($question->is_core_dikti) {
+            // Untuk Pertanyaan Inti Standar Dikti:
+            // Hanya izinkan mengubah question_text, help_text, dan options teks
+            // KODE VARIABEL & TIPE INPUT TERKUNCI AMAN AGAR TIDAK MERUSAK EKSPOR DIKTI 86 KOLOM
+            $validated = $request->validate([
+                'question_text' => 'required|string|max:1000',
+                'help_text' => 'nullable|string|max:1000',
+                'options' => 'nullable|array',
+            ]);
+
+            $updateData = [
+                'question_text' => $validated['question_text'],
+                'help_text' => $validated['help_text'] ?? null,
+            ];
+
+            if ($question->type === 'radio' && ! empty($validated['options'])) {
+                $updateData['options'] = $validated['options'];
+            }
+
+            $question->update($updateData);
+
+            return redirect()->back()->with('success', 'Teks pertanyaan standar Dikti berhasil diperbarui.');
+        }
+
+        // Untuk Pertanyaan Kustom: Boleh edit semua atribut
+        $validated = $request->validate([
+            'section' => 'required|string|in:pembiayaan,karir,studi_lanjut,kompetensi,pembelajaran,evaluasi_kampus',
+            'question_text' => 'required|string|max:1000',
+            'help_text' => 'nullable|string|max:1000',
+            'type' => 'required|string|in:text,number,textarea,radio,checkbox,select,rating_scale',
+            'options' => 'nullable|array',
+            'is_required' => 'boolean',
+        ]);
+
+        $question->update([
+            'section' => $validated['section'],
+            'question_text' => $validated['question_text'],
+            'help_text' => $validated['help_text'] ?? null,
+            'type' => $validated['type'],
+            'options' => $validated['options'] ?? null,
+            'is_required' => $validated['is_required'] ?? false,
+        ]);
+
+        return redirect()->back()->with('success', 'Pertanyaan kustom berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus Pertanyaan Kuesioner (Hanya Boleh untuk Kustom)
+     */
+    public function destroyQuestion($id): RedirectResponse
+    {
+        $question = TracerQuestion::findOrFail($id);
+
+        if ($question->is_core_dikti) {
+            return redirect()->back()->with('error', 'Pertanyaan standar inti Dikti tidak dapat dihapus demi kepatuhan pelaporan kementerian.');
+        }
+
+        $question->delete();
+
+        return redirect()->back()->with('success', 'Pertanyaan kustom berhasil dihapus.');
+    }
+
+    /**
+     * Toggle Keaktifan Pertanyaan
+     */
+    public function toggleQuestionActive($id): RedirectResponse
+    {
+        $question = TracerQuestion::findOrFail($id);
+
+        // Jangan izinkan menonaktifkan pertanyaan wajib kunci Dikti (status f8, waktu tunggu, pendapatan, keselarasan)
+        $lockedCodes = ['f8', 'f502', 'f505', 'f14', 'f15'];
+        if ($question->is_core_dikti && in_array($question->code, $lockedCodes) && $question->is_active) {
+            return redirect()->back()->with('error', 'Pertanyaan wajib Dikti (F8, F502, F505, F14, F15) tidak boleh dinonaktifkan.');
+        }
+
+        $question->update([
+            'is_active' => ! $question->is_active,
+        ]);
+
+        return redirect()->back()->with('success', 'Status keaktifan pertanyaan berhasil diubah.');
+    }
+
+    /**
+     * Urutkan Pertanyaan Kuesioner
+     */
+    public function reorderQuestions(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'orders' => 'required|array',
+            'orders.*.id' => 'required|exists:tracer_questions,id',
+            'orders.*.order' => 'required|integer',
+        ]);
+
+        foreach ($validated['orders'] as $item) {
+            TracerQuestion::where('id', $item['id'])->update(['order' => $item['order']]);
+        }
+
+        return redirect()->back()->with('success', 'Urutan pertanyaan kuesioner berhasil diperbarui.');
     }
 }

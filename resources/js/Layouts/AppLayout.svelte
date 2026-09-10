@@ -15,6 +15,18 @@
     let { title = 'Dashboard', children }: Props = $props();
 
     let isSidebarOpen = $state(false);
+    let isSidebarCollapsed = $state(
+        typeof localStorage !== 'undefined'
+            ? localStorage.getItem('admin_sidebar_collapsed') === 'true'
+            : false
+    );
+
+    function toggleSidebarCollapse() {
+        isSidebarCollapsed = !isSidebarCollapsed;
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('admin_sidebar_collapsed', isSidebarCollapsed ? 'true' : 'false');
+        }
+    }
 
     const pageProps = $derived(page.props as unknown as PageProps);
     const site = $derived(pageProps.site);
@@ -55,10 +67,15 @@
     <Toaster position="top-right" richColors closeButton />
 
     <!-- Sidebar -->
-    <Sidebar isOpen={isSidebarOpen} onClose={() => isSidebarOpen = false} />
+    <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => isSidebarOpen = false}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={toggleSidebarCollapse}
+    />
 
-    <!-- Main Content Wrapper -->
-    <div class="lg:pl-64 flex flex-col flex-1 min-h-screen">
+    <!-- Main Content Wrapper (Smooth transition matching sidebar width) -->
+    <div class="{isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'} flex flex-col flex-1 min-h-screen transition-all duration-300">
         <!-- Navbar -->
         <Navbar onToggleSidebar={() => isSidebarOpen = !isSidebarOpen} />
 
@@ -71,7 +88,7 @@
 
         <!-- Footer -->
         <footer class="py-4 px-6 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400 dark:text-slate-500">
-            &copy; {new Date().getFullYear()} LaraSvelte Starterkit. Built with Laravel 13, Svelte 5 & Tailwind CSS v4.
+            &copy; {new Date().getFullYear()} Kemahasiswaan & Alumni Universitas Nahdlatul Ulama Purwokerto. Seluruh hak cipta dilindungi.
         </footer>
     </div>
 </div>

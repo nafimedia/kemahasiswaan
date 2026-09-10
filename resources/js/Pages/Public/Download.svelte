@@ -41,7 +41,7 @@
 </script>
 
 <svelte:head>
-    <title>Download Center - Kemahasiswaan & Alumni UNU Purwokerto</title>
+    <title>Pusat Unduhan Berkas - Kemahasiswaan & Alumni UNU Purwokerto</title>
 </svelte:head>
 
 <div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-500 selection:text-white transition-colors duration-300">
@@ -107,7 +107,7 @@
             <div class="max-w-3xl space-y-4">
                 <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 text-blue-700 dark:text-blue-300 text-xs font-black tracking-wider uppercase animate-float">
                     <Download class="w-4 h-4 text-blue-500" />
-                    Download Center Dokumen Layanan
+                    Pusat Unduhan Berkas & Panduan
                 </div>
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
                     Buku Panduan & Formulir Kemahasiswaan

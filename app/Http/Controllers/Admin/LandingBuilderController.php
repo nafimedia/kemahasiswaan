@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\LandingSection;
-use App\Models\LandingSectionVersion;
 use App\Models\LandingSiteSetting;
 use App\Models\MediaFile;
 use Illuminate\Http\Request;
@@ -18,26 +17,31 @@ class LandingBuilderController extends Controller
      */
     public function index()
     {
+        // Only seed once on initial setup if table is empty and never seeded before
+        $hasSeeded = LandingSiteSetting::get('landing_sections_seeded', false);
+
+        if (! $hasSeeded && LandingSection::count() === 0) {
+            $this->seedDefaultSections();
+            LandingSiteSetting::set('landing_sections_seeded', true);
+        }
+
         $sections = LandingSection::orderBy('order', 'asc')->get();
 
-        // Seed & sync default UNU Purwokerto sections if missing
-        $sections = $this->seedDefaultSections();
-
         $themeSettings = LandingSiteSetting::get('theme_config', [
-            'primaryColor' => '#6366f1',
-            'secondaryColor' => '#a855f7',
-            'accentColor' => '#ec4899',
-            'backgroundColor' => '#090d16',
+            'primaryColor' => '#059669',
+            'secondaryColor' => '#0d9488',
+            'accentColor' => '#f59e0b',
+            'backgroundColor' => '#f8fafc',
             'fontFamily' => 'Plus Jakarta Sans',
-            'darkMode' => true,
+            'darkMode' => false,
             'containerWidth' => '7xl',
         ]);
 
         $seoSettings = LandingSiteSetting::get('seo_config', [
-            'metaTitle' => 'FairuzKit — Starter Kit Laravel 13 + Svelte 5 + Inertia',
-            'metaDescription' => 'Starter kit full-stack terlengkap dengan Svelte 5 Runes, Laravel 13 RBAC, Inertia.js, Tailwind v4 & Dark Mode bawaan.',
-            'keywords' => 'laravel 13, svelte 5, inertia.js, starter kit, rbac, tailwindcss',
-            'ogImage' => '/images/hero-hijab.png',
+            'metaTitle' => 'Kemahasiswaan & Alumni — Universitas Nahdlatul Ulama Purwokerto',
+            'metaDescription' => 'Portal resmi layanan kemahasiswaan, beasiswa, program Belmawa, dan tracer study alumni UNU Purwokerto.',
+            'keywords' => 'kemahasiswaan, unu purwokerto, beasiswa, belmawa, tracer study alumni',
+            'ogImage' => '/images/branding/unu_purwokerto_logo.png',
         ]);
 
         $mediaFiles = MediaFile::latest()->get();
@@ -63,7 +67,7 @@ class LandingBuilderController extends Controller
         ]);
 
         $maxOrder = LandingSection::max('order') ?? 0;
-        $slug = Str::slug($validated['name']) . '-' . Str::random(4);
+        $slug = Str::slug($validated['name']).'-'.Str::random(4);
 
         $defaultContent = $this->getDefaultContentForType($validated['type']);
         $defaultSettings = [
@@ -152,11 +156,11 @@ class LandingBuilderController extends Controller
         $original = LandingSection::findOrFail($id);
 
         $maxOrder = LandingSection::max('order') ?? 0;
-        $newSlug = $original->type . '-' . Str::random(6);
+        $newSlug = $original->type.'-'.Str::random(6);
 
         $duplicate = $original->replicate();
         $duplicate->section_id = $newSlug;
-        $duplicate->name = $original->name . ' (Salinan)';
+        $duplicate->name = $original->name.' (Salinan)';
         $duplicate->order = $maxOrder + 1;
         $duplicate->status = 'draft';
         $duplicate->save();
@@ -172,7 +176,21 @@ class LandingBuilderController extends Controller
         $section = LandingSection::findOrFail($id);
         $section->delete();
 
+        LandingSiteSetting::set('landing_sections_seeded', true);
+
         return redirect()->back()->with('success', 'Section berhasil dihapus');
+    }
+
+    /**
+     * Reset sections to default UNU Purwokerto layout.
+     */
+    public function resetDefaults()
+    {
+        LandingSection::query()->delete();
+        $this->seedDefaultSections();
+        LandingSiteSetting::set('landing_sections_seeded', true);
+
+        return redirect()->back()->with('success', 'Daftar section berhasil direset ke pengaturan bawaan');
     }
 
     /**
@@ -216,13 +234,13 @@ class LandingBuilderController extends Controller
         ]);
 
         $file = $request->file('file');
-        $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
+        $filename = time().'_'.Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.$file->getClientOriginalExtension();
         $path = $file->storeAs('landing', $filename, 'public');
 
         MediaFile::create([
             'filename' => $filename,
             'original_name' => $file->getClientOriginalName(),
-            'file_path' => '/storage/' . $path,
+            'file_path' => '/storage/'.$path,
             'file_type' => $file->getClientMimeType(),
             'file_size' => $file->getSize(),
             'uploaded_by' => auth()->id(),
@@ -255,7 +273,7 @@ class LandingBuilderController extends Controller
                         ['title' => 'Beasiswa & Kesejahteraan', 'desc' => 'Informasi KIP Kuliah, Beasiswa Yayasan, Baznas, & Pemda.', 'icon' => 'Coins'],
                         ['title' => 'Program Belmawa', 'desc' => 'Pendampingan PKM, P2MW, Pilmapres, & PPK Ormawa.', 'icon' => 'Sparkles'],
                         ['title' => 'Hall of Achievement', 'desc' => 'Pendataan dan apresiasi kejuaraan mahasiswa nasional & internasional.', 'icon' => 'Trophy'],
-                    ]
+                    ],
                 ];
             case 'stats':
                 return [
@@ -264,24 +282,24 @@ class LandingBuilderController extends Controller
                         ['value' => '89.4%', 'label' => 'Serapan Kerja Alumni'],
                         ['value' => '100+', 'label' => 'Prestasi Mahasiswa'],
                         ['value' => '100%', 'label' => 'Layanan Kemahasiswaan Digital'],
-                    ]
+                    ],
                 ];
             case 'testimonials':
                 return [
                     'items' => [
                         ['name' => 'M. Rizky Pratama, S.Kom.', 'role' => 'Alumni Informatika 2022', 'comment' => 'Pendidikan dan organisasi di UNU Purwokerto membentuk fondasi kepemimpinan dan karir profesional saya.', 'avatar' => ''],
-                    ]
+                    ],
                 ];
             case 'faq':
                 return [
                     'items' => [
                         ['question' => 'Bagaimana cara mengajukan Beasiswa di UNU Purwokerto?', 'answer' => 'Pengajuan beasiswa dapat dilakukan melalui menu Informasi Beasiswa dan melengkapi berkas di Bagian Kemahasiswaan.'],
                         ['question' => 'Dimana alumni dapat mengisi Kuesioner Tracer Study?', 'answer' => 'Alumni dapat mengisi kuesioner pada menu Tracer Study atau melalui tracer.unupurwokerto.ac.id.'],
-                    ]
+                    ],
                 ];
             default:
                 return [
-                    'html_content' => '<div class="p-8 bg-slate-900 rounded-2xl text-center"><h3 class="text-xl font-bold">Informasi Tambahan</h3><p class="text-slate-400 mt-2">Konten Kemahasiswaan & Alumni UNU Purwokerto.</p></div>'
+                    'html_content' => '<div class="p-8 bg-slate-900 rounded-2xl text-center"><h3 class="text-xl font-bold">Informasi Tambahan</h3><p class="text-slate-400 mt-2">Konten Kemahasiswaan & Alumni UNU Purwokerto.</p></div>',
                 ];
         }
     }
@@ -320,7 +338,7 @@ class LandingBuilderController extends Controller
                         ['title' => 'Beasiswa KIP & Internal Yayasan', 'desc' => 'Informasi pembebasan UKT, KIP-Kuliah, Baznas, BI, dan Pemda Banyumas.', 'icon' => 'Coins'],
                         ['title' => 'Karir Alumni & Bursa Kerja', 'desc' => 'Info lowongan kerja mitra industri, magang kerja, dan jejaring alumni.', 'icon' => 'Zap'],
                         ['title' => 'Sistem Tracer Study Alumni', 'desc' => 'Kuesioner penjaminan mutu dan pelacakan jejak karir alumni UNU Purwokerto.', 'icon' => 'Layers'],
-                    ]
+                    ],
                 ],
                 'settings' => ['background' => 'slate-900/30', 'paddingTop' => 'py-16', 'containerWidth' => '7xl', 'alignment' => 'center', 'animation' => 'none', 'hideMobile' => false],
                 'order' => 2,
@@ -340,7 +358,7 @@ class LandingBuilderController extends Controller
                         ['value' => '89.4%', 'label' => 'Serapan Kerja Alumni (IKU 1)'],
                         ['value' => '100+', 'label' => 'Prestasi Kejuaraan 2026'],
                         ['value' => '100%', 'label' => 'Layanan Kemahasiswaan Digital'],
-                    ]
+                    ],
                 ],
                 'settings' => ['background' => 'slate-900/50', 'paddingTop' => 'py-12', 'containerWidth' => '7xl', 'alignment' => 'center', 'animation' => 'none', 'hideMobile' => false],
                 'order' => 3,
@@ -359,7 +377,7 @@ class LandingBuilderController extends Controller
                         ['question' => 'Bagaimana cara pendaftaran Beasiswa KIP Kuliah di UNU Purwokerto?', 'answer' => 'Pendaftaran KIP-Kuliah dilakukan bersamaan dengan alur PMB UNU Purwokerto pada semester gasal.'],
                         ['question' => 'Dimana alumni dapat mengisi Kuesioner Tracer Study?', 'answer' => 'Alumni dapat mengisi kuesioner pada menu Tracer Study atau melalui tracer.unupurwokerto.ac.id.'],
                         ['question' => 'Bagaimana alur pendataan prestasi mahasiswa?', 'answer' => 'Mahasiswa mengunggah sertifikat kejuaraan melalui Form Pendataan Prestasi di menu Prestasi.'],
-                    ]
+                    ],
                 ],
                 'settings' => ['background' => 'transparent', 'paddingTop' => 'py-16', 'containerWidth' => '7xl', 'alignment' => 'center', 'animation' => 'none', 'hideMobile' => false],
                 'order' => 4,

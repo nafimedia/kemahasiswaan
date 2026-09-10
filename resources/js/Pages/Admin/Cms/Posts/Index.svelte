@@ -5,7 +5,26 @@
     import Button from '@/Components/UI/Button.svelte';
     import Badge from '@/Components/UI/Badge.svelte';
     import Modal from '@/Components/UI/Modal.svelte';
-    import { Plus, Edit3, Trash2, RotateCcw, Newspaper, Eye, Pin, Star, Clock, Folder, ExternalLink, Copy } from 'lucide-svelte';
+    import {
+        Plus,
+        Edit3,
+        Trash2,
+        RotateCcw,
+        Newspaper,
+        Eye,
+        Pin,
+        Star,
+        Clock,
+        Folder,
+        ExternalLink,
+        Copy,
+        Megaphone,
+        Sparkles,
+        Trophy,
+        Coins,
+        Briefcase,
+        Download
+    } from 'lucide-svelte';
 
     interface Props {
         posts: any;
@@ -19,6 +38,74 @@
     let selectedIds = $state<number[]>([]);
     let previewPost = $state<any>(null);
     let isPreviewOpen = $state(false);
+
+    const categoryInfoMap: Record<string, { title: string; desc: string; icon: any; btnText: string }> = {
+        'beasiswa': {
+            title: 'Portal Beasiswa',
+            desc: 'Kelola informasi pendaftaran beasiswa, persyaratan berkas, dan pengumuman penerima beasiswa kampus',
+            icon: Coins,
+            btnText: 'Tambah Info Beasiswa',
+        },
+        'prestasi-mahasiswa': {
+            title: 'Prestasi Mahasiswa',
+            desc: 'Kelola etalase capaian kejuaraan, piagam kompetisi ilmiah, seni, dan olahraga mahasiswa',
+            icon: Trophy,
+            btnText: 'Tambah Data Prestasi',
+        },
+        'program-belmawa': {
+            title: 'Program Belmawa',
+            desc: 'Kelola publikasi dan pendampingan program PKM, P2MW, PPK Ormawa, dan Belmawa Kemendiktisaintek',
+            icon: Sparkles,
+            btnText: 'Tambah Program Belmawa',
+        },
+        'pengumuman': {
+            title: 'Informasi & Berita',
+            desc: 'Kelola rilis pengumuman akademik, kabar kegiatan kemahasiswaan, dan siaran resmi kampus',
+            icon: Megaphone,
+            btnText: 'Tulis Pengumuman Baru',
+        },
+        'informasi': {
+            title: 'Informasi & Berita',
+            desc: 'Kelola rilis pengumuman akademik, kabar kegiatan kemahasiswaan, dan siaran resmi kampus',
+            icon: Megaphone,
+            btnText: 'Tulis Pengumuman Baru',
+        },
+        'alumni-karir': {
+            title: 'Alumni & Karir',
+            desc: 'Kelola informasi bursa kerja, lowongan mitra industri, rekrutmen, dan kiprah karir alumni',
+            icon: Briefcase,
+            btnText: 'Tambah Lowongan / Karir',
+        },
+        'download-center': {
+            title: 'Pusat Unduhan',
+            desc: 'Kelola berkas unduhan pedoman kemahasiswaan, buku panduan, template formulir, dan SOP layanan',
+            icon: Download,
+            btnText: 'Tambah Berkas Baru',
+        },
+        'download': {
+            title: 'Pusat Unduhan',
+            desc: 'Kelola berkas unduhan pedoman kemahasiswaan, buku panduan, template formulir, dan SOP layanan',
+            icon: Download,
+            btnText: 'Tambah Berkas Baru',
+        },
+    };
+
+    const activeCatSlug = $derived(filters?.category || '');
+    const matchedCategory = $derived(categories.find((c: any) => c.slug === activeCatSlug));
+
+    const currentMeta = $derived(
+        categoryInfoMap[activeCatSlug] || (activeCatSlug && matchedCategory ? {
+            title: matchedCategory.name,
+            desc: `Kelola semua artikel dan postingan dalam kategori ${matchedCategory.name}`,
+            icon: Folder,
+            btnText: `Tambah ${matchedCategory.name}`,
+        } : {
+            title: 'Manajemen Artikel & Berita',
+            desc: 'Kelola seluruh postingan artikel blog, siaran berita, kategori, tag, dan waktu baca',
+            icon: Newspaper,
+            btnText: 'Tulis Artikel Baru',
+        })
+    );
 
     function handlePostView(postItem: any) {
         if (postItem.status === 'published') {
@@ -101,25 +188,29 @@
     ]);
 </script>
 
-<AppLayout title="Manajemen Artikel & Blog (Posts)">
+<AppLayout title={currentMeta.title}>
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Newspaper class="w-5 h-5 text-indigo-500" />
-                <span>Manajemen Artikel & Berita</span>
+                <currentMeta.icon class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <span>{currentMeta.title}</span>
             </h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kelola postingan blog, artikel berita, kategori, tag, dan waktu baca</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{currentMeta.desc}</p>
         </div>
-        <Button variant="primary" size="md" onclick={() => router.get('/admin/cms/posts/create')}>
+        <Button
+            variant="primary"
+            size="md"
+            onclick={() => router.get(`/admin/cms/posts/create${activeCatSlug ? `?category=${activeCatSlug}` : ''}`)}
+        >
             <Plus class="w-4 h-4" />
-            <span>Tulis Artikel Baru</span>
+            <span>{currentMeta.btnText}</span>
         </Button>
     </div>
 
     <!-- Bulk Actions Bar -->
     {#if selectedIds.length > 0}
-        <div class="p-3 bg-indigo-950/40 border border-indigo-500/30 rounded-xl flex items-center justify-between gap-4">
-            <span class="text-xs font-semibold text-indigo-300">
+        <div class="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 rounded-xl flex items-center justify-between gap-4">
+            <span class="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
                 {selectedIds.length} Artikel Terpilih
             </span>
             <div class="flex items-center gap-2">
@@ -147,7 +238,7 @@
                         type="checkbox"
                         checked={posts.data?.length > 0 && selectedIds.length === posts.data?.length}
                         onchange={toggleSelectAll}
-                        class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500"
+                        class="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                     />
                 </th>
                 <th class="px-4 py-3">Artikel</th>
@@ -167,39 +258,39 @@
                         type="checkbox"
                         checked={selectedIds.includes(postItem.id)}
                         onchange={() => toggleSelect(postItem.id)}
-                        class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500"
+                        class="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                     />
                 </td>
                 <td class="px-4 py-3">
                     <div class="flex items-center gap-3">
                         {#if postItem.featured_image}
-                            <img src={postItem.featured_image} alt={postItem.title} class="w-12 h-12 object-cover rounded-lg border border-slate-700 shrink-0" />
+                            <img src={postItem.featured_image} alt={postItem.title} class="w-12 h-12 object-cover rounded-lg border border-slate-200 dark:border-slate-700 shrink-0" />
                         {:else}
-                            <div class="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500 shrink-0">
+                            <div class="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700/60 shrink-0">
                                 <Newspaper class="w-6 h-6" />
                             </div>
                         {/if}
                         <div class="space-y-0.5 max-w-xs">
                             <p class="font-bold text-slate-900 dark:text-slate-100 truncate flex items-center gap-1">
                                 {#if postItem.is_sticky}
-                                    <span title="Sticky Post"><Pin class="w-3 h-3 text-amber-400 fill-amber-400 shrink-0" /></span>
+                                    <span title="Sticky Post"><Pin class="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" /></span>
                                 {/if}
                                 {#if postItem.is_featured}
-                                    <span title="Featured Article"><Star class="w-3 h-3 text-indigo-400 fill-indigo-400 shrink-0" /></span>
+                                    <span title="Featured Article"><Star class="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" /></span>
                                 {/if}
                                 <span>{postItem.title}</span>
                             </p>
-                            <p class="text-[10px] text-slate-400 font-mono truncate">/{postItem.slug}</p>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate">/{postItem.slug}</p>
                         </div>
                     </div>
                 </td>
                 <td class="px-4 py-3 text-xs">
                     {#if postItem.category}
-                        <span class="px-2 py-0.5 rounded-full bg-slate-800 text-indigo-300 font-semibold border border-slate-700">
+                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-800 text-[11px] whitespace-nowrap">
                             {postItem.category.name}
                         </span>
                     {:else}
-                        <span class="text-slate-500">— Uncategorized</span>
+                        <span class="text-slate-400 dark:text-slate-500">— Uncategorized</span>
                     {/if}
                 </td>
                 <td class="px-4 py-3">
@@ -210,46 +301,46 @@
                         {postItem.status.toUpperCase()}
                     </Badge>
                 </td>
-                <td class="px-4 py-3 text-xs text-slate-400 font-mono">
+                <td class="px-4 py-3 text-xs text-slate-600 dark:text-slate-400 font-mono">
                     {postItem.published_at ? new Date(postItem.published_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Draft'}
                 </td>
-                <td class="px-4 py-3 text-xs text-slate-400 font-mono">
+                <td class="px-4 py-3 text-xs text-slate-600 dark:text-slate-400 font-mono">
                     <div class="flex items-center gap-2">
                         <span class="flex items-center gap-1" title="Reading Time">
-                            <Clock class="w-3 h-3 text-amber-400" />
+                            <Clock class="w-3.5 h-3.5 text-amber-500" />
                             {postItem.reading_time}m
                         </span>
                         <span class="flex items-center gap-1" title="Total Views">
-                            <Eye class="w-3 h-3 text-cyan-400" />
+                            <Eye class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                             {postItem.view_count || 0}
                         </span>
                     </div>
                 </td>
-                <td class="px-4 py-3 text-xs text-slate-400">
+                <td class="px-4 py-3 text-xs text-slate-600 dark:text-slate-400">
                     {postItem.author?.name || 'Admin'}
                 </td>
                 <td class="px-4 py-3 text-right">
                     <div class="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="icon" onclick={() => handlePostView(postItem)} title={postItem.status === 'published' ? 'Lihat Post Live' : 'Preview Artikel (Draft Mode)'}>
-                            <ExternalLink class="w-4 h-4 text-cyan-400" />
+                            <ExternalLink class="w-4 h-4 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors" />
                         </Button>
                         <Button variant="ghost" size="icon" onclick={() => openPreview(postItem)} title="Detail Quick View">
-                            <Eye class="w-4 h-4 text-slate-400" />
+                            <Eye class="w-4 h-4 text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors" />
                         </Button>
 
                         {#if postItem.deleted_at}
                             <Button variant="ghost" size="icon" onclick={() => restorePost(postItem.id)} title="Pulihkan">
-                                <RotateCcw class="w-4 h-4 text-emerald-400" />
+                                <RotateCcw class="w-4 h-4 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors" />
                             </Button>
                         {:else}
                             <Button variant="ghost" size="icon" onclick={() => duplicatePost(postItem.id)} title="Gandakan Artikel">
-                                <Copy class="w-4 h-4 text-amber-400" />
+                                <Copy class="w-4 h-4 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors" />
                             </Button>
                             <Button variant="ghost" size="icon" onclick={() => router.get(`/admin/cms/posts/${postItem.id}/edit`)} title="Edit Artikel">
-                                <Edit3 class="w-4 h-4 text-indigo-400" />
+                                <Edit3 class="w-4 h-4 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors" />
                             </Button>
                             <Button variant="ghost" size="icon" onclick={() => deletePost(postItem.id)} title="Hapus">
-                                <Trash2 class="w-4 h-4 text-rose-400" />
+                                <Trash2 class="w-4 h-4 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors" />
                             </Button>
                         {/if}
                     </div>
@@ -263,13 +354,13 @@
         {#if previewPost}
             <div class="space-y-4 text-xs">
                 {#if previewPost.featured_image}
-                    <img src={previewPost.featured_image} alt={previewPost.title} class="w-full h-48 object-cover rounded-xl border border-slate-800" />
+                    <img src={previewPost.featured_image} alt={previewPost.title} class="w-full h-48 object-cover rounded-xl border border-slate-200 dark:border-slate-800" />
                 {/if}
-                <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-1">
-                    <p class="text-slate-400 font-mono">URL Slug: /{previewPost.slug}</p>
-                    <p class="text-slate-400">Estimasi Waktu Baca: {previewPost.reading_time} Menit</p>
+                <div class="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1">
+                    <p class="text-slate-600 dark:text-slate-400 font-mono">URL Slug: /{previewPost.slug}</p>
+                    <p class="text-slate-600 dark:text-slate-400">Estimasi Waktu Baca: {previewPost.reading_time} Menit</p>
                 </div>
-                <div class="prose prose-invert max-w-none">
+                <div class="prose dark:prose-invert max-w-none">
                     {@html previewPost.content || previewPost.summary || '<p class="text-slate-500 italic">Konten artikel belum diisi.</p>'}
                 </div>
             </div>

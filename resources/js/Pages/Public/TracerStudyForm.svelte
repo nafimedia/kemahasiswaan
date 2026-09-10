@@ -35,6 +35,19 @@
         };
         activePeriod?: { title: string; year: number };
         existingResponse?: any;
+        questions?: Array<{
+            id: number;
+            code: string;
+            section: string;
+            question_text: string;
+            help_text?: string;
+            type: string;
+            options?: any;
+            is_required: boolean;
+            is_core_dikti: boolean;
+            is_active: boolean;
+            order: number;
+        }>;
     });
 
     const verified = $derived(pageProps.verifiedAlumni || {
@@ -48,6 +61,63 @@
     });
     const branding = $derived(pageProps.branding || {});
     const site = $derived(pageProps.site || { name: 'Kemahasiswaan & Alumni UNU Purwokerto' });
+
+    const questions = $derived((pageProps.questions || []) as Array<{
+        id: number;
+        code: string;
+        section: string;
+        question_text: string;
+        help_text?: string;
+        type: string;
+        options?: any;
+        is_required: boolean;
+        is_core_dikti: boolean;
+        is_active: boolean;
+        order: number;
+    }>);
+
+    const customQuestions = $derived(questions.filter(q => !q.is_core_dikti && q.is_active));
+
+    function getQuestion(code: string) {
+        return questions.find(q => q.code === code);
+    }
+
+    function cleanDisplayLabel(text: string): string {
+        if (!text) return '';
+        return text
+            .replace(/\(\s*0\/1\s*\)/gi, '')
+            .replace(/\(\s*F\s*\d+[a-z]?\d*\s*\)/gi, '')
+            .replace(/\(\s*f\s*\d+[a-z]?\d*\s*\)/gi, '')
+            .replace(/\*\s*\(\s*Wajib\s+diisi[^)]*\)/gi, '')
+            .replace(/\*\s*\(\s*bukan\s+ketika\s+Studi\s+Lanjut\s*\)/gi, '(bukan saat Studi Lanjut)')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function cleanDisplayHelp(text: string): string {
+        if (!text) return '';
+        return text
+            .replace(/\(\s*f\d+\s*=\s*\d+\s*\)/gi, '')
+            .replace(/\(\s*F\s*\d+[a-z]?\d*\s*\)/gi, '')
+            .replace(/\(\s*f\s*\d+[a-z]?\d*\s*\)/gi, '')
+            .replace(/f\d+\s*(wajib diisi|harus diisi)[^.]*\.?/gi, '')
+            .replace(/Wajib diisi jika Memilih[^.]*\.?/gi, '')
+            .replace(/Jika Memilih[^.]*\.?/gi, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function getQuestionText(code: string, fallback: string): string {
+        const q = getQuestion(code);
+        const raw = q?.question_text || fallback;
+        return cleanDisplayLabel(raw);
+    }
+
+    function getQuestionHelp(code: string, fallback: string = ''): string {
+        const q = getQuestion(code);
+        const raw = q?.help_text || fallback;
+        return cleanDisplayHelp(raw);
+    }
 
     // Step State: 1 to 5
     let currentStep = $state(1);
@@ -75,13 +145,14 @@
         nama_instansi: '',
         jabatan: '',
         kategori_instansi: 'Perusahaan Swasta',
-        waktu_tunggu_bulan: 3,
+        waktu_tunggu_bulan: 3 as number | null,
         pendapatan_bulanan: '',
         keselarasan_horisontal: 'erat',
         keselarasan_vertikal: 'setara',
 
-        // Payload 86 Kolom Dikti
+        // Payload 86 Kolom Dikti & Pertanyaan Kustom UNU
         detail_jawaban: {
+            custom_answers: {} as Record<string, any>,
             // Pembiayaan S1 (F1201 & F1202)
             f1201: 1, // 1=Sendiri, 2=ADIK, 3=Bidikmisi/KIP-K, 4=PPA, 5=Afirmasi, 6=Swasta, 7=Lainnya
             f1202: '',
@@ -142,11 +213,11 @@
     });
 
     const steps = [
-        { id: 1, title: 'Biodata & Pembiayaan S1', icon: User },
-        { id: 2, title: 'Status & Detail Karir / Studi', icon: Briefcase },
-        { id: 3, title: 'Pencarian Kerja & Lamaran', icon: FileSearch },
-        { id: 4, title: 'Kompetensi & Pembelajaran', icon: Star },
-        { id: 5, title: 'Alasan Pekerjaan & Kirim', icon: MessageSquare },
+        { id: 1, title: 'Identitas Alumni', icon: User },
+        { id: 2, title: 'Status Karir Saat Ini', icon: Briefcase },
+        { id: 3, title: 'Pembiayaan & Keselarasan', icon: GraduationCap },
+        { id: 4, title: 'Keterampilan & Pembelajaran', icon: Star },
+        { id: 5, title: 'Riwayat Pencarian & Alasan', icon: MessageSquare },
     ];
 
     function handleStatusChange(statusId: number, statusSlug: string) {
@@ -169,6 +240,111 @@
         }
     }
 
+    $effect(() => {
+        if (pageProps.existingResponse) {
+            const ex = pageProps.existingResponse;
+            if (ex.nama) form.nama = ex.nama;
+            if (ex.email) form.email = ex.email;
+            if (ex.phone) form.phone = ex.phone;
+            if (ex.tahun_lulus) form.tahun_lulus = ex.tahun_lulus;
+            if (ex.npwp) form.npwp = ex.npwp;
+            if (ex.ipk) form.ipk = ex.ipk;
+            if (ex.status_saat_ini) form.status_saat_ini = ex.status_saat_ini;
+            if (ex.f8) form.f8 = ex.f8;
+            if (ex.nama_instansi) form.nama_instansi = ex.nama_instansi;
+            if (ex.jabatan) form.jabatan = ex.jabatan;
+            if (ex.kategori_instansi) form.kategori_instansi = ex.kategori_instansi;
+            if (ex.detail_jawaban) {
+                form.detail_jawaban = {
+                    ...form.detail_jawaban,
+                    ...ex.detail_jawaban,
+                    custom_answers: {
+                        ...(form.detail_jawaban.custom_answers || {}),
+                        ...(ex.detail_jawaban.custom_answers || {})
+                    }
+                };
+            }
+        }
+    });
+
+    // Wilayah Indonesia (Provinces & Regencies) cascading state
+    let provinces = $state<Array<{ id: string; name: string }>>([]);
+    let regencies = $state<Array<{ id: string; province_id: string; name: string }>>([]);
+    let selectedProvinceId = $state<string>('');
+    let isLoadingProvinces = $state<boolean>(false);
+    let isLoadingRegencies = $state<boolean>(false);
+
+    async function loadProvinces() {
+        if (provinces.length > 0) return;
+        isLoadingProvinces = true;
+        try {
+            const res = await fetch('/api/wilayah/provinces');
+            if (res.ok) {
+                provinces = await res.json();
+                if (form.detail_jawaban.f5a1) {
+                    const matched = provinces.find(
+                        p => p.name.toLowerCase() === form.detail_jawaban.f5a1.toLowerCase()
+                    );
+                    if (matched) {
+                        selectedProvinceId = matched.id;
+                        await loadRegencies(matched.id);
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Gagal memuat data provinsi:', e);
+        } finally {
+            isLoadingProvinces = false;
+        }
+    }
+
+    async function loadRegencies(provinceId: string) {
+        if (!provinceId) {
+            regencies = [];
+            return;
+        }
+        isLoadingRegencies = true;
+        try {
+            const res = await fetch(`/api/wilayah/regencies/${provinceId}`);
+            if (res.ok) {
+                regencies = await res.json();
+            }
+        } catch (e) {
+            console.error('Gagal memuat data kabupaten/kota:', e);
+        } finally {
+            isLoadingRegencies = false;
+        }
+    }
+
+    async function handleProvinceChange(e: Event) {
+        const target = e.target as HTMLSelectElement;
+        selectedProvinceId = target.value;
+        const found = provinces.find(p => p.id === selectedProvinceId);
+        form.detail_jawaban.f5a1 = found ? found.name : '';
+        form.detail_jawaban.f5a2 = ''; // Reset pilihan kota/kabupaten
+        if (selectedProvinceId) {
+            await loadRegencies(selectedProvinceId);
+        } else {
+            regencies = [];
+        }
+    }
+
+    $effect(() => {
+        loadProvinces();
+    });
+
+    $effect(() => {
+        if (provinces.length > 0 && form.detail_jawaban.f5a1 && !selectedProvinceId) {
+            const matched = provinces.find(
+                p => p.name.toLowerCase() === form.detail_jawaban.f5a1.toLowerCase()
+            );
+            if (matched) {
+                selectedProvinceId = matched.id;
+                loadRegencies(matched.id);
+            }
+        }
+    });
+
     function handleSubmit(e: Event) {
         e.preventDefault();
         // Sync values to summary fields for DB columns
@@ -182,7 +358,7 @@
 </script>
 
 <svelte:head>
-    <title>Form Kuesioner Tracer Study (86 Kolom Dikti) - UNU Purwokerto</title>
+    <title>Formulir Kuesioner Tracer Study - UNU Purwokerto</title>
 </svelte:head>
 
 <div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-500 selection:text-white transition-colors duration-300">
@@ -197,7 +373,7 @@
                             Kuesioner Tracer Study Alumni
                         </span>
                         <span class="text-[10px] font-extrabold tracking-widest text-slate-500 uppercase block">
-                            STANDAR DIKTI BELMAWA 86 KOLOM
+                            UNIVERSITAS NAHDLATUL ULAMA PURWOKERTO
                         </span>
                     </div>
                 </Link>
@@ -214,9 +390,9 @@
         <!-- Verified Alumni Banner -->
         <div class="bg-gradient-to-r from-blue-500/10 via-teal-500/10 to-emerald-500/10 border border-blue-500/30 rounded-2xl p-6 flex flex-wrap items-center justify-between gap-4">
             <div class="space-y-1">
-                <span class="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">Responden Alumni Terverifikasi</span>
+                <span class="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">Data Alumni Terverifikasi</span>
                 <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    {verified.prodi} <span class="text-xs font-mono font-normal text-slate-500">(Kode Prodi: {verified.kode_prodi || '55200'})</span>
+                    {verified.prodi}
                 </h2>
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 dark:text-slate-300 font-medium">
                     <span>NIM: <strong>{verified.nim}</strong></span>
@@ -230,7 +406,7 @@
             </div>
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold border border-emerald-500/30">
                 <CheckCircle2 class="w-4 h-4 text-emerald-500" />
-                <span>Format Dikti Versi 2026</span>
+                <span>Data Terkonfirmasi Resmi</span>
             </div>
         </div>
 
@@ -267,29 +443,57 @@
         <!-- Main Form Card -->
         <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-10 shadow-xl space-y-8">
             <form onsubmit={handleSubmit} class="space-y-8">
-                <!-- TAHAP 1: BIODATA & PEMBIAYAAN S1 -->
+                <!-- TAHAP 1: IDENTITAS ALUMNI RESMI -->
                 {#if currentStep === 1}
                     <div class="space-y-6 animate-fade-in">
                         <div class="border-b border-slate-100 dark:border-slate-800 pb-4">
                             <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                                 <User class="w-5 h-5 text-blue-500" />
-                                Tahap 1: Identitas Responden & Pembiayaan Kuliah S1
+                                Tahap 1: Identitas Alumni (Data Terverifikasi)
                             </h3>
                             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                Isi identitas kontak aktif serta sumber utama pembiayaan selama kuliah S1 di UNU Purwokerto.
+                                Pastikan data identitas resmi alumni berikut telah sesuai dengan data Pangkalan Data Pendidikan Tinggi (PDDikti).
                             </p>
+                        </div>
+
+                        <!-- Info Card Data Terverifikasi PDDIKTI -->
+                        <div class="p-5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50">
+                            <div class="flex items-center gap-2 mb-3">
+                                <ShieldCheck class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                <span class="text-xs font-black uppercase tracking-wider text-blue-800 dark:text-blue-300">
+                                    Data Terverifikasi Perguruan Tinggi
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                                <div>
+                                    <span class="text-[11px] text-slate-500 dark:text-slate-400 block">NIM Mahasiswa</span>
+                                    <span class="font-bold text-slate-900 dark:text-slate-100">{verified.nim || '-'}</span>
+                                </div>
+                                <div>
+                                    <span class="text-[11px] text-slate-500 dark:text-slate-400 block">NIK (KTP)</span>
+                                    <span class="font-bold text-slate-900 dark:text-slate-100">{verified.nik || '-'}</span>
+                                </div>
+                                <div>
+                                    <span class="text-[11px] text-slate-500 dark:text-slate-400 block">Program Studi</span>
+                                    <span class="font-bold text-slate-900 dark:text-slate-100">{verified.prodi || '-'}</span>
+                                </div>
+                                <div>
+                                    <span class="text-[11px] text-slate-500 dark:text-slate-400 block">Kode PT / Prodi</span>
+                                    <span class="font-bold text-slate-900 dark:text-slate-100">061033 / {verified.kode_prodi || '55200'}</span>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div class="sm:col-span-2">
                                 <label for="nama" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                    Nama Lengkap Alumni <span class="text-rose-500">*</span>
+                                    Nama Lengkap Mahasiswa / Alumni <span class="text-rose-500">*</span>
                                 </label>
                                 <input
                                     id="nama"
                                     type="text"
                                     bind:value={form.nama}
-                                    placeholder="Masukkan Nama Lengkap Anda beserta Gelar"
+                                    placeholder="Masukkan nama lengkap Anda beserta gelar"
                                     class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
@@ -309,7 +513,7 @@
 
                             <div>
                                 <label for="phone" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                    No. Handphone / WhatsApp <span class="text-rose-500">*</span>
+                                    Nomor Telepon / HP / WhatsApp <span class="text-rose-500">*</span>
                                 </label>
                                 <input
                                     id="phone"
@@ -322,7 +526,7 @@
 
                             <div>
                                 <label for="tahun_lulus" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                    Tahun Kelulusan S1 <span class="text-rose-500">*</span>
+                                    Tahun Kelulusan <span class="text-rose-500">*</span>
                                 </label>
                                 <select
                                     id="tahun_lulus"
@@ -347,131 +551,118 @@
                                     class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
-
-                            <!-- F1201: Sumber Pembiayaan Kuliah S1 -->
-                            <div class="sm:col-span-2 space-y-2">
-                                <label for="f1201" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200">
-                                    Sebutkan sumberdana dalam pembiayaan kuliah? (F1201) <span class="text-rose-500">*</span>
-                                </label>
-                                <select
-                                    id="f1201"
-                                    bind:value={form.detail_jawaban.f1201}
-                                    class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value={1}>Biaya Sendiri/Keluarga (1)</option>
-                                    <option value={2}>Beasiswa ADIK (2)</option>
-                                    <option value={3}>Beasiswa BIDIKMISI (3)</option>
-                                    <option value={4}>Beasiswa PPA (4)</option>
-                                    <option value={5}>Beasiswa AFIRMASI (5)</option>
-                                    <option value={6}>Beasiswa Perusahaan/Swasta (6)</option>
-                                    <option value={7}>Lainnya, tuliskan (7)</option>
-                                </select>
-                                {#if form.detail_jawaban.f1201 === 7}
-                                    <input
-                                        type="text"
-                                        bind:value={form.detail_jawaban.f1202}
-                                        placeholder="Tuliskan rincian sumberdana pembiayaan lainnya (Kode f1202) *"
-                                        class="w-full h-11 px-4 mt-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs"
-                                    />
-                                {/if}
-                            </div>
                         </div>
                     </div>
                 {/if}
 
-                <!-- TAHAP 2: STATUS UTAMA & DETAIL KARIR/STUDI -->
+                <!-- TAHAP 2: KUESIONER WAJIB - STATUS UTAMA & DETAIL KARIR -->
                 {#if currentStep === 2}
                     <div class="space-y-6 animate-fade-in">
                         <div class="border-b border-slate-100 dark:border-slate-800 pb-4">
                             <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                                 <Briefcase class="w-5 h-5 text-blue-500" />
-                                Tahap 2: Status Utama & Detail Pekerjaan / Wiraswasta / Studi Lanjut
+                                Tahap 2: Status Karir Saat Ini
                             </h3>
                             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                Jelaskan status Anda saat ini (Kode F8 Standar Dikti).
+                                Pilih status aktivitas utama Anda saat ini dan lengkapi rincian informasi yang bersesuaian.
                             </p>
                         </div>
 
-                        <!-- 5 Opsi Status F8 -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <!-- F8 = 1: Bekerja -->
-                            <button
-                                type="button"
-                                onclick={() => handleStatusChange(1, 'bekerja')}
-                                class={`p-4 rounded-2xl border text-left transition-all ${
-                                    form.f8 === 1
-                                        ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500 text-blue-700 dark:text-blue-300 font-bold'
-                                        : 'border-slate-200 dark:border-slate-800 hover:border-blue-400'
-                                }`}
-                            >
-                                <span class="text-xs uppercase font-extrabold block">Bekerja (1)</span>
-                                <span class="text-[11px] text-slate-500 block mt-1">Bekerja (full time / part time)</span>
-                            </button>
+                        <!-- Pertanyaan Status Utama -->
+                        <div class="space-y-3">
+                            <div>
+                                <span class="block text-sm font-black text-slate-900 dark:text-slate-100">
+                                    Jelaskan status Anda saat ini <span class="text-rose-500 font-bold">*</span>
+                                </span>
+                                {#if getQuestionHelp('f8')}
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{getQuestionHelp('f8')}</p>
+                                {/if}
+                            </div>
 
-                            <!-- F8 = 3: Wiraswasta -->
-                            <button
-                                type="button"
-                                onclick={() => handleStatusChange(3, 'wiraswasta')}
-                                class={`p-4 rounded-2xl border text-left transition-all ${
-                                    form.f8 === 3
-                                        ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500 text-blue-700 dark:text-blue-300 font-bold'
-                                        : 'border-slate-200 dark:border-slate-800 hover:border-blue-400'
-                                }`}
-                            >
-                                <span class="text-xs uppercase font-extrabold block">Wiraswasta (3)</span>
-                                <span class="text-[11px] text-slate-500 block mt-1">Memiliki bisnis / usaha sendiri</span>
-                            </button>
+                            <!-- 5 Opsi Status F8 Sesuai Panduan -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <!-- 1: Bekerja -->
+                                <button
+                                    type="button"
+                                    onclick={() => handleStatusChange(1, 'bekerja')}
+                                    class={`p-4 rounded-2xl border text-left transition-all ${
+                                        form.f8 === 1
+                                            ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500 text-blue-700 dark:text-blue-300 font-bold'
+                                            : 'border-slate-200 dark:border-slate-800 hover:border-blue-400'
+                                    }`}
+                                >
+                                    <span class="text-xs uppercase font-extrabold block">Bekerja (full time / part time)</span>
+                                    <span class="text-[11px] text-slate-500 block mt-1">Bekerja penuh waktu atau paruh waktu</span>
+                                </button>
 
-                            <!-- F8 = 4: Melanjutkan Pendidikan -->
-                            <button
-                                type="button"
-                                onclick={() => handleStatusChange(4, 'studi_lanjut')}
-                                class={`p-4 rounded-2xl border text-left transition-all ${
-                                    form.f8 === 4
-                                        ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500 text-blue-700 dark:text-blue-300 font-bold'
-                                        : 'border-slate-200 dark:border-slate-800 hover:border-blue-400'
-                                }`}
-                            >
-                                <span class="text-xs uppercase font-extrabold block">Melanjutkan Pendidikan (4)</span>
-                                <span class="text-[11px] text-slate-500 block mt-1">Studi lanjut S2 / S3 / Spesialis</span>
-                            </button>
+                                <!-- 2: Belum memungkinkan bekerja -->
+                                <button
+                                    type="button"
+                                    onclick={() => handleStatusChange(2, 'mencari_kerja')}
+                                    class={`p-4 rounded-2xl border text-left transition-all ${
+                                        form.f8 === 2
+                                            ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500 text-blue-700 dark:text-blue-300 font-bold'
+                                            : 'border-slate-200 dark:border-slate-800 hover:border-blue-400'
+                                    }`}
+                                >
+                                    <span class="text-xs uppercase font-extrabold block">Belum memungkinkan bekerja</span>
+                                    <span class="text-[11px] text-slate-500 block mt-1">Mengurus keluarga, istirahat, atau alasan pribadi</span>
+                                </button>
 
-                            <!-- F8 = 5: Tidak kerja tetapi sedang mencari kerja -->
-                            <button
-                                type="button"
-                                onclick={() => handleStatusChange(5, 'mencari_kerja')}
-                                class={`p-4 rounded-2xl border text-left transition-all ${
-                                    form.f8 === 5
-                                        ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500 text-blue-700 dark:text-blue-300 font-bold'
-                                        : 'border-slate-200 dark:border-slate-800 hover:border-blue-400'
-                                }`}
-                            >
-                                <span class="text-xs uppercase font-extrabold block">Mencari Kerja (5)</span>
-                                <span class="text-[11px] text-slate-500 block mt-1">Tidak kerja tetapi sedang mencari kerja</span>
-                            </button>
+                                <!-- 3: Wiraswasta -->
+                                <button
+                                    type="button"
+                                    onclick={() => handleStatusChange(3, 'wiraswasta')}
+                                    class={`p-4 rounded-2xl border text-left transition-all ${
+                                        form.f8 === 3
+                                            ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500 text-blue-700 dark:text-blue-300 font-bold'
+                                            : 'border-slate-200 dark:border-slate-800 hover:border-blue-400'
+                                    }`}
+                                >
+                                    <span class="text-xs uppercase font-extrabold block">Wiraswasta</span>
+                                    <span class="text-[11px] text-slate-500 block mt-1">Memiliki usaha atau bisnis mandiri</span>
+                                </button>
 
-                            <!-- F8 = 2: Belum memungkinkan bekerja -->
-                            <button
-                                type="button"
-                                onclick={() => handleStatusChange(2, 'mencari_kerja')}
-                                class={`p-4 rounded-2xl border text-left transition-all ${
-                                    form.f8 === 2
-                                        ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500 text-blue-700 dark:text-blue-300 font-bold'
-                                        : 'border-slate-200 dark:border-slate-800 hover:border-blue-400'
-                                }`}
-                            >
-                                <span class="text-xs uppercase font-extrabold block">Belum Memungkinkan Bekerja (2)</span>
-                                <span class="text-[11px] text-slate-500 block mt-1">Menikah/mengurus keluarga/alasan kesehatan</span>
-                            </button>
+                                <!-- 4: Melanjutkan Pendidikan -->
+                                <button
+                                    type="button"
+                                    onclick={() => handleStatusChange(4, 'studi_lanjut')}
+                                    class={`p-4 rounded-2xl border text-left transition-all ${
+                                        form.f8 === 4
+                                            ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500 text-blue-700 dark:text-blue-300 font-bold'
+                                            : 'border-slate-200 dark:border-slate-800 hover:border-blue-400'
+                                    }`}
+                                >
+                                    <span class="text-xs uppercase font-extrabold block">Melanjutkan Pendidikan</span>
+                                    <span class="text-[11px] text-slate-500 block mt-1">Kuliah lanjutan S2 / S3 / Profesi</span>
+                                </button>
+
+                                <!-- 5: Tidak kerja tetapi sedang mencari kerja -->
+                                <button
+                                    type="button"
+                                    onclick={() => handleStatusChange(5, 'mencari_kerja')}
+                                    class={`p-4 rounded-2xl border text-left transition-all ${
+                                        form.f8 === 5
+                                            ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500 text-blue-700 dark:text-blue-300 font-bold'
+                                            : 'border-slate-200 dark:border-slate-800 hover:border-blue-400'
+                                    }`}
+                                >
+                                    <span class="text-xs uppercase font-extrabold block">Tidak kerja tetapi sedang mencari kerja</span>
+                                    <span class="text-[11px] text-slate-500 block mt-1">Aktif mencari lowongan pekerjaan</span>
+                                </button>
+                            </div>
                         </div>
 
                         <!-- FIELD SPESIFIK UNTUK BEKERJA (f8 === 1) -->
                         {#if form.f8 === 1}
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-800">
                                 <div>
-                                    <label for="f502_bekerja" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Dalam berapa bulan Anda mendapatkan pekerjaan pertama ? (F502) <span class="text-rose-500">*</span>
+                                    <label for="f502_bekerja" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                                        Dalam berapa bulan Anda mendapatkan pekerjaan pertama ? <span class="text-rose-500 font-bold">*</span>
                                     </label>
+                                    {#if getQuestionHelp('f502')}
+                                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2">{getQuestionHelp('f502')}</p>
+                                    {/if}
                                     <input
                                         id="f502_bekerja"
                                         type="number"
@@ -483,9 +674,12 @@
                                 </div>
 
                                 <div>
-                                    <label for="f505_bekerja" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Berapa rata-rata pendapatan Anda per bulan? (take home pay)? (F505) <span class="text-rose-500">*</span>
+                                    <label for="f505_bekerja" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                                        Berapa rata-rata pendapatan Anda per bulan? (take home pay)? <span class="text-rose-500 font-bold">*</span>
                                     </label>
+                                    {#if getQuestionHelp('f505')}
+                                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2">{getQuestionHelp('f505')}</p>
+                                    {/if}
                                     <input
                                         id="f505_bekerja"
                                         type="number"
@@ -498,52 +692,69 @@
 
                                 <div>
                                     <label for="f5a1" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Provinsi tempat bekerja (F5A1)
+                                        Dimana lokasi tempat Anda bekerja? Provinsi
                                     </label>
-                                    <input
+                                    <select
                                         id="f5a1"
-                                        type="text"
-                                        bind:value={form.detail_jawaban.f5a1}
-                                        placeholder="Nama Provinsi (contoh: Jawa Tengah)"
-                                        class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm"
-                                    />
+                                        value={selectedProvinceId}
+                                        onchange={handleProvinceChange}
+                                        disabled={isLoadingProvinces}
+                                        class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                    >
+                                        <option value="">{isLoadingProvinces ? 'Memuat daftar provinsi...' : '-- Pilih Provinsi --'}</option>
+                                        {#each provinces as prov (prov.id)}
+                                            <option value={prov.id}>{prov.name}</option>
+                                        {/each}
+                                    </select>
                                 </div>
 
                                 <div>
                                     <label for="f5a2" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Kota/Kabupaten tempat bekerja (F5A2)
+                                        Dimana lokasi tempat Anda bekerja? Kota/Kabupaten
                                     </label>
-                                    <input
+                                    <select
                                         id="f5a2"
-                                        type="text"
                                         bind:value={form.detail_jawaban.f5a2}
-                                        placeholder="Nama Kota/Kabupaten (contoh: Kab. Banyumas)"
-                                        class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm"
-                                    />
+                                        disabled={!selectedProvinceId || isLoadingRegencies}
+                                        class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <option value="">
+                                            {#if !selectedProvinceId}
+                                                -- Pilih Provinsi Terlebih Dahulu --
+                                            {:else if isLoadingRegencies}
+                                                Memuat data kabupaten/kota...
+                                            {:else}
+                                                -- Pilih Kota/Kabupaten --
+                                            {/if}
+                                        </option>
+                                        {#each regencies as reg (reg.id)}
+                                            <option value={reg.name}>{reg.name}</option>
+                                        {/each}
+                                    </select>
                                 </div>
 
                                 <div>
                                     <label for="f1101" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Apa jenis perusahaan/intansi/institusi tempat anda bekerja sekarang? (F1101) <span class="text-rose-500">*</span>
+                                        Apa jenis perusahaan/intansi/institusi tempat anda bekerja sekarang? <span class="text-rose-500 font-bold">*</span>
                                     </label>
                                     <select
                                         id="f1101"
                                         bind:value={form.detail_jawaban.f1101}
                                         class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500"
                                     >
-                                        <option value={1}>Instansi pemerintah (1)</option>
-                                        <option value={2}>Organisasi non-profit/Lembaga Swadaya Masyarakat (2)</option>
-                                        <option value={3}>Perusahaan swasta (3)</option>
-                                        <option value={4}>Wiraswasta/perusahaan sendiri (4)</option>
-                                        <option value={6}>BUMN/BUMD (6)</option>
-                                        <option value={7}>Institusi/Organisasi Multilateral (7)</option>
-                                        <option value={5}>Lainnya, tuliskan (5)</option>
+                                        <option value={1}>Intansi pemerintah</option>
+                                        <option value={2}>Organisasi non-profit/Lembaga Swadaya Masyarakat</option>
+                                        <option value={3}>Perusahaan swasta</option>
+                                        <option value={4}>Wiraswasta/perusahaan sendiri</option>
+                                        <option value={6}>BUMN/BUMD</option>
+                                        <option value={7}>Institusi/Organisasi Multilateral</option>
+                                        <option value={5}>Lainnya, tuliskan</option>
                                     </select>
                                     {#if form.detail_jawaban.f1101 === 5}
                                         <input
                                             type="text"
                                             bind:value={form.detail_jawaban.f1102}
-                                            placeholder="Tuliskan jenis instansi lainnya (Kode f1102) *"
+                                            placeholder="Tuliskan jenis instansi lainnya *"
                                             class="w-full h-11 px-4 mt-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs"
                                         />
                                     {/if}
@@ -551,62 +762,30 @@
 
                                 <div>
                                     <label for="f5b" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Apa nama perusahaan/kantor tempat Anda bekerja? (F5B) <span class="text-rose-500">*</span>
+                                        Apa nama perusahaan/kantor tempat Anda bekerja? <span class="text-rose-500 font-bold">*</span>
                                     </label>
                                     <input
                                         id="f5b"
                                         type="text"
                                         bind:value={form.detail_jawaban.f5b}
-                                        placeholder="Nama Perusahaan / Instansi"
+                                        placeholder="Nama Perusahaan / Kantor tempat Anda bekerja"
                                         class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
 
-                                <div>
+                                <div class="sm:col-span-2">
                                     <label for="f5d_bekerja" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Apa tingkat tempat kerja Anda? (F5D) <span class="text-rose-500">*</span>
+                                        Apa tingkat tempat kerja Anda? <span class="text-rose-500 font-bold">*</span>
                                     </label>
                                     <select
                                         id="f5d_bekerja"
                                         bind:value={form.detail_jawaban.f5d}
                                         class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500"
                                     >
-                                        <option value={1}>Lokal/Wilayah/Wiraswasta tidak berbadan hukum (1)</option>
-                                        <option value={2}>Nasional/Wiraswasta berbadan hukum (2)</option>
-                                        <option value={3}>Multinasional/Internasional (3)</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label for="f14" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Seberapa erat hubungan bidang studi dengan pekerjaan Anda? (F14) <span class="text-rose-500">*</span>
-                                    </label>
-                                    <select
-                                        id="f14"
-                                        bind:value={form.detail_jawaban.f14}
-                                        class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value={1}>Sangat Erat (1)</option>
-                                        <option value={2}>Erat (2)</option>
-                                        <option value={3}>Cukup Erat (3)</option>
-                                        <option value={4}>Kurang Erat (4)</option>
-                                        <option value={5}>Tidak Sama Sekali (5)</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label for="f15" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Tingkat pendidikan apa yang paling tepat/sesuai untuk pekerjaan anda saat ini? (F15) <span class="text-rose-500">*</span>
-                                    </label>
-                                    <select
-                                        id="f15"
-                                        bind:value={form.detail_jawaban.f15}
-                                        class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value={1}>Setingkat Lebih Tinggi (1)</option>
-                                        <option value={2}>Tingkat yang Sama (2)</option>
-                                        <option value={3}>Setingkat Lebih Rendah (3)</option>
-                                        <option value={4}>Tidak Perlu Pendidikan Tinggi (4)</option>
+                                        <option value="">-- Silahkan Pilih --</option>
+                                        <option value={1}>Lokal/Wilayah/Wiraswasta tidak berbadan hukum</option>
+                                        <option value={2}>Nasional/Wiraswasta berbadan hukum</option>
+                                        <option value={3}>Multinasional/Internasional</option>
                                     </select>
                                 </div>
                             </div>
@@ -617,7 +796,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-800">
                                 <div>
                                     <label for="f502_wiraswasta" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Dalam berapa bulan setelah lulus Anda memulai wiraswasta ? (F502) <span class="text-rose-500">*</span>
+                                        Dalam berapa bulan setelah lulus anda memulai wiraswasta ? <span class="text-rose-500 font-bold">*</span>
                                     </label>
                                     <input
                                         id="f502_wiraswasta"
@@ -631,7 +810,7 @@
 
                                 <div>
                                     <label for="f505_wiraswasta" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Berapa rata-rata pendapatan Anda per bulan? (take home pay)? (F505) <span class="text-rose-500">*</span>
+                                        Berapa rata-rata pendapatan Anda per bulan? (take home pay)? <span class="text-rose-500 font-bold">*</span>
                                     </label>
                                     <input
                                         id="f505_wiraswasta"
@@ -645,58 +824,77 @@
 
                                 <div>
                                     <label for="f5a1_wiraswasta" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Provinsi tempat usaha (F5A1)
+                                        Dimana lokasi tempat Anda bekerja? Provinsi
                                     </label>
-                                    <input
+                                    <select
                                         id="f5a1_wiraswasta"
-                                        type="text"
-                                        bind:value={form.detail_jawaban.f5a1}
-                                        placeholder="Nama Provinsi"
-                                        class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm"
-                                    />
+                                        value={selectedProvinceId}
+                                        onchange={handleProvinceChange}
+                                        disabled={isLoadingProvinces}
+                                        class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                    >
+                                        <option value="">{isLoadingProvinces ? 'Memuat daftar provinsi...' : '-- Pilih Provinsi --'}</option>
+                                        {#each provinces as prov (prov.id)}
+                                            <option value={prov.id}>{prov.name}</option>
+                                        {/each}
+                                    </select>
                                 </div>
 
                                 <div>
                                     <label for="f5a2_wiraswasta" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Kota/Kabupaten tempat usaha (F5A2)
+                                        Dimana lokasi tempat Anda bekerja? Kota/Kabupaten
                                     </label>
-                                    <input
+                                    <select
                                         id="f5a2_wiraswasta"
-                                        type="text"
                                         bind:value={form.detail_jawaban.f5a2}
-                                        placeholder="Nama Kota/Kabupaten"
-                                        class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm"
-                                    />
+                                        disabled={!selectedProvinceId || isLoadingRegencies}
+                                        class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <option value="">
+                                            {#if !selectedProvinceId}
+                                                -- Pilih Provinsi Terlebih Dahulu --
+                                            {:else if isLoadingRegencies}
+                                                Memuat data kabupaten/kota...
+                                            {:else}
+                                                -- Pilih Kota/Kabupaten --
+                                            {/if}
+                                        </option>
+                                        {#each regencies as reg (reg.id)}
+                                            <option value={reg.name}>{reg.name}</option>
+                                        {/each}
+                                    </select>
                                 </div>
 
                                 <div>
                                     <label for="f5c" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Bila berwiraswasta, apa posisi/jabatan Anda saat ini? (F5C) <span class="text-rose-500">*</span>
+                                        Bila berwiraswasta, apa posisi/jabatan Anda saat ini? <span class="text-rose-500 font-bold">*</span>
                                     </label>
                                     <select
                                         id="f5c"
                                         bind:value={form.detail_jawaban.f5c}
                                         class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500"
                                     >
-                                        <option value={1}>Founder (1)</option>
-                                        <option value={2}>Co-Founder (2)</option>
-                                        <option value={3}>Staff (3)</option>
-                                        <option value={4}>Freelance/Kerja Lepas (4)</option>
+                                        <option value="">-- Silahkan Pilih --</option>
+                                        <option value={1}>Founder</option>
+                                        <option value={2}>Co-Founder</option>
+                                        <option value={3}>Staff</option>
+                                        <option value={4}>Freelance/Kerja Lepas</option>
                                     </select>
                                 </div>
 
                                 <div>
                                     <label for="f5d_wiraswasta" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Apa tingkat tempat kerja/usaha Anda? (F5D) <span class="text-rose-500">*</span>
+                                        Apa tingkat tempat kerja Anda? <span class="text-rose-500 font-bold">*</span>
                                     </label>
                                     <select
                                         id="f5d_wiraswasta"
                                         bind:value={form.detail_jawaban.f5d}
                                         class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500"
                                     >
-                                        <option value={1}>Lokal/Wilayah/Wiraswasta tidak berbadan hukum (1)</option>
-                                        <option value={2}>Nasional/Wiraswasta berbadan hukum (2)</option>
-                                        <option value={3}>Multinasional/Internasional (3)</option>
+                                        <option value="">-- Silahkan Pilih --</option>
+                                        <option value={1}>Lokal/Wilayah/Wiraswasta tidak berbadan hukum</option>
+                                        <option value={2}>Nasional/Wiraswasta berbadan hukum</option>
+                                        <option value={3}>Multinasional/Internasional</option>
                                     </select>
                                 </div>
                             </div>
@@ -707,47 +905,48 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-800">
                                 <div>
                                     <label for="f18a" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Sumber biaya (F18A) <span class="text-rose-500">*</span>
+                                        Sumber biaya <span class="text-rose-500 font-bold">*</span>
                                     </label>
                                     <select
                                         id="f18a"
                                         bind:value={form.detail_jawaban.f18a}
                                         class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm"
                                     >
-                                        <option value={1}>Biaya Sendiri (1)</option>
-                                        <option value={2}>Beasiswa (2)</option>
+                                        <option value="">-- Silahkan Pilih --</option>
+                                        <option value={1}>Biaya Sendiri</option>
+                                        <option value={2}>Beasiswa</option>
                                     </select>
                                 </div>
 
                                 <div>
                                     <label for="f18b" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Perguruan Tinggi (F18B) <span class="text-rose-500">*</span>
+                                        Perguruan Tinggi <span class="text-rose-500 font-bold">*</span>
                                     </label>
                                     <input
                                         id="f18b"
                                         type="text"
                                         bind:value={form.detail_jawaban.f18b}
-                                        placeholder="Nama Perguruan Tinggi S2/S3"
+                                        placeholder="Nama Perguruan Tinggi S2 / S3 / Profesi"
                                         class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm"
                                     />
                                 </div>
 
                                 <div>
                                     <label for="f18c" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Program Studi (F18C) <span class="text-rose-500">*</span>
+                                        Program Studi <span class="text-rose-500 font-bold">*</span>
                                     </label>
                                     <input
                                         id="f18c"
                                         type="text"
                                         bind:value={form.detail_jawaban.f18c}
-                                        placeholder="Nama Program Studi"
+                                        placeholder="Nama Program Studi Lanjutan"
                                         class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm"
                                     />
                                 </div>
 
                                 <div>
                                     <label for="f18d" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                        Tanggal Masuk (F18D) <span class="text-rose-500">*</span>
+                                        Tanggal Masuk <span class="text-rose-500 font-bold">*</span>
                                     </label>
                                     <input
                                         id="f18d"
@@ -761,56 +960,346 @@
                     </div>
                 {/if}
 
-                <!-- TAHAP 3: RIWAYAT PENCARIAN KERJA -->
+                <!-- TAHAP 3: PEMBIAYAAN KULIAH & KESELARASAN BIDANG STUDI (F1201, F14, F15) -->
                 {#if currentStep === 3}
                     <div class="space-y-6 animate-fade-in">
                         <div class="border-b border-slate-100 dark:border-slate-800 pb-4">
                             <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                                <FileSearch class="w-5 h-5 text-blue-500" />
-                                Tahap 3: Pengalaman Pencarian Kerja & Aplikasi Lamaran
+                                <GraduationCap class="w-5 h-5 text-blue-500" />
+                                Tahap 3: Pembiayaan Kuliah & Keselarasan Bidang Studi
                             </h3>
                             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                Informasi mengenai periode dan saluran pencarian kerja Anda (Kode F301 - F416, F6, F7, F7A, F1001).
+                                Bagikan informasi mengenai sumber dana pembiayaan selama studi dan keselarasan bidang keilmuan Anda.
                             </p>
                         </div>
 
-                        <div class="space-y-6">
-                            <!-- F301: Kapan mulai mencari pekerjaan -->
+                        <!-- F1201: Pembiayaan Kuliah S1 -->
+                        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
                             <div>
-                                <label for="f301" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-2">
-                                    Kapan Anda mulai mencari pekerjaan? (Mohon pekerjaan sambilan tidak dimasukkan) (F301) <span class="text-rose-500">*</span>
+                                <label for="f1201" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200">
+                                    Sebutkan sumberdana dalam pembiayaan kuliah ? * ( bukan ketika Studi Lanjut ) <span class="text-rose-500 font-bold">*</span>
                                 </label>
+                                {#if getQuestionHelp('f1201')}
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{getQuestionHelp('f1201')}</p>
+                                {/if}
+                            </div>
+                            <select
+                                id="f1201"
+                                bind:value={form.detail_jawaban.f1201}
+                                class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">-- Silahkan Pilih --</option>
+                                <option value={1}>Biaya Sendiri/ Keluarga</option>
+                                <option value={2}>Beasiswa ADIK</option>
+                                <option value={3}>Beasiswa BIDIKMISI</option>
+                                <option value={4}>Beasiswa PPA</option>
+                                <option value={5}>Beasiswa AFIRMASI</option>
+                                <option value={6}>Beasiswa Perusahaan/ Swasta</option>
+                                <option value={7}>Lainnya , tuliskan</option>
+                            </select>
+                            {#if form.detail_jawaban.f1201 === 7}
+                                <input
+                                    type="text"
+                                    bind:value={form.detail_jawaban.f1202}
+                                    placeholder="Tuliskan rincian sumber pembiayaan lainnya *"
+                                    class="w-full h-11 px-4 mt-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs"
+                                />
+                            {/if}
+                        </div>
+
+                        <!-- F14 & F15: Keselarasan (Tampil untuk Alumni Bekerja / Wiraswasta) -->
+                        {#if form.f8 === 1 || form.f8 === 3}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+                                <div>
+                                    <label for="f14" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                                        Seberapa erat hubungan bidang studi dengan pekerjaan Anda? <span class="text-rose-500 font-bold">*</span>
+                                    </label>
+                                    {#if getQuestionHelp('f14')}
+                                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2">{getQuestionHelp('f14')}</p>
+                                    {/if}
+                                    <select
+                                        id="f14"
+                                        bind:value={form.detail_jawaban.f14}
+                                        class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="">-- Silahkan Pilih --</option>
+                                        <option value={1}>Sangat Erat</option>
+                                        <option value={2}>Erat</option>
+                                        <option value={3}>Cukup Erat</option>
+                                        <option value={4}>Kurang Erat</option>
+                                        <option value={5}>Tidak Sama Sekali</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="f15" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                                        Tingkat pendidikan apa yang paling tepat / sesuai untuk pekerjaan anda saat ini ? <span class="text-rose-500 font-bold">*</span>
+                                    </label>
+                                    {#if getQuestionHelp('f15')}
+                                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2">{getQuestionHelp('f15')}</p>
+                                    {/if}
+                                    <select
+                                        id="f15"
+                                        bind:value={form.detail_jawaban.f15}
+                                        class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="">-- Silahkan Pilih --</option>
+                                        <option value={1}>Setingkat Lebih Tinggi</option>
+                                        <option value={2}>Tingkat yang Sama</option>
+                                        <option value={3}>Setingkat Lebih Rendah</option>
+                                        <option value={4}>Tidak Perlu Pendidikan Tinggi</option>
+                                    </select>
+                                </div>
+                            </div>
+                        {:else}
+                            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-500">
+                                ℹ️ Pertanyaan keselarasan bidang studi hanya diperuntukkan bagi alumni yang berstatus Bekerja atau Berwirausaha. Silakan klik tombol <strong>Lanjut</strong> untuk mengisi evaluasi kompetensi.
+                            </div>
+                        {/if}
+                    </div>
+                {/if}
+
+                <!-- TAHAP 4: EVALUASI KOMPETENSI & METODE PEMBELAJARAN -->
+                {#if currentStep === 4}
+                    <div class="space-y-6 animate-fade-in">
+                        <div class="border-b border-slate-100 dark:border-slate-800 pb-4">
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                                <Star class="w-5 h-5 text-blue-500" />
+                                Tahap 4: Keterampilan Kerja & Pengalaman Belajar di Kampus
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                Bandingkan keterampilan yang Anda kuasai saat lulus dengan kebutuhan kerja saat ini, serta metode belajar yang diterapkan di program studi Anda.
+                            </p>
+                        </div>
+
+                        <!-- Table Evaluasi Kompetensi (A: Lulus vs B: Diperlukan Kerja) -->
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="text-xs font-extrabold text-slate-900 dark:text-slate-100 leading-relaxed">
+                                    Pada saat lulus, pada tingkat mana kompetensi di bawah ini anda : kuasai? (A) Pada saat ini, pada tingkat mana kompetensi di bawah ini diperlukan dalam pekerjaan? (B) <span class="text-rose-500 font-bold">* (Wajib diisi)</span>
+                                </h4>
+                                <p class="text-[11px] text-slate-500 mt-1">
+                                    Skala penilaian: <strong>1 (Sangat Rendah)</strong> hingga <strong>5 (Sangat Tinggi)</strong> untuk kompetensi saat lulus (A) dan kebutuhan dalam pekerjaan saat ini (B).
+                                </p>
+                            </div>
+
+                            <!-- Dual Matrix Table Layout (Persis Panduan Dokumen) -->
+                            <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm">
+                                <table class="w-full text-xs text-center border-collapse">
+                                    <thead>
+                                        <!-- Header Utama: A | Aspek | B -->
+                                        <tr class="bg-slate-100/90 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+                                            <th colspan="5" class="py-2.5 px-2 font-black text-blue-700 dark:text-blue-300 border-r border-slate-200 dark:border-slate-800">
+                                                A (Pada Saat Lulus)
+                                            </th>
+                                            <th rowspan="2" class="py-2.5 px-4 font-black text-slate-800 dark:text-slate-100 border-r border-slate-200 dark:border-slate-800 min-w-[200px] text-left">
+                                                Kompetensi
+                                            </th>
+                                            <th colspan="5" class="py-2.5 px-2 font-black text-emerald-700 dark:text-emerald-300">
+                                                B (Diperlukan dalam Pekerjaan)
+                                            </th>
+                                        </tr>
+                                        <!-- Subheader 1-5 -->
+                                        <tr class="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400 font-bold">
+                                            <!-- A cols 1 to 5 -->
+                                            <th class="py-2 px-1 w-10">1</th>
+                                            <th class="py-2 px-1 w-10">2</th>
+                                            <th class="py-2 px-1 w-10">3</th>
+                                            <th class="py-2 px-1 w-10">4</th>
+                                            <th class="py-2 px-1 w-10 border-r border-slate-200 dark:border-slate-800">5</th>
+                                            <!-- B cols 1 to 5 -->
+                                            <th class="py-2 px-1 w-10">1</th>
+                                            <th class="py-2 px-1 w-10">2</th>
+                                            <th class="py-2 px-1 w-10">3</th>
+                                            <th class="py-2 px-1 w-10">4</th>
+                                            <th class="py-2 px-1 w-10">5</th>
+                                        </tr>
+                                        <!-- Baris Keterangan Skala Rendah & Tinggi -->
+                                        <tr class="bg-slate-100/40 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 text-[9px] text-slate-400">
+                                            <th colspan="2" class="py-1 text-left px-2">Sangat Rendah</th>
+                                            <th></th>
+                                            <th colspan="2" class="py-1 text-right px-2 border-r border-slate-200 dark:border-slate-800">Sangat Tinggi</th>
+                                            <th></th>
+                                            <th colspan="2" class="py-1 text-left px-2">Sangat Rendah</th>
+                                            <th></th>
+                                            <th colspan="2" class="py-1 text-right px-2">Sangat Tinggi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80">
+                                        {#each [
+                                            { name: 'Etika', codeA: 'f1761', codeB: 'f1762' },
+                                            { name: 'Keahlian berdasarkan bidang ilmu', codeA: 'f1763', codeB: 'f1764' },
+                                            { name: 'Bahasa Inggris', codeA: 'f1765', codeB: 'f1766' },
+                                            { name: 'Penggunaan Teknologi Informasi', codeA: 'f1767', codeB: 'f1768' },
+                                            { name: 'Komunikasi', codeA: 'f1769', codeB: 'f1770' },
+                                            { name: 'Kerja sama tim', codeA: 'f1771', codeB: 'f1772' },
+                                            { name: 'Pengembangan', codeA: 'f1773', codeB: 'f1774' }
+                                        ] as item}
+                                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-900/40 transition-colors">
+                                                <!-- A (1 to 5) -->
+                                                {#each [1, 2, 3, 4, 5] as val}
+                                                    <td class={`py-2 px-1 ${val === 5 ? 'border-r border-slate-200 dark:border-slate-800' : ''}`}>
+                                                        <button
+                                                            type="button"
+                                                            onclick={() => form.detail_jawaban[item.codeA] = val}
+                                                            class={`w-8 h-8 rounded-full text-xs font-bold transition-all mx-auto flex items-center justify-center cursor-pointer ${
+                                                                form.detail_jawaban[item.codeA] === val
+                                                                    ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-400/30 font-black scale-105'
+                                                                    : 'bg-slate-100/70 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'
+                                                            }`}
+                                                            aria-label={`${item.name} - Saat Lulus: ${val}`}
+                                                        >
+                                                            {val}
+                                                        </button>
+                                                    </td>
+                                                {/each}
+
+                                                <!-- Aspect Name -->
+                                                <td class="py-3 px-4 font-semibold text-slate-800 dark:text-slate-200 text-left border-r border-slate-200 dark:border-slate-800 whitespace-nowrap sm:whitespace-normal">
+                                                    {item.name}
+                                                </td>
+
+                                                <!-- B (1 to 5) -->
+                                                {#each [1, 2, 3, 4, 5] as val}
+                                                    <td class="py-2 px-1">
+                                                        <button
+                                                            type="button"
+                                                            onclick={() => form.detail_jawaban[item.codeB] = val}
+                                                            class={`w-8 h-8 rounded-full text-xs font-bold transition-all mx-auto flex items-center justify-center cursor-pointer ${
+                                                                form.detail_jawaban[item.codeB] === val
+                                                                    ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-400/30 font-black scale-105'
+                                                                    : 'bg-slate-100/70 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'
+                                                            }`}
+                                                            aria-label={`${item.name} - Diperlukan Kerja: ${val}`}
+                                                        >
+                                                            {val}
+                                                        </button>
+                                                    </td>
+                                                {/each}
+                                            </tr>
+                                        {/each}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Table Metode Pembelajaran (F21 - F27) -->
+                        <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                            <div>
+                                <h4 class="text-xs font-extrabold text-slate-900 dark:text-slate-100 leading-relaxed">
+                                    Menurut anda seberapa besar penekanan pada metode pembelajaran dibawah ini dilaksanakan di program studi anda ? <span class="text-rose-500 font-bold">*</span>
+                                </h4>
+                                <p class="text-[11px] text-slate-500 mt-1">
+                                    Skala: <strong>1 = Sangat Besar</strong>, <strong>2 = Besar</strong>, <strong>3 = Cukup Besar</strong>, <strong>4 = Kurang Besar</strong>, <strong>5 = Tidak Sama Sekali</strong>
+                                </p>
+                            </div>
+
+                            <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm">
+                                <table class="w-full text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-100/90 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
+                                            <th class="py-2.5 px-4 font-black text-left min-w-[180px]">Metode Pembelajaran</th>
+                                            <th class="py-2.5 px-2 font-bold text-center w-24">1<br><span class="text-[9px] font-normal text-slate-400">Sangat Besar</span></th>
+                                            <th class="py-2.5 px-2 font-bold text-center w-20">2<br><span class="text-[9px] font-normal text-slate-400">Besar</span></th>
+                                            <th class="py-2.5 px-2 font-bold text-center w-20">3<br><span class="text-[9px] font-normal text-slate-400">Cukup Besar</span></th>
+                                            <th class="py-2.5 px-2 font-bold text-center w-20">4<br><span class="text-[9px] font-normal text-slate-400">Kurang Besar</span></th>
+                                            <th class="py-2.5 px-2 font-bold text-center w-24">5<br><span class="text-[9px] font-normal text-slate-400">Tdk Sama Sekali</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80">
+                                        {#each [
+                                            { code: 'f21', label: 'Perkuliahan' },
+                                            { code: 'f22', label: 'Demonstrasi' },
+                                            { code: 'f23', label: 'Partisipasi dalam proyek riset' },
+                                            { code: 'f24', label: 'Magang' },
+                                            { code: 'f25', label: 'Praktikum' },
+                                            { code: 'f26', label: 'Kerja Lapangan' },
+                                            { code: 'f27', label: 'Diskusi' }
+                                        ] as m}
+                                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-900/40 transition-colors">
+                                                <td class="py-3 px-4 font-semibold text-slate-800 dark:text-slate-200">
+                                                    {m.label}
+                                                </td>
+                                                {#each [1, 2, 3, 4, 5] as star}
+                                                    <td class="py-2 px-2 text-center">
+                                                        <button
+                                                            type="button"
+                                                            onclick={() => form.detail_jawaban[m.code] = star}
+                                                            class={`w-8 h-8 rounded-full text-xs font-bold transition-all mx-auto flex items-center justify-center cursor-pointer ${
+                                                                form.detail_jawaban[m.code] === star
+                                                                    ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-400/30 font-black scale-105'
+                                                                    : 'bg-slate-100/70 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'
+                                                            }`}
+                                                            aria-label={`${m.label}: ${star}`}
+                                                        >
+                                                            {star}
+                                                        </button>
+                                                    </td>
+                                                {/each}
+                                            </tr>
+                                        {/each}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                {/if}
+
+                <!-- TAHAP 5: RIWAYAT PENCARIAN KERJA, ALASAN PEKERJAAN & KUESIONER UNU -->
+                {#if currentStep === 5}
+                    <div class="space-y-6 animate-fade-in">
+                        <div class="border-b border-slate-100 dark:border-slate-800 pb-4">
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                                <MessageSquare class="w-5 h-5 text-blue-500" />
+                                Tahap 5: Riwayat Pencarian Kerja & Pertimbangan Karir
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                Bagikan pengalaman mencari kerja, pertimbangan dalam mengambil pekerjaan saat ini, dan konfirmasi pengiriman kuesioner.
+                            </p>
+                        </div>
+
+                        <!-- Bagian Pencarian Kerja -->
+                        <div class="space-y-6">
+                            <!-- Kapan mulai mencari pekerjaan -->
+                            <div>
+                                <label for="f301" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
+                                    Kapan anda mulai mencari pekerjaan? Mohon pekerjaan sambilan tidak dimasukkan <span class="text-rose-500 font-bold">*</span>
+                                </label>
+                                {#if getQuestionHelp('f301')}
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2">{getQuestionHelp('f301')}</p>
+                                {/if}
                                 <select
                                     id="f301"
                                     bind:value={form.detail_jawaban.f301}
                                     class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm"
                                 >
-                                    <option value={1}>Kira-kira X bulan sebelum lulus (1)</option>
-                                    <option value={2}>Kira-kira X bulan sesudah lulus (2)</option>
-                                    <option value={3}>Saya tidak mencari kerja (3)</option>
+                                    <option value="">-- Silahkan Pilih --</option>
+                                    <option value={1}>Kira-kira ... bulan sebelum lulus</option>
+                                    <option value={2}>Kira-kira ... bulan sesudah lulus</option>
+                                    <option value={3}>Saya tidak mencari kerja</option>
                                 </select>
                             </div>
 
                             {#if form.detail_jawaban.f301 === 1}
                                 <div>
                                     <label for="f302" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
-                                        Kira-kira berapa bulan SEBELUM lulus? (Kode f302) <span class="text-rose-500">*</span>
+                                        Kira-kira ... bulan sebelum lulus <span class="text-rose-500 font-bold">*</span>
                                     </label>
-                                    <input type="number" min="0" bind:value={form.detail_jawaban.f302} class="w-full h-11 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs" />
+                                    <input type="number" min="0" bind:value={form.detail_jawaban.f302} placeholder="Jumlah bulan (contoh: 3)" class="w-full h-11 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs" />
                                 </div>
                             {:else if form.detail_jawaban.f301 === 2}
                                 <div>
                                     <label for="f303" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
-                                        Kira-kira berapa bulan SESUDAH lulus? (Kode f303) <span class="text-rose-500">*</span>
+                                        Kira-kira ... bulan sesudah lulus <span class="text-rose-500 font-bold">*</span>
                                     </label>
-                                    <input type="number" min="0" bind:value={form.detail_jawaban.f303} class="w-full h-11 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs" />
+                                    <input type="number" min="0" bind:value={form.detail_jawaban.f303} placeholder="Jumlah bulan (contoh: 2)" class="w-full h-11 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs" />
                                 </div>
                             {/if}
 
-                            <!-- F401 - F415: Saluran pencarian kerja -->
+                            <!-- Saluran pencarian kerja -->
                             <div class="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                                 <span class="block text-xs font-extrabold text-slate-800 dark:text-slate-200">
-                                    Bagaimana Anda mencari pekerjaan tersebut? (Jawaban bisa lebih dari satu - Kode f401 s.d. f415)
+                                    Bagaimana anda mencari pekerjaan tersebut? Jawaban bisa lebih dari satu
                                 </span>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                                     {#each [
@@ -837,7 +1326,7 @@
                                                 onchange={(e) => form.detail_jawaban[chk.code] = e.currentTarget.checked ? 1 : 0}
                                                 class="rounded text-blue-600 focus:ring-blue-500"
                                             />
-                                            <span>{chk.label} ({chk.code})</span>
+                                            <span>{chk.label}</span>
                                         </label>
                                     {/each}
                                 </div>
@@ -845,165 +1334,73 @@
                                     <input
                                         type="text"
                                         bind:value={form.detail_jawaban.f416}
-                                        placeholder="Tuliskan saluran pencarian kerja lainnya (Kode f416) *"
+                                        placeholder="Tuliskan saluran lainnya *"
                                         class="w-full h-11 px-4 mt-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs"
                                     />
                                 {/if}
                             </div>
 
-                            <!-- Jumlah aplikasi lamaran F6, F7, F7A -->
+                            <!-- Jumlah aplikasi lamaran -->
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                                 <div>
                                     <label for="f6" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
-                                        Berapa perusahaan/instansi/institusi yang sudah Anda lamar sebelum memeroleh pekerjaan pertama? (F6)
+                                        Berapa perusahaan/instansi/institusi yang sudah anda lamar (lewat surat atau e-mail) sebelum anda memeroleh pekerjaan pertama?
                                     </label>
-                                    <input type="number" min="0" bind:value={form.detail_jawaban.f6} class="w-full h-11 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs" />
+                                    <input type="number" min="0" bind:value={form.detail_jawaban.f6} placeholder="Jumlah instansi (contoh: 5)" class="w-full h-11 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs" />
                                 </div>
 
                                 <div>
                                     <label for="f7" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
-                                        Berapa banyak perusahaan/instansi/institusi yang merespons lamaran Anda? (F7)
+                                        Berapa banyak perusahaan/instansi/institusi yang merespons lamaran anda?
                                     </label>
-                                    <input type="number" min="0" bind:value={form.detail_jawaban.f7} class="w-full h-11 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs" />
+                                    <input type="number" min="0" bind:value={form.detail_jawaban.f7} placeholder="Jumlah instansi (contoh: 3)" class="w-full h-11 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs" />
                                 </div>
 
                                 <div>
                                     <label for="f7a" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200 mb-1">
-                                        Berapa banyak perusahaan/instansi/institusi yang mengundang Anda untuk wawancara? (F7A)
+                                        Berapa banyak perusahaan/instansi/institusi yang mengundang anda untuk wawancara?
                                     </label>
-                                    <input type="number" min="0" bind:value={form.detail_jawaban.f7a} class="w-full h-11 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs" />
+                                    <input type="number" min="0" bind:value={form.detail_jawaban.f7a} placeholder="Jumlah wawancara (contoh: 2)" class="w-full h-11 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs" />
                                 </div>
                             </div>
 
-                            <!-- F1001: Aktif mencari kerja dalam 4 minggu terakhir -->
+                            <!-- Aktif mencari kerja dalam 4 minggu terakhir -->
                             <div class="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
-                                <label for="f1001" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200">
-                                    Apakah Anda aktif mencari pekerjaan dalam 4 minggu terakhir? (Pilihlah satu jawaban) (F1001)
-                                </label>
+                                <div>
+                                    <label for="f1001" class="block text-xs font-extrabold text-slate-800 dark:text-slate-200">
+                                        Apakah anda aktif mencari pekerjaan dalam 4 minggu terakhir? Pilihlah satu jawaban
+                                    </label>
+                                    {#if getQuestionHelp('f1001')}
+                                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{getQuestionHelp('f1001')}</p>
+                                    {/if}
+                                </div>
                                 <select
                                     id="f1001"
                                     bind:value={form.detail_jawaban.f1001}
                                     class="w-full h-12 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm"
                                 >
-                                    <option value={1}>Tidak (1)</option>
-                                    <option value={2}>Tidak, tapi saya sedang menunggu hasil lamaran kerja (2)</option>
-                                    <option value={3}>Ya, saya akan mulai bekerja dalam 2 minggu ke depan (3)</option>
-                                    <option value={4}>Ya, tapi saya belum pasti akan bekerja dalam 2 minggu ke depan (4)</option>
-                                    <option value={5}>Lainnya (5)</option>
+                                    <option value="">-- Silahkan Pilih --</option>
+                                    <option value={1}>Tidak</option>
+                                    <option value={2}>Tidak, tapi saya sedang menunggu hasil lamaran kerja</option>
+                                    <option value={3}>Ya, saya akan mulai bekerja dalam 2 minggu ke depan</option>
+                                    <option value={4}>Ya, tapi saya belum pasti akan bekerja dalam 2 minggu ke depan</option>
+                                    <option value={5}>Lainnya</option>
                                 </select>
                                 {#if form.detail_jawaban.f1001 === 5}
                                     <input
                                         type="text"
                                         bind:value={form.detail_jawaban.f1002}
-                                        placeholder="Tuliskan alasan/keterangan lainnya (Kode f1002) *"
+                                        placeholder="Tuliskan keterangan lainnya *"
                                         class="w-full h-11 px-4 mt-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs"
                                     />
                                 {/if}
                             </div>
                         </div>
-                    </div>
-                {/if}
 
-                <!-- TAHAP 4: EVALUASI KOMPETENSI & PEMBELAJARAN -->
-                {#if currentStep === 4}
-                    <div class="space-y-6 animate-fade-in">
-                        <div class="border-b border-slate-100 dark:border-slate-800 pb-4">
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                                <Star class="w-5 h-5 text-blue-500" />
-                                Tahap 4: Evaluasi 7 Kompetensi & Penekanan Metode Pembelajaran Kampus
-                            </h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                Penilaian penguasaan kompetensi saat lulus (A) vs keperluan pekerjaan (B), serta penekanan metode pembelajaran di program studi Anda.
-                            </p>
-                        </div>
-
-                        <!-- Table Evaluasi Kompetensi (A: Lulus vs B: Diperlukan Kerja) -->
-                        <div class="space-y-4">
-                            <h4 class="text-xs font-black uppercase text-blue-600 dark:text-blue-400 tracking-wider">
-                                A. Pada saat lulus, pada tingkat mana kompetensi di bawah ini Anda kuasai? (A) | Pada saat ini, pada tingkat mana kompetensi di bawah ini diperlukan dalam pekerjaan? (B) (Skala 1: Sangat Rendah - 5: Sangat Tinggi)
-                            </h4>
-                            <div class="space-y-3">
-                                {#each [
-                                    { name: 'Etika', codeA: 'f1761', codeB: 'f1762' },
-                                    { name: 'Keahlian berdasarkan bidang ilmu', codeA: 'f1763', codeB: 'f1764' },
-                                    { name: 'Bahasa Inggris', codeA: 'f1765', codeB: 'f1766' },
-                                    { name: 'Penggunaan Teknologi Informasi', codeA: 'f1767', codeB: 'f1768' },
-                                    { name: 'Komunikasi', codeA: 'f1769', codeB: 'f1770' },
-                                    { name: 'Kerja sama tim', codeA: 'f1771', codeB: 'f1772' },
-                                    { name: 'Pengembangan', codeA: 'f1773', codeB: 'f1774' }
-                                ] as c}
-                                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
-                                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">{c.name}</span>
-                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1 text-xs">
-                                            <div class="flex items-center justify-between gap-2 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
-                                                <span class="text-[11px] text-slate-500">A. Saat Lulus:</span>
-                                                <div class="flex items-center gap-1">
-                                                    {#each [1, 2, 3, 4, 5] as val}
-                                                        <button type="button" onclick={() => form.detail_jawaban[c.codeA] = val} class={`px-2.5 py-1 rounded text-xs font-bold ${form.detail_jawaban[c.codeA] === val ? 'bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>{val}</button>
-                                                    {/each}
-                                                </div>
-                                            </div>
-
-                                            <div class="flex items-center justify-between gap-2 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
-                                                <span class="text-[11px] text-slate-500">B. Diperlukan Kerja:</span>
-                                                <div class="flex items-center gap-1">
-                                                    {#each [1, 2, 3, 4, 5] as val}
-                                                        <button type="button" onclick={() => form.detail_jawaban[c.codeB] = val} class={`px-2.5 py-1 rounded text-xs font-bold ${form.detail_jawaban[c.codeB] === val ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>{val}</button>
-                                                    {/each}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {/each}
-                            </div>
-                        </div>
-
-                        <!-- Table Metode Pembelajaran (F21 - F27) -->
-                        <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                            <h4 class="text-xs font-black uppercase text-blue-600 dark:text-blue-400 tracking-wider">
-                                B. Menurut Anda seberapa besar penekanan pada metode pembelajaran di bawah ini dilaksanakan di program studi Anda? (1: Sangat Besar, 2: Besar, 3: Cukup Besar, 4: Kurang Besar, 5: Tidak Sama Sekali)
-                            </h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                                {#each [
-                                    { code: 'f21', label: 'Perkuliahan' },
-                                    { code: 'f22', label: 'Demonstrasi' },
-                                    { code: 'f23', label: 'Partisipasi dalam proyek riset' },
-                                    { code: 'f24', label: 'Magang' },
-                                    { code: 'f25', label: 'Praktikum' },
-                                    { code: 'f26', label: 'Kerja Lapangan' },
-                                    { code: 'f27', label: 'Diskusi' }
-                                ] as m}
-                                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
-                                        <span class="font-semibold text-slate-700 dark:text-slate-300">{m.label} ({m.code})</span>
-                                        <div class="flex items-center gap-1">
-                                            {#each [1, 2, 3, 4, 5] as star}
-                                                <button type="button" onclick={() => form.detail_jawaban[m.code] = star} class={`px-2 py-1 rounded text-[11px] font-bold ${form.detail_jawaban[m.code] === star ? 'bg-blue-500 text-white' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'}`}>{star}</button>
-                                            {/each}
-                                        </div>
-                                    </div>
-                                {/each}
-                            </div>
-                        </div>
-                    </div>
-                {/if}
-
-                <!-- TAHAP 5: ALASAN PEKERJAAN & KIRIM -->
-                {#if currentStep === 5}
-                    <div class="space-y-6 animate-fade-in">
-                        <div class="border-b border-slate-100 dark:border-slate-800 pb-4">
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                                <MessageSquare class="w-5 h-5 text-blue-500" />
-                                Tahap 5: Alasan Pekerjaan & Konfirmasi Kirim
-                            </h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                Pertanyaan mengenai alasan mengambil pekerjaan saat ini (Kode F1601 - F1614).
-                            </p>
-                        </div>
-
-                        <!-- Checkbox F1601 - F1613 -->
-                        <div class="space-y-3">
+                        <!-- Checkbox Alasan Pekerjaan (F1601 - F1614) -->
+                        <div class="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                             <span class="block text-xs font-extrabold text-slate-800 dark:text-slate-200">
-                                Jika menurut Anda pekerjaan Anda saat ini tidak sesuai dengan pendidikan Anda, mengapa Anda mengambilnya? (Jawaban bisa lebih dari satu - Kode F1601 s.d. F1613)
+                                Jika menurut anda pekerjaan anda saat ini tidak sesuai dengan : pendidikan anda, mengapa anda mengambilnya? Jawaban bisa lebih dari satu
                             </span>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                                 {#each [
@@ -1028,7 +1425,7 @@
                                             onchange={(e) => form.detail_jawaban[r.code] = e.currentTarget.checked ? 1 : 0}
                                             class="rounded text-blue-600 focus:ring-blue-500"
                                         />
-                                        <span>{r.label} ({r.code})</span>
+                                        <span>{r.label}</span>
                                     </label>
                                 {/each}
                             </div>
@@ -1036,17 +1433,127 @@
                                 <input
                                     type="text"
                                     bind:value={form.detail_jawaban.f1614}
-                                    placeholder="Tuliskan alasan lainnya (Kode f1614) *"
+                                    placeholder="Tuliskan alasan lainnya *"
                                     class="w-full h-11 px-4 mt-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs"
                                 />
                             {/if}
                         </div>
 
+                        <!-- Pertanyaan Kuesioner Khusus Perguruan Tinggi / UNU Purwokerto -->
+                        {#if customQuestions.length > 0}
+                            <div class="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-800">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                                        <Sparkles class="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100">
+                                            Evaluasi & Kuesioner Khusus UNU Purwokerto
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                                            Kuesioner evaluasi mutu, fasilitas, dan kemitraan alumni internal universitas.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    {#each customQuestions as q (q.id)}
+                                        <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
+                                            <div>
+                                                <span class="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                                                    {q.question_text}
+                                                    {#if q.is_required}
+                                                        <span class="text-rose-500 font-bold">*</span>
+                                                    {/if}
+                                                </span>
+                                                {#if q.help_text}
+                                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{q.help_text}</p>
+                                                {/if}
+                                            </div>
+
+                                            <!-- Form input berdasarkan tipe pertanyaan -->
+                                            {#if q.type === 'rating_scale'}
+                                                <div class="flex flex-wrap items-center gap-2 pt-1">
+                                                    {#each [1, 2, 3, 4, 5] as star}
+                                                        <button
+                                                            type="button"
+                                                            onclick={() => form.detail_jawaban.custom_answers[q.code] = star}
+                                                            class={`h-10 px-4 rounded-xl text-xs font-bold transition-all ${
+                                                                form.detail_jawaban.custom_answers[q.code] === star
+                                                                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20'
+                                                                    : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                                            }`}
+                                                        >
+                                                            {star}
+                                                        </button>
+                                                    {/each}
+                                                    <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold ml-2">
+                                                        {#if form.detail_jawaban.custom_answers[q.code]}
+                                                            (Skor: {form.detail_jawaban.custom_answers[q.code]} dari 5)
+                                                        {:else}
+                                                            <span class="text-slate-400 font-normal">Pilih skala 1 (Sangat Rendah) s.d. 5 (Sangat Tinggi)</span>
+                                                        {/if}
+                                                    </span>
+                                                </div>
+                                            {:else if q.type === 'radio'}
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                                                    {#each (q.options || []) as opt}
+                                                        <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer text-xs">
+                                                            <input
+                                                                type="radio"
+                                                                name={`custom_${q.code}`}
+                                                                value={opt.value ?? opt}
+                                                                checked={form.detail_jawaban.custom_answers[q.code] == (opt.value ?? opt)}
+                                                                onchange={() => form.detail_jawaban.custom_answers[q.code] = (opt.value ?? opt)}
+                                                                class="text-emerald-600 focus:ring-emerald-500"
+                                                            />
+                                                            <span>{opt.label ?? opt}</span>
+                                                        </label>
+                                                    {/each}
+                                                </div>
+                                            {:else if q.type === 'select'}
+                                                <select
+                                                    bind:value={form.detail_jawaban.custom_answers[q.code]}
+                                                    class="w-full h-11 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs"
+                                                >
+                                                    <option value="">-- Pilih salah satu opsi --</option>
+                                                    {#each (q.options || []) as opt}
+                                                        <option value={opt.value ?? opt}>{opt.label ?? opt}</option>
+                                                    {/each}
+                                                </select>
+                                            {:else if q.type === 'textarea'}
+                                                <textarea
+                                                    rows="3"
+                                                    bind:value={form.detail_jawaban.custom_answers[q.code]}
+                                                    placeholder="Tuliskan jawaban atau masukan Anda..."
+                                                    class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs focus:ring-2 focus:ring-emerald-500"
+                                                ></textarea>
+                                            {:else if q.type === 'number'}
+                                                <input
+                                                    type="number"
+                                                    bind:value={form.detail_jawaban.custom_answers[q.code]}
+                                                    placeholder="Masukkan angka..."
+                                                    class="w-full h-11 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs focus:ring-2 focus:ring-emerald-500"
+                                                />
+                                            {:else}
+                                                <input
+                                                    type="text"
+                                                    bind:value={form.detail_jawaban.custom_answers[q.code]}
+                                                    placeholder="Tuliskan jawaban singkat..."
+                                                    class="w-full h-11 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs focus:ring-2 focus:ring-emerald-500"
+                                                />
+                                            {/if}
+                                        </div>
+                                    {/each}
+                                </div>
+                            </div>
+                        {/if}
+
                         <div class="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-xs text-blue-800 dark:text-blue-200 flex items-start gap-3">
                             <ShieldCheck class="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
                             <div>
-                                <p class="font-bold">Pernyataan Kebenaran Data Responden</p>
-                                <p class="text-[11px] leading-relaxed mt-0.5">Saya menyatakan bahwa seluruh data yang diisikan dalam form kuesioner Tracer Study ini adalah jujur, akurat, dan sesuai kondisi sebenarnya.</p>
+                                <p class="font-bold">Pernyataan Kejujuran Data Responden</p>
+                                <p class="text-[11px] leading-relaxed mt-0.5">Saya menyatakan bahwa seluruh informasi yang saya isikan pada kuesioner ini adalah benar dan sesuai dengan kondisi yang saya jalani saat ini.</p>
                             </div>
                         </div>
                     </div>
@@ -1082,7 +1589,7 @@
                             disabled={form.processing}
                             class="px-10 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-black text-xs shadow-xl shadow-emerald-500/30 inline-flex items-center gap-2 hover:scale-105 transition-all disabled:opacity-50"
                         >
-                            <span>Kirim Kuesioner Tracer Study (86 Kolom)</span>
+                            <span>Kirim Data Kuesioner Alumni</span>
                             {#if form.processing}
                                 <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                             {:else}

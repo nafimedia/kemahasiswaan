@@ -110,22 +110,22 @@
                         <p class="text-[10px] text-slate-400">{category.description || 'Tidak ada deskripsi'}</p>
                     </div>
                 </td>
-                <td class="px-4 py-3 text-xs text-indigo-400 font-mono">
+                <td class="px-4 py-3 text-xs text-emerald-600 dark:text-emerald-400 font-mono">
                     /{category.slug}
                 </td>
-                <td class="px-4 py-3 text-xs text-slate-400">
+                <td class="px-4 py-3 text-xs text-slate-600 dark:text-slate-400">
                     {category.parent?.name || '— (Root)'}
                 </td>
-                <td class="px-4 py-3 text-xs font-mono font-bold text-slate-300">
+                <td class="px-4 py-3 text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
                     {category.posts_count || 0} Posts
                 </td>
                 <td class="px-4 py-3 text-right">
                     <div class="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="icon" onclick={() => openEditModal(category)} title="Edit Kategori">
-                            <Edit3 class="w-4 h-4 text-indigo-400" />
+                            <Edit3 class="w-4 h-4 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors" />
                         </Button>
                         <Button variant="ghost" size="icon" onclick={() => deleteCategory(category.id)} title="Hapus Kategori">
-                            <Trash2 class="w-4 h-4 text-rose-400" />
+                            <Trash2 class="w-4 h-4 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors" />
                         </Button>
                     </div>
                 </td>

@@ -1,43 +1,49 @@
 <?php
 
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\BrandingController;
 use App\Http\Controllers\Admin\Cms\CategoryController;
 use App\Http\Controllers\Admin\Cms\CmsAnalyticsController;
 use App\Http\Controllers\Admin\Cms\CommentController;
+use App\Http\Controllers\Admin\Cms\MediaController;
+use App\Http\Controllers\Admin\Cms\MenuController;
 use App\Http\Controllers\Admin\Cms\PageController;
 use App\Http\Controllers\Admin\Cms\PostController;
+use App\Http\Controllers\Admin\Cms\RedirectController;
 use App\Http\Controllers\Admin\Cms\TagController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FormBuilderController;
 use App\Http\Controllers\Admin\LandingBuilderController;
+use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingController;
-use App\Http\Controllers\Admin\BrandingController;
-use App\Http\Controllers\Admin\ModuleController;
+use App\Http\Controllers\Admin\TracerAdminController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\PublicFormController;
+use App\Http\Controllers\Api\WilayahController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\BlogController;
-use App\Http\Controllers\Admin\Cms\MenuController;
-use App\Http\Controllers\Admin\Cms\MediaController;
-use App\Http\Controllers\Admin\FormBuilderController;
-use App\Http\Controllers\Admin\Cms\RedirectController;
+use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\PublicKemahasiswaanController;
 use App\Http\Controllers\TracerStudyController;
-use App\Http\Controllers\Admin\TracerAdminController;
+use App\Models\LandingSection;
+use App\Models\LandingSiteSetting;
+use App\Models\Menu;
+use App\Models\Post;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 // Home Route (Landing Page)
 Route::get('/', function () {
-    $sections = \App\Models\LandingSection::where('is_active', true)
+    $sections = LandingSection::where('is_active', true)
         ->where('status', 'published')
         ->orderBy('order', 'asc')
         ->get();
 
-    $theme = \App\Models\LandingSiteSetting::get('theme_config');
-    $seo = \App\Models\LandingSiteSetting::get('seo_config');
+    $theme = LandingSiteSetting::get('theme_config');
+    $seo = LandingSiteSetting::get('seo_config');
 
-    $latestPosts = \App\Models\Post::where('status', 'published')
+    $latestPosts = Post::where('status', 'published')
         ->where(function ($q) {
             $q->whereNull('published_at')->orWhere('published_at', '<=', now());
         })
@@ -46,14 +52,14 @@ Route::get('/', function () {
         ->take(6)
         ->get();
 
-    $navMenu = \App\Models\Menu::where('location', 'navbar')
+    $navMenu = Menu::where('location', 'navbar')
         ->where('is_active', true)
         ->with(['items' => function ($q) {
             $q->orderBy('order', 'asc');
         }])
         ->first();
 
-    return \Inertia\Inertia::render('Welcome', [
+    return Inertia::render('Welcome', [
         'dynamicSections' => $sections,
         'themeSettings' => $theme,
         'seoSettings' => $seo,
@@ -76,6 +82,10 @@ Route::get('/tracer-study/kuesioner', [TracerStudyController::class, 'form'])->n
 Route::post('/tracer-study/submit', [TracerStudyController::class, 'submit'])->name('public.tracer-study.submit');
 Route::get('/tracer-study/sukses', [TracerStudyController::class, 'success'])->name('public.tracer-study.sukses');
 
+// Public Wilayah Indonesia API Routes
+Route::get('/api/wilayah/provinces', [WilayahController::class, 'provinces'])->name('api.wilayah.provinces');
+Route::get('/api/wilayah/regencies/{province_id?}', [WilayahController::class, 'regencies'])->name('api.wilayah.regencies');
+
 Route::get('/download', [PublicKemahasiswaanController::class, 'download'])->name('public.download');
 Route::get('/kontak', [PublicKemahasiswaanController::class, 'kontak'])->name('public.kontak');
 
@@ -84,7 +94,6 @@ Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/preview/posts/{id}/{token}', [BlogController::class, 'preview'])->name('blog.preview');
 Route::post('/blog/{id}/comments', [BlogController::class, 'storeComment'])->name('blog.comments.store');
-
 
 // Guest Routes
 Route::middleware('guest')->group(function () {
@@ -116,6 +125,7 @@ Route::middleware('auth')->group(function () {
             Route::put('/landing-builder/sections/{id}', [LandingBuilderController::class, 'updateSection'])->name('landing-builder.sections.update');
             Route::post('/landing-builder/sections/{id}/duplicate', [LandingBuilderController::class, 'duplicateSection'])->name('landing-builder.sections.duplicate');
             Route::delete('/landing-builder/sections/{id}', [LandingBuilderController::class, 'destroySection'])->name('landing-builder.sections.destroy');
+            Route::post('/landing-builder/reset-defaults', [LandingBuilderController::class, 'resetDefaults'])->name('landing-builder.reset-defaults');
             Route::post('/landing-builder/publish', [LandingBuilderController::class, 'publish'])->name('landing-builder.publish');
             Route::post('/landing-builder/settings', [LandingBuilderController::class, 'updateSettings'])->name('landing-builder.settings');
             Route::post('/landing-builder/media', [LandingBuilderController::class, 'uploadMedia'])->name('landing-builder.media');
@@ -211,11 +221,11 @@ Route::middleware('auth')->group(function () {
             });
         });
 
-// Public Google Forms Response Routes
-Route::middleware('module:forms')->group(function () {
-    Route::get('/f/{slug}', [PublicFormController::class, 'show'])->name('forms.public.show');
-    Route::post('/f/{slug}/submit', [PublicFormController::class, 'submit'])->name('forms.public.submit');
-});
+        // Public Google Forms Response Routes
+        Route::middleware('module:forms')->group(function () {
+            Route::get('/f/{slug}', [PublicFormController::class, 'show'])->name('forms.public.show');
+            Route::post('/f/{slug}/submit', [PublicFormController::class, 'submit'])->name('forms.public.submit');
+        });
 
         // Users Management
         Route::middleware('permission:users.view')->group(function () {
@@ -260,8 +270,30 @@ Route::middleware('module:forms')->group(function () {
         });
 
         // Admin Tracer Study Management
-        Route::get('/tracer-study', [TracerAdminController::class, 'index'])->name('tracer-study.index');
-        Route::get('/tracer-study/export', [TracerAdminController::class, 'exportCsv'])->name('tracer-study.export');
-        Route::get('/tracer-study/template', [TracerAdminController::class, 'downloadTemplate'])->name('tracer-study.template');
+        Route::prefix('tracer-study')->name('tracer-study.')->group(function () {
+            Route::get('/', [TracerAdminController::class, 'index'])->name('index');
+            Route::get('/export', [TracerAdminController::class, 'exportCsv'])->name('export');
+            Route::get('/template', [TracerAdminController::class, 'downloadTemplate'])->name('template');
+
+            // Periode Tracer Study CRUD
+            Route::post('/periods', [TracerAdminController::class, 'storePeriod'])->name('periods.store');
+            Route::put('/periods/{id}', [TracerAdminController::class, 'updatePeriod'])->name('periods.update');
+            Route::delete('/periods/{id}', [TracerAdminController::class, 'destroyPeriod'])->name('periods.destroy');
+            Route::patch('/periods/{id}/toggle', [TracerAdminController::class, 'togglePeriodActive'])->name('periods.toggle');
+
+            // Response Tracer Study CRUD
+            Route::get('/responses/create', [TracerAdminController::class, 'createResponse'])->name('responses.create');
+            Route::post('/responses', [TracerAdminController::class, 'storeResponse'])->name('responses.store');
+            Route::get('/responses/{id}/edit', [TracerAdminController::class, 'editResponse'])->name('responses.edit');
+            Route::put('/responses/{id}', [TracerAdminController::class, 'updateResponse'])->name('responses.update');
+            Route::delete('/responses/{id}', [TracerAdminController::class, 'destroyResponse'])->name('responses.destroy');
+
+            // Questionnaire Questions Management (Dikti & Custom)
+            Route::post('/questions', [TracerAdminController::class, 'storeQuestion'])->name('questions.store');
+            Route::put('/questions/{id}', [TracerAdminController::class, 'updateQuestion'])->name('questions.update');
+            Route::delete('/questions/{id}', [TracerAdminController::class, 'destroyQuestion'])->name('questions.destroy');
+            Route::patch('/questions/{id}/toggle', [TracerAdminController::class, 'toggleQuestionActive'])->name('questions.toggle');
+            Route::put('/questions/reorder', [TracerAdminController::class, 'reorderQuestions'])->name('questions.reorder');
+        });
     });
 });

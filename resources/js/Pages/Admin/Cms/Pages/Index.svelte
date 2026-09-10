@@ -82,7 +82,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <FileText class="w-5 h-5 text-indigo-500" />
+                <FileText class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 <span>Manajemen Halaman Website</span>
             </h1>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kelola halaman bertingkat, template, slug, dan opsi publikasi</p>
@@ -95,8 +95,8 @@
 
     <!-- Bulk Actions Bar -->
     {#if selectedIds.length > 0}
-        <div class="p-3 bg-indigo-950/40 border border-indigo-500/30 rounded-xl flex items-center justify-between gap-4">
-            <span class="text-xs font-semibold text-indigo-300">
+        <div class="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 rounded-xl flex items-center justify-between gap-4">
+            <span class="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
                 {selectedIds.length} Halaman Terpilih
             </span>
             <div class="flex items-center gap-2">
@@ -124,7 +124,7 @@
                         type="checkbox"
                         checked={pages.data?.length > 0 && selectedIds.length === pages.data?.length}
                         onchange={toggleSelectAll}
-                        class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500"
+                        class="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                     />
                 </th>
                 <th class="px-4 py-3">Judul Halaman</th>
@@ -143,24 +143,24 @@
                         type="checkbox"
                         checked={selectedIds.includes(pageItem.id)}
                         onchange={() => toggleSelect(pageItem.id)}
-                        class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500"
+                        class="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                     />
                 </td>
                 <td class="px-4 py-3">
                     <div class="space-y-0.5">
                         <p class="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                             {#if pageItem.parent}
-                                <span class="text-xs text-indigo-400 font-normal">↳</span>
+                                <span class="text-xs text-emerald-600 dark:text-emerald-400 font-normal">↳</span>
                             {/if}
                             {pageItem.title}
                         </p>
-                        <span class="text-[10px] text-slate-400 font-mono">Template: {pageItem.template || 'default'}</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">Template: {pageItem.template || 'default'}</span>
                     </div>
                 </td>
-                <td class="px-4 py-3 text-xs text-indigo-400 font-mono">
+                <td class="px-4 py-3 text-xs text-emerald-600 dark:text-emerald-400 font-mono">
                     /{pageItem.slug}
                 </td>
-                <td class="px-4 py-3 text-xs text-slate-400">
+                <td class="px-4 py-3 text-xs text-slate-600 dark:text-slate-400">
                     {pageItem.parent?.title || '— (Root)'}
                 </td>
                 <td class="px-4 py-3">
@@ -171,13 +171,13 @@
                         {pageItem.status.toUpperCase()}
                     </Badge>
                 </td>
-                <td class="px-4 py-3 text-xs text-slate-400">
+                <td class="px-4 py-3 text-xs text-slate-600 dark:text-slate-400">
                     {pageItem.author?.name || 'Admin'}
                 </td>
                 <td class="px-4 py-3 text-right">
                     <div class="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="icon" onclick={() => openPreview(pageItem)} title="Preview Halaman">
-                            <Eye class="w-4 h-4 text-slate-400" />
+                            <Eye class="w-4 h-4 text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors" />
                         </Button>
 
                         {#if pageItem.deleted_at}
@@ -186,10 +186,10 @@
                             </Button>
                         {:else}
                             <Button variant="ghost" size="icon" onclick={() => router.get(`/admin/cms/pages/${pageItem.id}/edit`)} title="Edit Halaman">
-                                <Edit3 class="w-4 h-4 text-indigo-400" />
+                                <Edit3 class="w-4 h-4 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors" />
                             </Button>
-                            <Button variant="ghost" size="icon" onclick={() => deletePage(pageItem.id)} title="Hapus">
-                                <Trash2 class="w-4 h-4 text-rose-400" />
+                            <Button variant="ghost" size="icon" onclick={() => deletePage(pageItem.id)} title="Hapus Halaman">
+                                <Trash2 class="w-4 h-4 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors" />
                             </Button>
                         {/if}
                     </div>
@@ -198,16 +198,16 @@
         {/each}
     </DataTable>
 
-    <!-- Preview Modal -->
-    <Modal bind:open={isPreviewOpen} title={`Preview: ${previewPage?.title}`} description="Detail isi ringkasan halaman">
+    <!-- Page Quick Preview Modal -->
+    <Modal bind:open={isPreviewOpen} title={`Preview: ${previewPage?.title}`} description="Detail isi dan metadata halaman web">
         {#if previewPage}
             <div class="space-y-4 text-xs">
-                <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-1">
-                    <p class="text-slate-400 font-mono">URL: /{previewPage.slug}</p>
-                    <p class="text-slate-400">Status: {previewPage.status} | Visibility: {previewPage.visibility}</p>
+                <div class="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1">
+                    <p class="text-slate-600 dark:text-slate-400 font-mono">URL Slug: /{previewPage.slug}</p>
+                    <p class="text-slate-600 dark:text-slate-400">Template Layout: {previewPage.template || 'default'}</p>
                 </div>
-                <div class="prose prose-invert max-w-none">
-                    {@html previewPage.content || previewPage.summary || '<p class="text-slate-500 italic">Konten halaman kosong.</p>'}
+                <div class="prose dark:prose-invert max-w-none">
+                    {@html previewPage.content || '<p class="text-slate-400 italic">Halaman belum memiliki konten tersimpan.</p>'}
                 </div>
             </div>
         {/if}

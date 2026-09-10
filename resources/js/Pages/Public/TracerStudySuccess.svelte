@@ -161,7 +161,7 @@
 
                     <div>
                         <span class="text-slate-400 block">Status Saat Ini</span>
-                        <span class="font-extrabold text-emerald-600 dark:text-emerald-400 uppercase">{resp.status_saat_ini}</span>
+                        <span class="font-extrabold text-emerald-600 dark:text-emerald-400 uppercase">{resp.status_saat_ini.replace(/_/g, ' ')}</span>
                     </div>
 
                     {#if resp.nama_instansi}

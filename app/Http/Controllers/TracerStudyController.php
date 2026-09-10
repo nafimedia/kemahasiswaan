@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Alumni;
 use App\Models\TracerPeriod;
+use App\Models\TracerQuestion;
 use App\Models\TracerResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -83,11 +85,11 @@ class TracerStudyController extends Controller
         // Cek atau buat data master Alumni
         $alumni = Alumni::where('nim', $validated['nim'])->first();
 
-        if (!$alumni) {
+        if (! $alumni) {
             $alumni = Alumni::create([
                 'nim' => strtoupper(trim($validated['nim'])),
                 'nik' => trim($validated['nik']),
-                'nama' => 'Alumni ' . strtoupper(trim($validated['nim'])),
+                'nama' => 'Alumni '.strtoupper(trim($validated['nim'])),
                 'prodi' => $validated['prodi'],
                 'kode_prodi' => $kodeProdi,
                 'tanggal_lahir' => $validated['tanggal_lahir'],
@@ -120,11 +122,11 @@ class TracerStudyController extends Controller
     /**
      * Halaman Pengisian Kuesioner Tracer Study Multi-Step
      */
-    public function form(): Response|\Illuminate\Http\RedirectResponse
+    public function form(): Response|RedirectResponse
     {
         $verifiedAlumni = session('tracer_verified_alumni');
 
-        if (!$verifiedAlumni) {
+        if (! $verifiedAlumni) {
             return redirect()->route('public.tracer-study')
                 ->with('error', 'Silakan isi form verifikasi awal alumni terlebih dahulu.');
         }
@@ -143,6 +145,7 @@ class TracerStudyController extends Controller
             'activePeriod' => $activePeriod,
             'prodiList' => array_column($this->prodiList, 'nama'),
             'existingResponse' => $existingResponse,
+            'questions' => TracerQuestion::where('is_active', true)->orderBy('order', 'asc')->get(),
         ]);
     }
 
@@ -153,7 +156,7 @@ class TracerStudyController extends Controller
     {
         $verifiedAlumni = session('tracer_verified_alumni');
 
-        if (!$verifiedAlumni) {
+        if (! $verifiedAlumni) {
             return redirect()->route('public.tracer-study')
                 ->with('error', 'Sesi verifikasi telah berakhir. Silakan verifikasi ulang.');
         }
@@ -162,12 +165,12 @@ class TracerStudyController extends Controller
             'nama' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:30',
-            'tahun_lulus' => 'required|integer|min:2010|max:' . date('Y'),
+            'tahun_lulus' => 'required|integer|min:2010|max:'.date('Y'),
             'npwp' => 'nullable|string|max:30',
             'ipk' => 'nullable|numeric|between:0,4.00',
             'f8' => 'required|integer|in:1,2,3,4,5', // 1=Bekerja, 2=Belum Bekerja, 3=Wiraswasta, 4=Studi Lanjut, 5=Mencari Kerja
             'status_saat_ini' => 'required|string',
-            
+
             'nama_instansi' => 'nullable|string|max:255',
             'jabatan' => 'nullable|string|max:255',
             'kategori_instansi' => 'nullable|string|max:255',
@@ -229,8 +232,8 @@ class TracerStudyController extends Controller
                 'nama_instansi' => $validated['nama_instansi'] ?? $detail['f5b'] ?? null,
                 'jabatan' => $validated['jabatan'] ?? $detail['f5c'] ?? null,
                 'kategori_instansi' => $validated['kategori_instansi'] ?? null,
-                'waktu_tunggu_bulan' => $validated['waktu_tunggu_bulan'] ?? (isset($detail['f502']) && is_numeric($detail['f502']) ? (int)$detail['f502'] : null),
-                'pendapatan_bulanan' => $validated['pendapatan_bulanan'] ?? (isset($detail['f505']) ? (string)$detail['f505'] : null),
+                'waktu_tunggu_bulan' => $validated['waktu_tunggu_bulan'] ?? (isset($detail['f502']) && is_numeric($detail['f502']) ? (int) $detail['f502'] : null),
+                'pendapatan_bulanan' => $validated['pendapatan_bulanan'] ?? (isset($detail['f505']) ? (string) $detail['f505'] : null),
                 'keselarasan_horisontal' => $validated['keselarasan_horisontal'] ?? null,
                 'keselarasan_vertikal' => $validated['keselarasan_vertikal'] ?? null,
                 'detail_jawaban' => $detail,
@@ -247,17 +250,17 @@ class TracerStudyController extends Controller
     /**
      * Halaman Sukses / Bukti Pengisian Kuesioner
      */
-    public function success(): Response|\Illuminate\Http\RedirectResponse
+    public function success(): Response|RedirectResponse
     {
         $responseId = session('tracer_completed_response_id');
 
-        if (!$responseId) {
+        if (! $responseId) {
             return redirect()->route('public.tracer-study');
         }
 
         $tracerResponse = TracerResponse::with(['period'])->find($responseId);
 
-        if (!$tracerResponse) {
+        if (! $tracerResponse) {
             return redirect()->route('public.tracer-study');
         }
 

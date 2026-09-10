@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Admin\Cms;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Post;
+use App\Models\PostRevision;
+use App\Models\PostSlugRedirect;
 use App\Models\Tag;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -20,8 +23,8 @@ class PostController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('slug', 'like', "%{$search}%")
-                  ->orWhere('summary', 'like', "%{$search}%");
+                    ->orWhere('slug', 'like', "%{$search}%")
+                    ->orWhere('summary', 'like', "%{$search}%");
             });
         }
 
@@ -59,15 +62,24 @@ class PostController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $categories = Category::all();
         $tags = Tag::all();
+        $defaultCategoryId = null;
+
+        if ($request->filled('category')) {
+            $cat = Category::where('slug', $request->input('category'))->first();
+            if ($cat) {
+                $defaultCategoryId = $cat->id;
+            }
+        }
 
         return Inertia::render('Admin/Cms/Posts/Edit', [
             'postItem' => null,
             'categories' => $categories,
             'tags' => $tags,
+            'defaultCategoryId' => $defaultCategoryId,
         ]);
     }
 
@@ -99,8 +111,8 @@ class PostController extends Controller
         $readingTime = max(1, (int) ceil($wordCount / 200));
 
         $publishedAt = null;
-        if (!empty($validated['published_at'])) {
-            $publishedAt = \Carbon\Carbon::parse($validated['published_at']);
+        if (! empty($validated['published_at'])) {
+            $publishedAt = Carbon::parse($validated['published_at']);
         } elseif ($validated['status'] === 'published') {
             $publishedAt = now();
         }
@@ -112,12 +124,12 @@ class PostController extends Controller
             'published_at' => $publishedAt,
         ]));
 
-        if (!empty($validated['tag_ids'])) {
+        if (! empty($validated['tag_ids'])) {
             $post->tags()->sync($validated['tag_ids']);
         }
 
         // Create initial revision
-        \App\Models\PostRevision::create([
+        PostRevision::create([
             'post_id' => $post->id,
             'user_id' => auth()->id(),
             'title' => $post->title,
@@ -151,7 +163,7 @@ class PostController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:posts,slug,' . $id,
+            'slug' => 'required|string|max:255|unique:posts,slug,'.$id,
             'summary' => 'nullable|string',
             'content' => 'nullable|string',
             'featured_image' => 'nullable|string',
@@ -175,7 +187,7 @@ class PostController extends Controller
 
         // Check if slug changed -> store 301 redirect
         if ($post->slug !== $newSlug && $post->status === 'published') {
-            \App\Models\PostSlugRedirect::create([
+            PostSlugRedirect::create([
                 'post_id' => $post->id,
                 'old_slug' => $post->slug,
             ]);
@@ -185,9 +197,9 @@ class PostController extends Controller
         $wordCount = str_word_count(strip_tags($validated['content'] ?? ''));
         $validated['reading_time'] = max(1, (int) ceil($wordCount / 200));
 
-        if (!empty($validated['published_at'])) {
-            $validated['published_at'] = \Carbon\Carbon::parse($validated['published_at']);
-        } elseif ($validated['status'] === 'published' && !$post->published_at) {
+        if (! empty($validated['published_at'])) {
+            $validated['published_at'] = Carbon::parse($validated['published_at']);
+        } elseif ($validated['status'] === 'published' && ! $post->published_at) {
             $validated['published_at'] = now();
         }
 
@@ -198,7 +210,7 @@ class PostController extends Controller
         }
 
         // Store version revision snapshot
-        \App\Models\PostRevision::create([
+        PostRevision::create([
             'post_id' => $post->id,
             'user_id' => auth()->id(),
             'title' => $post->title,
@@ -237,8 +249,8 @@ class PostController extends Controller
             'preview_token',
         ]);
 
-        $duplicate->title = 'Copy of ' . $original->title;
-        $duplicate->slug = Str::slug($duplicate->title) . '-' . time();
+        $duplicate->title = 'Copy of '.$original->title;
+        $duplicate->slug = Str::slug($duplicate->title).'-'.time();
         $duplicate->status = 'draft';
         $duplicate->published_at = null;
         $duplicate->created_at = now();
@@ -254,7 +266,7 @@ class PostController extends Controller
     public function restoreRevision($id, $revisionId)
     {
         $post = Post::findOrFail($id);
-        $revision = \App\Models\PostRevision::where('post_id', $id)->findOrFail($revisionId);
+        $revision = PostRevision::where('post_id', $id)->findOrFail($revisionId);
 
         $post->update([
             'title' => $revision->title,

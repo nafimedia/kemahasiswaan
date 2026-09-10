@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "laravel-boost": {
+      "command": "php",
+      "args": [
+        "artisan",
+        "boost:mcp"
+      ]
+    },
+    "shadcn-svelte": {
+      "command": "C:\\Users\\user\\.gemini\\config\\mcp\\shadcn-svelte-mcp\\node_modules\\bun\\bin\\bun.exe",
+      "args": [
+        "C:\\Users\\user\\.gemini\\config\\mcp\\shadcn-svelte-mcp\\node_modules\\@binsarjr\\shadcn-svelte-mcp\\dist\\index.js"
+      ]
+    }
+  }
+}

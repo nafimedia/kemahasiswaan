@@ -38,9 +38,16 @@
     interface Props {
         isOpen?: boolean;
         onClose?: () => void;
+        isCollapsed?: boolean;
+        onToggleCollapse?: () => void;
     }
 
-    let { isOpen = false, onClose }: Props = $props();
+    let {
+        isOpen = false,
+        onClose,
+        isCollapsed = false,
+        onToggleCollapse
+    }: Props = $props();
 
     const pageProps = $derived(page.props as unknown as PageProps);
     const user = $derived(pageProps.auth.user);
@@ -60,20 +67,6 @@
         if (!key) return true;
         if (!modules) return true;
         return modules[key] !== false;
-    }
-
-    // Sidebar Collapsed (Icon-Only Mode) State
-    let isCollapsed = $state(
-        typeof localStorage !== 'undefined'
-            ? localStorage.getItem('admin_sidebar_collapsed') === 'true'
-            : false
-    );
-
-    function toggleCollapse() {
-        isCollapsed = !isCollapsed;
-        if (typeof localStorage !== 'undefined') {
-            localStorage.setItem('admin_sidebar_collapsed', isCollapsed ? 'true' : 'false');
-        }
     }
 
     function hasPermission(permission: string): boolean {
@@ -175,7 +168,7 @@
                     show: true,
                 },
                 {
-                    name: 'Download Center',
+                    name: 'Pusat Unduhan',
                     href: '/admin/cms/posts?category=download-center',
                     icon: Download,
                     active: currentUrl.includes('category=download-center') || currentUrl.includes('category=download'),
@@ -192,17 +185,17 @@
         },
         {
             key: 'content',
-            title: 'Content Management',
+            title: 'Pengelolaan Konten',
             items: [
                 {
-                    name: 'Semua Artikel & Blog',
+                    name: 'Semua Artikel & Berita',
                     href: '/admin/cms/posts',
                     icon: Newspaper,
                     active: currentUrl === '/admin/cms/posts',
                     show: isModuleActive('posts'),
                 },
                 {
-                    name: 'Halaman Web (Pages)',
+                    name: 'Halaman Khusus',
                     href: '/admin/cms/pages',
                     icon: FileText,
                     active: currentUrl.startsWith('/admin/cms/pages'),
@@ -240,10 +233,10 @@
         },
         {
             key: 'builder',
-            title: 'Website Builder',
+            title: 'Penata Tampilan Website',
             items: [
                 {
-                    name: 'Landing Builder',
+                    name: 'Penyusun Halaman Depan',
                     href: '/admin/landing-builder',
                     icon: Sparkles,
                     active: currentUrl.startsWith('/admin/landing-builder'),
@@ -257,7 +250,7 @@
                     show: isModuleActive('menus'),
                 },
                 {
-                    name: 'Form Builder',
+                    name: 'Pembuat Formulir Online',
                     href: '/admin/cms/forms',
                     icon: FileSpreadsheet,
                     active: currentUrl.startsWith('/admin/cms/forms'),
@@ -267,10 +260,10 @@
         },
         {
             key: 'media',
-            title: 'Media',
+            title: 'Pustaka Berkas',
             items: [
                 {
-                    name: 'Media Library',
+                    name: 'Pustaka Foto & File',
                     href: '/admin/cms/media',
                     icon: Image,
                     active: currentUrl.startsWith('/admin/cms/media'),
@@ -280,17 +273,17 @@
         },
         {
             key: 'seo',
-            title: 'SEO & Optimization',
+            title: 'Statistik & Optimasi',
             items: [
                 {
-                    name: 'Redirect Manager',
+                    name: 'Pengalihan Tautan',
                     href: '/admin/cms/redirects',
                     icon: ArrowRightLeft,
                     active: currentUrl.startsWith('/admin/cms/redirects'),
                     show: isModuleActive('redirects'),
                 },
                 {
-                    name: 'CMS Analitik',
+                    name: 'Statistik Pengunjung',
                     href: '/admin/cms/analytics',
                     icon: BarChart3,
                     active: currentUrl.startsWith('/admin/cms/analytics'),
@@ -300,7 +293,7 @@
         },
         {
             key: 'system',
-            title: 'System Management',
+            title: 'Pengaturan Sistem',
             items: [
                 {
                     name: 'Manajemen Pengguna',
@@ -310,7 +303,7 @@
                     show: hasPermission('users.view') && isModuleActive('users'),
                 },
                 {
-                    name: 'Role & Izin (RBAC)',
+                    name: 'Peran & Hak Akses',
                     href: '/admin/roles',
                     icon: ShieldCheck,
                     active: currentUrl.startsWith('/admin/roles'),
@@ -343,41 +336,56 @@
 </script>
 
 <aside
-    class={`fixed inset-y-0 left-0 z-40 bg-slate-900 text-slate-300 border-r border-slate-800/80 transition-all duration-300 flex flex-col shadow-2xl ${
+    class={`fixed inset-y-0 left-0 z-40 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-r border-slate-200 dark:border-slate-800/80 transition-all duration-300 flex flex-col shadow-xl dark:shadow-2xl ${
         isCollapsed ? 'w-20' : 'w-64'
     } ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
 >
     <!-- Sidebar Header -->
-    <div class="h-20 flex items-center justify-between px-4 border-b border-slate-800/80 shrink-0">
-        <Link href="/admin/dashboard" class="flex items-center gap-3 overflow-hidden">
-            <img
-                src={getBrandingUrl(branding?.public_logo_dark || branding?.public_logo_light)}
-                alt={site?.name || 'UNU Purwokerto'}
-                class="h-9 w-auto shrink-0 object-contain"
-            />
-            {#if !isCollapsed}
+    <div class="h-16 flex items-center justify-between px-3 border-b border-slate-100 dark:border-slate-800/80 shrink-0 transition-all duration-300">
+        {#if !isCollapsed}
+            <Link href="/admin/dashboard" class="flex items-center gap-3 overflow-hidden min-w-0">
+                <img
+                    src={getBrandingUrl(branding?.public_logo_light || branding?.public_logo_dark)}
+                    alt={site?.name || 'UNU Purwokerto'}
+                    class="h-8 w-auto shrink-0 object-contain"
+                />
                 <div class="flex flex-col min-w-0">
-                    <span class="font-black text-sm text-white truncate tracking-tight">Kemahasiswaan</span>
-                    <span class="text-[10px] font-extrabold text-blue-400 tracking-widest uppercase truncate">UNU PURWOKERTO</span>
+                    <span class="font-black text-xs text-slate-900 dark:text-white truncate tracking-tight">Kemahasiswaan</span>
+                    <span class="text-[9px] font-extrabold text-emerald-600 dark:text-emerald-400 tracking-widest uppercase truncate">UNU PURWOKERTO</span>
                 </div>
-            {/if}
-        </Link>
+            </Link>
 
-        <button
-            onclick={toggleCollapse}
-            class="hidden lg:flex items-center justify-center p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all shrink-0"
-            title={isCollapsed ? 'Perluas Sidebar' : 'Ciutkan Sidebar'}
-        >
-            {#if isCollapsed}
-                <PanelLeftOpen class="w-5 h-5 text-blue-400" />
-            {:else}
-                <PanelLeftClose class="w-5 h-5 text-slate-400" />
-            {/if}
-        </button>
+            <button
+                type="button"
+                onclick={onToggleCollapse}
+                class="hidden lg:flex items-center justify-center p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-all shrink-0 cursor-pointer"
+                title="Ciutkan Sidebar"
+            >
+                <PanelLeftClose class="w-4 h-4 text-slate-400" />
+            </button>
+        {:else}
+            <div class="w-full flex items-center justify-between px-0.5">
+                <Link href="/admin/dashboard" title="Dashboard Kemahasiswaan" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <img
+                        src={getBrandingUrl(branding?.public_logo_light || branding?.public_logo_dark)}
+                        alt={site?.name || 'UNU Purwokerto'}
+                        class="h-7 w-7 shrink-0 object-contain"
+                    />
+                </Link>
+                <button
+                    type="button"
+                    onclick={onToggleCollapse}
+                    class="hidden lg:flex items-center justify-center p-1.5 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 text-emerald-600 dark:text-emerald-400 transition-colors cursor-pointer"
+                    title="Perluas Sidebar"
+                >
+                    <PanelLeftOpen class="w-4 h-4" />
+                </button>
+            </div>
+        {/if}
     </div>
 
     <!-- Navigation Menu Items -->
-    <div class="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-800">
+    <div class="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-800">
         {#each menuGroups as group}
             {#if group.items.some((i) => i.show)}
                 <div class="space-y-1">
@@ -385,7 +393,7 @@
                         <button
                             type="button"
                             onclick={() => toggleGroup(group.key)}
-                            class="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-extrabold tracking-widest uppercase text-slate-500 hover:text-slate-300 transition-colors"
+                            class="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-extrabold tracking-widest uppercase text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
                         >
                             <span>{group.title}</span>
                             {#if openGroups[group.key]}
@@ -403,21 +411,21 @@
                                     <Link
                                         href={item.href}
                                         onclick={onClose}
-                                        class={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative group ${
+                                        class={`flex items-center gap-3 py-2.5 rounded-xl text-xs font-bold transition-all relative group ${
                                             item.active
-                                                ? 'bg-blue-600/90 text-white shadow-lg shadow-blue-600/30'
-                                                : 'text-slate-400 hover:text-white hover:bg-slate-800/80'
-                                        }`}
+                                                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                                                : 'text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-white hover:bg-emerald-50/70 dark:hover:bg-slate-800/80'
+                                        } ${isCollapsed ? 'justify-center px-0' : 'px-3'}`}
                                         title={isCollapsed ? item.name : undefined}
                                     >
-                                        <item.icon class={`w-4 h-4 shrink-0 transition-colors ${item.active ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'}`} />
+                                        <item.icon class={`w-4 h-4 shrink-0 transition-colors ${item.active ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400'}`} />
                                         {#if !isCollapsed}
                                             <span class="truncate">{item.name}</span>
                                         {/if}
 
                                         {#if isCollapsed}
                                             <!-- Tooltip when collapsed -->
-                                            <div class="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-950 text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                                            <div class="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
                                                 {item.name}
                                             </div>
                                         {/if}
@@ -432,16 +440,16 @@
     </div>
 
     <!-- User Profile Footer -->
-    <div class="p-3 border-t border-slate-800/80 shrink-0">
+    <div class="p-3 border-t border-slate-100 dark:border-slate-800/80 shrink-0">
         {#if user}
-            <div class={`flex items-center gap-3 p-2 rounded-xl bg-slate-950/60 border border-slate-800 ${isCollapsed ? 'justify-center' : ''}`}>
-                <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-xs shrink-0 border border-blue-500/30">
+            <div class={`flex items-center gap-3 p-2 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800 ${isCollapsed ? 'justify-center p-1.5' : ''}`}>
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-black text-xs shrink-0 border border-emerald-500/30">
                     {user.name.charAt(0).toUpperCase()}
                 </div>
 
                 {#if !isCollapsed}
                     <div class="flex flex-col min-w-0 flex-1">
-                        <span class="text-xs font-bold text-white truncate">{user.name}</span>
+                        <span class="text-xs font-bold text-slate-800 dark:text-white truncate">{user.name}</span>
                         <span class="text-[10px] text-slate-500 truncate">{user.roles?.[0] || 'Admin'}</span>
                     </div>
                 {/if}

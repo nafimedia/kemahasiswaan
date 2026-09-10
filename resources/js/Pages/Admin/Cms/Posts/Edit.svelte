@@ -15,6 +15,7 @@
         tags?: any[];
         allPosts?: any[];
         revisions?: any[];
+        defaultCategoryId?: number | null;
     }
 
     let {
@@ -22,7 +23,8 @@
         categories = [],
         tags = [],
         allPosts = [],
-        revisions = []
+        revisions = [],
+        defaultCategoryId = null
     }: Props = $props();
 
     const isEditing = $derived(!!postItem);
@@ -37,7 +39,7 @@
         summary: postItem?.summary || '',
         content: postItem?.content || '',
         featured_image: postItem?.featured_image || '',
-        category_id: postItem?.category_id || '',
+        category_id: postItem?.category_id || defaultCategoryId || '',
         tag_ids: postItem?.tags ? postItem.tags.map((t: any) => t.id) : [] as number[],
         manual_related_ids: postItem?.manual_related_ids || [] as number[],
         is_sticky: postItem?.is_sticky || false,
@@ -96,17 +98,24 @@
             form.post('/admin/cms/posts');
         }
     }
+
+    const activeCategory = $derived(categories.find((c: any) => c.id === Number(form.category_id)));
+    const pageTitle = $derived(
+        isEditing
+            ? `Edit: ${postItem?.title}`
+            : (activeCategory ? `Tambah Data ${activeCategory.name}` : 'Tulis Artikel Baru')
+    );
 </script>
 
-<AppLayout title={isEditing ? `Edit Artikel: ${postItem?.title}` : 'Tulis Artikel Baru'}>
+<AppLayout title={pageTitle}>
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
-            <Button variant="outline" size="sm" onclick={() => router.get('/admin/cms/posts')}>
+            <Button variant="outline" size="sm" onclick={() => window.history.length > 1 ? window.history.back() : router.get('/admin/cms/posts')}>
                 <ArrowLeft class="w-4 h-4 mr-1" />
                 <span>Kembali</span>
             </Button>
             <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">
-                {isEditing ? `Edit Artikel: ${postItem?.title}` : 'Tulis Artikel Baru'}
+                {pageTitle}
             </h1>
         </div>
 

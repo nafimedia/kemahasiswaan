@@ -27,8 +27,9 @@
 </script>
 
 <header class="sticky top-0 z-30 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 flex items-center justify-between transition-colors">
-    <!-- Left Section: Toggle Sidebar & App Title -->
+    <!-- Left Section: Toggle Sidebar & App Context -->
     <div class="flex items-center gap-3">
+        <!-- Mobile Sidebar Toggle -->
         <button
             type="button"
             onclick={onToggleSidebar}
@@ -38,7 +39,8 @@
             <Menu class="w-5 h-5" />
         </button>
 
-        <div class="flex items-center gap-3">
+        <!-- Mobile-Only Logo (Sidebar is off-screen on mobile) -->
+        <div class="flex items-center gap-2.5 lg:hidden">
             <div class="p-1.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 shadow-xs shrink-0">
                 <img
                     src={getBrandingUrl(branding?.admin_logo_light) || getBrandingUrl(branding?.admin_logo_dark)}
@@ -47,7 +49,7 @@
                     class="h-7 w-auto object-contain"
                 />
             </div>
-            <div class="hidden sm:block leading-tight">
+            <div class="leading-tight">
                 <span class="font-extrabold text-xs bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-300 bg-clip-text text-transparent block">
                     Kemahasiswaan & Alumni
                 </span>
@@ -55,6 +57,13 @@
                     UNU Purwokerto
                 </span>
             </div>
+        </div>
+
+        <!-- Desktop Context Breadcrumb -->
+        <div class="hidden lg:flex items-center gap-2 text-xs">
+            <span class="font-medium text-slate-400 dark:text-slate-500">Panel Admin</span>
+            <span class="text-slate-300 dark:text-slate-700">/</span>
+            <span class="font-bold text-slate-700 dark:text-slate-200">Kemahasiswaan & Alumni UNU Purwokerto</span>
         </div>
     </div>
 

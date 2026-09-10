@@ -28,22 +28,22 @@
 
     const jobVacancies = [
         {
-            title: 'Junior Software Engineer (Fullstack)',
+            title: 'Pengembang Web & Aplikasi Sistem',
             company: 'PT Solusi Teknologi Nusantara',
-            location: 'Purwokerto / Hybrid',
-            type: 'Full-time',
+            location: 'Purwokerto / Fleksibel',
+            type: 'Penuh Waktu',
             deadline: '30 Agustus 2026',
         },
         {
-            title: 'Staff Administration & Financial Analyst',
+            title: 'Staf Administrasi & Analisis Keuangan',
             company: 'Kospin Jasa Cabang Banyumas',
             location: 'Purwokerto',
-            type: 'Full-time',
+            type: 'Penuh Waktu',
             deadline: '15 September 2026',
         },
         {
-            title: 'Internship Social Media & Digital Content',
-            company: 'UNU Purwokerto Media Creative',
+            title: 'Magang Pengelola Konten & Media Kreatif',
+            company: 'UNU Purwokerto Media Kreatif',
             location: 'Purwokerto',
             type: 'Magang 6 Bulan',
             deadline: '25 Agustus 2026',
@@ -53,7 +53,7 @@
     const prominentAlumni = [
         {
             name: 'M. Rizky Pratama, S.Kom.',
-            role: 'Senior Cloud Engineer di PT Telkom Indonesia',
+            role: 'Ahli Rekayasa Sistem Cloud di PT Telkom Indonesia',
             field: 'Teknologi & Industri',
             quote: 'Pendidikan dan organisasi di UNU Purwokerto membentuk fondasi kepemimpinan dan teknis saya.',
             year: 'Alumni Informatika 2022',
@@ -135,7 +135,7 @@
             <div class="max-w-3xl space-y-4">
                 <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-black tracking-wider uppercase animate-float">
                     <Users class="w-4 h-4 text-purple-500" />
-                    Jaringan Alumni & Career Center UNU Purwokerto
+                    Jaringan Alumni & Pusat Karir UNU Purwokerto
                 </div>
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
                     Ikatan Alumni & Bursa Kerja Terintegrasi
@@ -173,7 +173,7 @@
                             </p>
                         </div>
                         <div class="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500">
-                            <span>Deadline: {job.deadline}</span>
+                            <span>Batas Lamaran: {job.deadline}</span>
                         </div>
                     </div>
                 {/each}

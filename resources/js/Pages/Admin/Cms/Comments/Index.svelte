@@ -105,9 +105,9 @@
                     </div>
                 </td>
                 <td class="px-4 py-3 text-xs max-w-sm">
-                    <p class="text-slate-300 line-clamp-2">"{comment.content}"</p>
+                    <p class="text-slate-700 dark:text-slate-300 line-clamp-2">"{comment.content}"</p>
                     {#if comment.replies && comment.replies.length > 0}
-                        <div class="mt-1 flex items-center gap-1 text-[10px] text-indigo-400">
+                        <div class="mt-1 flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400">
                             <CornerDownRight class="w-3 h-3" />
                             <span>{comment.replies.length} Balasan</span>
                         </div>
@@ -115,9 +115,9 @@
                 </td>
                 <td class="px-4 py-3 text-xs">
                     {#if comment.post}
-                        <p class="font-semibold text-slate-300 truncate max-w-xs">{comment.post.title}</p>
+                        <p class="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-xs">{comment.post.title}</p>
                     {:else}
-                        <span class="text-slate-500">—</span>
+                        <span class="text-slate-400 dark:text-slate-500">—</span>
                     {/if}
                 </td>
                 <td class="px-4 py-3">

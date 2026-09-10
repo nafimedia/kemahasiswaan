@@ -53,7 +53,7 @@
 </script>
 
 <svelte:head>
-    <title>Hall of Achievement - Kemahasiswaan & Alumni UNU Purwokerto</title>
+    <title>Galeri Prestasi Mahasiswa - Kemahasiswaan & Alumni UNU Purwokerto</title>
 </svelte:head>
 
 <div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-500 selection:text-white transition-colors duration-300">
@@ -119,7 +119,7 @@
             <div class="max-w-3xl space-y-4">
                 <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-black tracking-wider uppercase animate-float">
                     <Trophy class="w-4 h-4 text-purple-500" />
-                    Hall of Achievement UNU Purwokerto
+                    Galeri Prestasi Mahasiswa UNU Purwokerto
                 </div>
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
                     Pendataan & Apresiasi Prestasi Mahasiswa
