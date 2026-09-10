@@ -11,168 +11,114 @@ class TracerSampleSeeder extends Seeder
 {
     public function run(): void
     {
-        $period = TracerPeriod::firstOrCreate(
-            ['year' => 2026],
-            [
-                'title' => 'Tracer Study UNU Purwokerto 2026',
-                'description' => 'Pelacakan Jejak Alumni Standar Kemendiktisaintek 86 Kolom',
-                'is_active' => true,
-            ]
-        );
+        $jsonPath = __DIR__.'/data/tracer_dataset.json';
 
-        $jsonPath = base_path('scratch_sample.json');
-        if (!file_exists($jsonPath)) {
+        if (! file_exists($jsonPath)) {
+            $jsonPath = base_path('scratch_sample.json');
+            if (! file_exists($jsonPath)) {
+                return;
+            }
+        }
+
+        $content = file_get_contents($jsonPath);
+        $data = json_decode($content, true);
+        if (! $data) {
             return;
         }
 
-        $data = json_decode(file_get_contents($jsonPath), true);
-        if (!$data) {
-            return;
+        // 1. Seed Periods
+        if (! empty($data['periods'])) {
+            foreach ($data['periods'] as $periodData) {
+                TracerPeriod::updateOrCreate(
+                    ['year' => $periodData['year']],
+                    [
+                        'title' => $periodData['title'],
+                        'description' => $periodData['description'] ?? null,
+                        'is_active' => $periodData['is_active'] ?? true,
+                        'start_date' => $periodData['start_date'] ?? null,
+                        'end_date' => $periodData['end_date'] ?? null,
+                    ]
+                );
+            }
+        } else {
+            TracerPeriod::firstOrCreate(
+                ['year' => 2026],
+                [
+                    'title' => 'Tracer Study UNU Purwokerto 2026',
+                    'description' => 'Pelaksanaan Survei Tracer Study Alumni Universitas Nahdlatul Ulama Purwokerto Tahun 2026.',
+                    'is_active' => true,
+                ]
+            );
         }
 
-        $prodiMap = [
-            '44201' => 'S1 Matematika',
-            '54201' => 'S1 Agribisnis',
-            '54211' => 'S1 Agroteknologi',
-            '41221' => 'S1 Teknologi Pangan',
-            '84208' => 'S1 Pendidikan Ilmu Pengetahuan Alam',
-            '46201' => 'S1 Biologi',
-            '95202' => 'S1 Sains Lingkungan',
-            '41201' => 'S1 Teknik Pertanian dan Biosistem',
-            '89201' => 'S1 Ilmu Keolahragaan',
-            '54247' => 'S1 Ilmu Perikanan',
-            '55200' => 'S1 Informatika',
-            '54231' => 'S1 Peternakan',
-            '63201' => 'S1 Administrasi Publik',
-            '74201' => 'S1 Ilmu Hukum',
-            '74234' => 'S1 Hukum Syariah',
-            '61201' => 'S1 Manajemen',
-            '62201' => 'S1 Akuntansi',
-            '88203' => 'S1 Pendidikan Bahasa Inggris',
-            '86230' => 'S1 Pendidikan Agama Islam',
-            '88204' => 'S1 Pendidikan Bahasa Arab',
-            '86232' => 'S1 Pendidikan Guru Madrasah Ibtidaiyah',
-            '86236' => 'S1 Pendidikan Islam Anak Usia Dini',
-        ];
+        $defaultPeriod = TracerPeriod::where('year', 2026)->first() ?? TracerPeriod::first();
 
-        foreach ($data as $row) {
-            $nim = trim($row['NIM/Nomor Mahasiswa'] ?? '');
-            if (!$nim) {
-                continue;
+        // 2. Seed Alumni
+        $alumniIdMap = [];
+        if (! empty($data['alumni'])) {
+            foreach ($data['alumni'] as $a) {
+                $created = Alumni::updateOrCreate(
+                    ['nim' => $a['nim']],
+                    [
+                        'nik' => $a['nik'] ?? null,
+                        'nama' => $a['nama'],
+                        'prodi' => $a['prodi'] ?? null,
+                        'kode_prodi' => $a['kode_prodi'] ?? null,
+                        'fakultas' => $a['fakultas'] ?? null,
+                        'tahun_lulus' => $a['tahun_lulus'] ?? null,
+                        'tanggal_lahir' => $a['tanggal_lahir'] ?? null,
+                        'email' => $a['email'] ?? null,
+                        'phone' => $a['phone'] ?? null,
+                        'npwp' => $a['npwp'] ?? null,
+                    ]
+                );
+                $alumniIdMap[$a['id']] = $created->id;
             }
+        }
 
-            $kodeProdi = trim($row['Kode Prodi'] ?? '');
-            $prodi = $prodiMap[$kodeProdi] ?? 'S1 Manajemen';
-            $nama = trim($row['Nama'] ?? '');
-            $nik = trim($row['NIK'] ?? '');
-            $email = trim($row['Email'] ?? '');
-            $phone = trim($row['HP'] ?? '');
-            $tahunLulus = intval($row['Tahun Lulus'] ?? 2025);
-            if ($tahunLulus < 2010) {
-                $tahunLulus = 2025;
-            }
-            $npwp = trim($row['NPWP'] ?? '');
+        // 3. Seed Responses
+        if (! empty($data['responses'])) {
+            foreach ($data['responses'] as $r) {
+                $alumniId = isset($r['alumni_id']) ? ($alumniIdMap[$r['alumni_id']] ?? null) : null;
+                if (! $alumniId && ! empty($r['nim'])) {
+                    $alumniId = Alumni::where('nim', $r['nim'])->value('id');
+                }
 
-            $f8 = intval($row['F8'] ?? 1);
-            if ($f8 < 1 || $f8 > 5) {
-                $f8 = 1;
-            }
+                $detail = $r['detail_jawaban'] ?? [];
+                if (is_string($detail)) {
+                    $detail = json_decode($detail, true) ?: [];
+                }
 
-            $statusMap = [1 => 'bekerja', 3 => 'wiraswasta', 4 => 'studi_lanjut', 2 => 'mencari_kerja', 5 => 'mencari_kerja'];
-            $statusSlug = $statusMap[$f8] ?? 'bekerja';
-
-            // Construct 86-field detail_jawaban map
-            $detail = [
-                'Kode Pt' => '061045',
-                'Kode Prodi' => $kodeProdi,
-                'Nomor Mhs' => $nim,
-                'Nama' => $nama,
-                'Hp' => $phone,
-                'Email' => $email,
-                'Tahun Lulus' => $tahunLulus,
-                'NIK' => $nik,
-                'NPWP' => $npwp,
-                'f8' => $f8,
-                'f502' => $row['F502'] ?? '',
-                'f505' => $row['F505'] ?? '',
-                'f5a1' => $row['F5a1'] ?? '',
-                'f5a2' => $row['F5a2'] ?? '',
-                'f1101' => $row['F1101'] ?? '',
-                'f1102' => $row['F1102'] ?? '',
-                'f5b' => $row['F5b'] ?? '',
-                'f5c' => $row['F5c'] ?? '',
-                'f5d' => $row['F5d'] ?? '',
-                'f18a' => $row['F18a'] ?? '',
-                'f18b' => $row['F18b'] ?? '',
-                'f18c' => $row['F18c'] ?? '',
-                'f18d' => $row['F18d'] ?? '',
-                'f1201' => $row['F1201'] ?? '',
-                'f1202' => $row['F1202'] ?? '',
-                'f14' => $row['F14'] ?? '',
-                'f15' => $row['F15'] ?? '',
-                'f6' => $row['F6'] ?? '',
-                'f7' => $row['F7'] ?? '',
-                'f7a' => $row['F7a'] ?? '',
-                'f1001' => $row['F1001'] ?? '',
-                'f1002' => $row['F1002'] ?? '',
-            ];
-
-            for ($k = 1761; $k <= 1774; $k++) {
-                $detail["f{$k}"] = $row["F{$k}"] ?? '';
+                TracerResponse::updateOrCreate(
+                    [
+                        'tracer_period_id' => $defaultPeriod?->id ?? 1,
+                        'nim' => $r['nim'],
+                    ],
+                    [
+                        'alumni_id' => $alumniId,
+                        'kode_pt' => $r['kode_pt'] ?? '061045',
+                        'kode_prodi' => $r['kode_prodi'] ?? null,
+                        'nik' => $r['nik'] ?? null,
+                        'nama' => $r['nama'] ?? null,
+                        'prodi' => $r['prodi'] ?? null,
+                        'tanggal_lahir' => $r['tanggal_lahir'] ?? null,
+                        'email' => $r['email'] ?? null,
+                        'phone' => $r['phone'] ?? null,
+                        'tahun_lulus' => $r['tahun_lulus'] ?? null,
+                        'npwp' => $r['npwp'] ?? null,
+                        'ipk' => $r['ipk'] ?? null,
+                        'f8' => $r['f8'] ?? null,
+                        'status_saat_ini' => $r['status_saat_ini'] ?? null,
+                        'nama_instansi' => $r['nama_instansi'] ?? null,
+                        'jabatan' => $r['jabatan'] ?? null,
+                        'kategori_instansi' => $r['kategori_instansi'] ?? null,
+                        'waktu_tunggu_bulan' => $r['waktu_tunggu_bulan'] ?? null,
+                        'pendapatan_bulanan' => $r['pendapatan_bulanan'] ?? null,
+                        'detail_jawaban' => $detail,
+                        'completed_at' => $r['completed_at'] ?? now(),
+                    ]
+                );
             }
-            for ($k = 21; $k <= 27; $k++) {
-                $detail["f{$k}"] = $row["F{$k}"] ?? '';
-            }
-            for ($k = 301; $k <= 303; $k++) {
-                $detail["f{$k}"] = $row["F{$k}"] ?? '';
-            }
-            for ($k = 401; $k <= 416; $k++) {
-                $detail["f{$k}"] = $row["F{$k}"] ?? '';
-            }
-            for ($k = 1601; $k <= 1614; $k++) {
-                $detail["f{$k}"] = $row["F{$k}"] ?? '';
-            }
-
-            $alumni = Alumni::updateOrCreate(
-                ['nim' => $nim],
-                [
-                    'nik' => $nik,
-                    'nama' => $nama,
-                    'prodi' => $prodi,
-                    'kode_prodi' => $kodeProdi,
-                    'tahun_lulus' => $tahunLulus,
-                    'email' => $email,
-                    'phone' => $phone,
-                    'npwp' => $npwp,
-                ]
-            );
-
-            TracerResponse::updateOrCreate(
-                [
-                    'tracer_period_id' => $period->id,
-                    'nim' => $nim,
-                ],
-                [
-                    'alumni_id' => $alumni->id,
-                    'kode_pt' => '061045',
-                    'kode_prodi' => $kodeProdi,
-                    'nik' => $nik,
-                    'nama' => $nama,
-                    'prodi' => $prodi,
-                    'email' => $email,
-                    'phone' => $phone,
-                    'tahun_lulus' => $tahunLulus,
-                    'npwp' => $npwp,
-                    'f8' => $f8,
-                    'status_saat_ini' => $statusSlug,
-                    'nama_instansi' => $row['F5b'] ?? ($row['F18b'] ?? null),
-                    'jabatan' => $row['F5c'] ?? ($row['F18c'] ?? null),
-                    'waktu_tunggu_bulan' => isset($row['F502']) && is_numeric($row['F502']) ? (int)$row['F502'] : null,
-                    'pendapatan_bulanan' => isset($row['F505']) ? (string)$row['F505'] : null,
-                    'detail_jawaban' => $detail,
-                    'completed_at' => now()->subDays(rand(1, 60)),
-                ]
-            );
         }
     }
 }

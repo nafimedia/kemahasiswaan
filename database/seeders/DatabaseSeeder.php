@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             PostSeeder::class,
             CmsMenuSeeder::class,
             FormSeeder::class,
+            TracerQuestionSeeder::class,
             TracerPeriodSeeder::class,
             TracerSampleSeeder::class,
         ]);
