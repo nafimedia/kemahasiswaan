@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('header_image')->nullable();
             $table->string('theme_color')->default('#6366F1');
             $table->boolean('is_accepting_responses')->default(true);
-            $table->text('confirmation_message')->default('Terima kasih, tanggapan Anda telah berhasil disimpan.');
+            $table->text('confirmation_message')->nullable();
             $table->boolean('require_login')->default(false);
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();

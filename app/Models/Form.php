@@ -30,6 +30,10 @@ class Form extends Model
         'require_login' => 'boolean',
     ];
 
+    protected $attributes = [
+        'confirmation_message' => 'Terima kasih, tanggapan Anda telah berhasil disimpan.',
+    ];
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
