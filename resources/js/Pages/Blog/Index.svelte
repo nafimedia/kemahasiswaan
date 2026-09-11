@@ -44,16 +44,20 @@
     }
 </script>
 
+<svelte:head>
+    <title>Kabar & Artikel Kampus | Kemahasiswaan UNU Purwokerto</title>
+</svelte:head>
+
 <div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500 selection:text-white transition-colors duration-300">
 
     <!-- Header Navigation -->
     <nav class="sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <Link href="/" class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">
-                    F
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center font-bold text-white shadow-lg shadow-emerald-500/20">
+                    U
                 </div>
-                <span class="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">FairuzKit <span class="text-indigo-600 dark:text-indigo-400 text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 border border-indigo-200 dark:border-indigo-500/30">Blog</span></span>
+                <span class="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">Kemahasiswaan <span class="text-emerald-600 dark:text-emerald-400 text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-500/30">Blog</span></span>
             </Link>
 
             <div class="flex items-center gap-4 text-xs font-semibold">
@@ -329,8 +333,8 @@
     <!-- Footer -->
     <footer class="mt-20 border-t border-slate-800 py-8 bg-slate-950">
         <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 space-y-2">
-            <p>&copy; 2026 FairuzKit CMS Platform. All rights reserved.</p>
-            <p>Built with Laravel 13, Svelte 5 Runes & Inertia.js v2</p>
+            <p>&copy; {new Date().getFullYear()} Kemahasiswaan & Alumni UNU Purwokerto. All rights reserved.</p>
+            <p>Sistem Informasi Kemahasiswaan, Prestasi & Tracer Study</p>
         </div>
     </footer>
 </div>

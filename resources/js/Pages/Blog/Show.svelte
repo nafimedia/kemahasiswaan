@@ -61,10 +61,10 @@
         }],
         "publisher": {
             "@type": "Organization",
-            "name": "FairuzKit CMS",
+            "name": "Kemahasiswaan & Alumni UNU Purwokerto",
             "logo": {
                 "@type": "ImageObject",
-                "url": "https://laravel.com/img/logomark.min.svg"
+                "url": "/images/logo-unu.png"
             }
         },
         "description": post.summary || post.meta_description
@@ -72,7 +72,7 @@
 </script>
 
 <svelte:head>
-    <title>{post.meta_title || post.title} | FairuzKit Blog</title>
+    <title>{post.meta_title || post.title} | Kemahasiswaan UNU Purwokerto</title>
     <meta name="description" content={post.meta_description || post.summary} />
     <meta name="keywords" content={post.keywords} />
     <meta property="og:title" content={post.title} />
@@ -95,10 +95,10 @@
             </div>
 
             <Link href="/" class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">
-                    F
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center font-bold text-white shadow-lg shadow-emerald-500/20">
+                    U
                 </div>
-                <span class="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">FairuzKit</span>
+                <span class="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">Kemahasiswaan <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">UNU</span></span>
             </Link>
 
             <div class="flex items-center gap-3">
