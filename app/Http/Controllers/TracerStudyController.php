@@ -111,6 +111,9 @@ class TracerStudyController extends Controller
             'nama' => $alumni->nama,
             'prodi' => $alumni->prodi,
             'kode_prodi' => $kodeProdi,
+            'email' => $alumni->email,
+            'phone' => $alumni->phone,
+            'tahun_lulus' => $alumni->tahun_lulus,
             'tanggal_lahir' => $alumni->tanggal_lahir ? $alumni->tanggal_lahir->format('Y-m-d') : null,
         ];
 
