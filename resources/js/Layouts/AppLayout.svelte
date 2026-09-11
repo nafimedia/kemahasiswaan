@@ -50,7 +50,7 @@
 </script>
 
 <svelte:head>
-    <title>{title} - {site?.name || 'LaraSvelte'}</title>
+    <title>{title} - {site?.name || 'Kemahasiswaan & Alumni UNU Purwokerto'}</title>
     {#if branding?.admin_favicon || branding?.public_favicon}
         <link rel="icon" href={branding?.admin_favicon || branding?.public_favicon} />
     {/if}

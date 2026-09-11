@@ -450,7 +450,7 @@
                 {#if !isCollapsed}
                     <div class="flex flex-col min-w-0 flex-1">
                         <span class="text-xs font-bold text-slate-800 dark:text-white truncate">{user.name}</span>
-                        <span class="text-[10px] text-slate-500 truncate">{user.roles?.[0] || 'Admin'}</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400 truncate">{user.roles?.[0] || 'Admin'}</span>
                     </div>
                 {/if}
             </div>

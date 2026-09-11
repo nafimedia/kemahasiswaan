@@ -557,7 +557,7 @@
                                 ? 'border-blue-500 bg-blue-500/10 font-extrabold text-blue-700 shadow-sm dark:text-blue-300'
                                 : currentStep > s.id
                                   ? 'border-slate-200 bg-slate-100 font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300'
-                                  : 'border-transparent text-slate-400 opacity-60'
+                                  : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                         }`}
                     >
                         <div
@@ -566,7 +566,7 @@
                                     ? 'bg-blue-500 text-white'
                                     : currentStep > s.id
                                       ? 'bg-emerald-500 text-white'
-                                      : 'bg-slate-200 text-slate-500 dark:bg-slate-800'
+                                      : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
                             }`}
                         >
                             {s.id}
@@ -715,7 +715,7 @@
                                     for="npwp"
                                     class="mb-2 block text-xs font-extrabold text-slate-800 dark:text-slate-200"
                                 >
-                                    NPWP (Nomor Pokok Wajib Pajak) <span class="font-normal text-slate-400"
+                                    NPWP (Nomor Pokok Wajib Pajak) <span class="font-normal text-slate-500 dark:text-slate-400"
                                         >(Opsional)</span
                                     >
                                 </label>
@@ -1660,7 +1660,7 @@
                                         </tr>
                                         <!-- Baris Keterangan Skala Rendah & Tinggi -->
                                         <tr
-                                            class="border-b border-slate-200 bg-slate-100/40 text-[9px] text-slate-400 dark:border-slate-800 dark:bg-slate-900/40"
+                                            class="border-b border-slate-200 bg-slate-100/60 text-[9px] font-bold text-slate-600 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-300"
                                         >
                                             <th colspan="2" class="px-2 py-1 text-left">Sangat Rendah</th>
                                             <th></th>
@@ -1691,7 +1691,7 @@
                                                             class={`mx-auto flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-xs font-bold transition-all ${
                                                                 form.detail_jawaban[item.codeA] === val
                                                                     ? 'scale-105 bg-blue-600 font-black text-white shadow-sm ring-2 ring-blue-400/30'
-                                                                    : 'bg-slate-100/70 text-slate-600 hover:bg-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800'
+                                                                    : 'bg-slate-100/90 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
                                                             }`}
                                                             aria-label={`${item.name} - Saat Lulus: ${val}`}
                                                         >
@@ -1706,7 +1706,7 @@
                                                 >
                                                     <div class="flex items-center justify-between gap-2">
                                                         <span>{item.name}</span>
-                                                        <span class="shrink-0 font-mono text-[10px] font-normal text-slate-400">({item.codeA.toUpperCase()} / {item.codeB.toUpperCase()})</span>
+                                                        <span class="shrink-0 font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400">({item.codeA.toUpperCase()} / {item.codeB.toUpperCase()})</span>
                                                     </div>
                                                 </td>
 
@@ -1719,7 +1719,7 @@
                                                             class={`mx-auto flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-xs font-bold transition-all ${
                                                                 form.detail_jawaban[item.codeB] === val
                                                                     ? 'scale-105 bg-emerald-600 font-black text-white shadow-sm ring-2 ring-emerald-400/30'
-                                                                    : 'bg-slate-100/70 text-slate-600 hover:bg-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800'
+                                                                    : 'bg-slate-100/90 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
                                                             }`}
                                                             aria-label={`${item.name} - Diperlukan Kerja: ${val}`}
                                                         >
@@ -1764,26 +1764,26 @@
                                                 >Metode Pembelajaran</th
                                             >
                                             <th class="w-24 px-2 py-2.5 text-center font-bold"
-                                                >1<br /><span class="text-[9px] font-normal text-slate-400"
+                                                >1<br /><span class="text-[9px] font-semibold text-slate-600 dark:text-slate-400"
                                                     >Sangat Besar (1)</span
                                                 ></th
                                             >
                                             <th class="w-20 px-2 py-2.5 text-center font-bold"
-                                                >2<br /><span class="text-[9px] font-normal text-slate-400">Besar (2)</span
+                                                >2<br /><span class="text-[9px] font-semibold text-slate-600 dark:text-slate-400">Besar (2)</span
                                                 ></th
                                             >
                                             <th class="w-20 px-2 py-2.5 text-center font-bold"
-                                                >3<br /><span class="text-[9px] font-normal text-slate-400"
+                                                >3<br /><span class="text-[9px] font-semibold text-slate-600 dark:text-slate-400"
                                                     >Cukup Besar (3)</span
                                                 ></th
                                             >
                                             <th class="w-20 px-2 py-2.5 text-center font-bold"
-                                                >4<br /><span class="text-[9px] font-normal text-slate-400"
+                                                >4<br /><span class="text-[9px] font-semibold text-slate-600 dark:text-slate-400"
                                                     >Kurang Besar (4)</span
                                                 ></th
                                             >
                                             <th class="w-24 px-2 py-2.5 text-center font-bold"
-                                                >5<br /><span class="text-[9px] font-normal text-slate-400"
+                                                >5<br /><span class="text-[9px] font-semibold text-slate-600 dark:text-slate-400"
                                                     >Tdk Sama Sekali (5)</span
                                                 ></th
                                             >
@@ -1808,7 +1808,7 @@
                                                             class={`mx-auto flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-xs font-bold transition-all ${
                                                                 form.detail_jawaban[m.code] === star
                                                                     ? 'scale-105 bg-blue-600 font-black text-white shadow-sm ring-2 ring-blue-400/30'
-                                                                    : 'bg-slate-100/70 text-slate-600 hover:bg-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800'
+                                                                    : 'bg-slate-100/90 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
                                                             }`}
                                                             aria-label={`${m.label}: ${star}`}
                                                         >

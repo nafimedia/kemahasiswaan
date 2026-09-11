@@ -275,7 +275,7 @@
                             <select
                                 id="f_period"
                                 bind:value={form.tracer_period_id}
-                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-900 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                 required
                             >
                                 <option value="">-- Pilih Periode Tracer Study --</option>
@@ -300,7 +300,7 @@
                                 type="text"
                                 bind:value={form.nim}
                                 placeholder="Contoh: 201011001"
-                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 font-mono text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 font-mono text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                                 required
                             />
                             {#if form.errors.nim}
@@ -319,7 +319,7 @@
                                 maxlength="16"
                                 bind:value={form.nik}
                                 placeholder="Contoh: 3302010101990001"
-                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 font-mono text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 font-mono text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                             />
                             {#if form.errors.nik}
                                 <p class="text-[11px] text-red-500">{form.errors.nik}</p>
@@ -336,7 +336,7 @@
                                 type="text"
                                 bind:value={form.nama}
                                 placeholder="Nama lengkap alumni sesuai ijazah"
-                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                                 required
                             />
                             {#if form.errors.nama}
@@ -352,7 +352,7 @@
                             <select
                                 id="f_prodi"
                                 bind:value={form.prodi}
-                                class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                 required
                             >
                                 {#each prodiList as item}
@@ -373,7 +373,7 @@
                                 id="f_tgl_lahir"
                                 type="date"
                                 bind:value={form.tanggal_lahir}
-                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                             />
                         </div>
 
@@ -388,7 +388,7 @@
                                 min="2000"
                                 max="2099"
                                 bind:value={form.tahun_lulus}
-                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                 required
                             />
                         </div>
@@ -405,7 +405,7 @@
                                 min="0"
                                 max="4.00"
                                 bind:value={form.ipk}
-                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                             />
                         </div>
 
@@ -419,7 +419,7 @@
                                 type="email"
                                 bind:value={form.email}
                                 placeholder="alumni@email.com"
-                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                             />
                         </div>
 
@@ -433,7 +433,7 @@
                                 type="text"
                                 bind:value={form.phone}
                                 placeholder="08xxxxxxxxxx"
-                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                             />
                         </div>
 
@@ -447,7 +447,7 @@
                                 type="text"
                                 bind:value={form.npwp}
                                 placeholder="Nomor Pokok Wajib Pajak"
-                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                             />
                         </div>
 
@@ -459,7 +459,7 @@
                             <select
                                 id="f_pembiayaan"
                                 bind:value={form.detail_jawaban.f1201}
-                                class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                             >
                                 <option value={1}>Biaya Sendiri / Keluarga</option>
                                 <option value={2}>Beasiswa ADIK</option>
@@ -635,7 +635,7 @@
                                     placeholder={form.status_saat_ini === 'wiraswasta'
                                         ? 'Contoh: Kedai Kopi Berkah, Agrobisnis Mandiri'
                                         : 'Contoh: PT Telkom Indonesia, RS Margono'}
-                                    class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                                 />
                             </div>
 
@@ -651,7 +651,7 @@
                                     placeholder={form.status_saat_ini === 'wiraswasta'
                                         ? 'Contoh: Owner / Pengelola'
                                         : 'Contoh: Software Engineer, Staff Finance'}
-                                    class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                                 />
                             </div>
 
@@ -664,7 +664,7 @@
                                     <select
                                         id="f_f5c"
                                         bind:value={form.detail_jawaban.f5c}
-                                        class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                        class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                     >
                                         <option value={1}>Founder / Pemilik Tunggal</option>
                                         <option value={2}>Co-Founder / Mitra Pemilik</option>
@@ -681,7 +681,7 @@
                                     <select
                                         id="f_f5d"
                                         bind:value={form.detail_jawaban.f5d}
-                                        class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                        class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                     >
                                         <option value={1}>Lokal / Belum Berbadan Hukum</option>
                                         <option value={2}>Nasional / Berbadan Hukum (CV/PT)</option>
@@ -708,7 +708,7 @@
                                             else if (val.includes('Organisasi')) form.detail_jawaban.f1101 = 2;
                                             else form.detail_jawaban.f1101 = 3;
                                         }}
-                                        class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                        class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                     >
                                         <option value="Perusahaan Swasta">Perusahaan Swasta</option>
                                         <option value="Instansi Pemerintah / BUMN"
@@ -740,7 +740,7 @@
                                     min="0"
                                     max="120"
                                     bind:value={form.waktu_tunggu_bulan}
-                                    class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                 />
                             </div>
 
@@ -754,7 +754,7 @@
                                     type="text"
                                     bind:value={form.pendapatan_bulanan}
                                     placeholder="Contoh: 4500000"
-                                    class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 font-mono text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 font-mono text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                                 />
                             </div>
 
@@ -768,7 +768,7 @@
                                     type="text"
                                     bind:value={form.detail_jawaban.f5a1}
                                     placeholder="Contoh: Jawa Tengah, DKI Jakarta"
-                                    class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                                 />
                             </div>
 
@@ -781,7 +781,7 @@
                                     type="text"
                                     bind:value={form.detail_jawaban.f5a2}
                                     placeholder="Contoh: Kab. Banyumas, Kota Purwokerto"
-                                    class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                                 />
                             </div>
 
@@ -806,7 +806,7 @@
                                         };
                                         form.detail_jawaban.f14 = mapping[e.target.value] || 2;
                                     }}
-                                    class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                 >
                                     <option value="sangat_erat">Sangat Erat (100% Sesuai Jurusan)</option>
                                     <option value="erat">Erat (Sesuai Bidang Keilmuan)</option>
@@ -836,7 +836,7 @@
                                         };
                                         form.detail_jawaban.f15 = mapping[e.target.value] || 2;
                                     }}
-                                    class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                 >
                                     <option value="setara">Setingkat Sama (Memerlukan Lulusan S1/D4)</option>
                                     <option value="tinggi">Setingkat Lebih Tinggi</option>
@@ -861,7 +861,7 @@
                                     type="text"
                                     bind:value={form.detail_jawaban.f18b}
                                     placeholder="Contoh: Universitas Gadjah Mada, ITB"
-                                    class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs focus:ring-2 focus:ring-teal-500 dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-teal-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                                     required
                                 />
                             </div>
@@ -876,7 +876,7 @@
                                     type="text"
                                     bind:value={form.detail_jawaban.f18c}
                                     placeholder="Contoh: Magister Ilmu Komputer"
-                                    class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs focus:ring-2 focus:ring-teal-500 dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-teal-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                                     required
                                 />
                             </div>
@@ -889,7 +889,7 @@
                                 <select
                                     id="f_f18a"
                                     bind:value={form.detail_jawaban.f18a}
-                                    class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 text-xs focus:ring-2 focus:ring-teal-500 dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 focus:ring-2 focus:ring-teal-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                 >
                                     <option value={1}>Biaya Sendiri / Keluarga</option>
                                     <option value={2}>Beasiswa Lembaga / Pemerintah (LPDP, dsb)</option>
@@ -905,7 +905,7 @@
                                     id="f_f18d"
                                     type="date"
                                     bind:value={form.detail_jawaban.f18d}
-                                    class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs focus:ring-2 focus:ring-teal-500 dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 focus:ring-2 focus:ring-teal-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                 />
                             </div>
                         </div>
@@ -981,7 +981,7 @@
                                 <select
                                     id="f_f301"
                                     bind:value={form.detail_jawaban.f301}
-                                    class="h-9 w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 text-xs dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-9 w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                 >
                                     <option value={1}>Kira-kira sebelum lulus</option>
                                     <option value={2}>Kira-kira setelah lulus</option>
@@ -998,7 +998,7 @@
                                     type="number"
                                     min="0"
                                     bind:value={form.detail_jawaban.f6}
-                                    class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                 />
                             </div>
 
@@ -1011,7 +1011,7 @@
                                     type="number"
                                     min="0"
                                     bind:value={form.detail_jawaban.f7}
-                                    class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                 />
                             </div>
 
@@ -1024,7 +1024,7 @@
                                     type="number"
                                     min="0"
                                     bind:value={form.detail_jawaban.f7a}
-                                    class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs dark:border-slate-800 dark:bg-slate-900"
+                                    class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                 />
                             </div>
                         </div>
@@ -1073,20 +1073,20 @@
                             <div class="flex flex-wrap items-center justify-between gap-3 text-xs">
                                 <span class="w-52 font-bold text-slate-700 dark:text-slate-200">Etika</span>
                                 <div class="flex items-center gap-4">
-                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
                                         Saat Lulus (F1761):
                                         <select
                                             bind:value={form.detail_jawaban.f1761}
-                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold dark:border-slate-800 dark:bg-slate-900"
+                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                         >
                                             {#each [1, 2, 3, 4, 5] as val}<option value={val}>{val}</option>{/each}
                                         </select>
                                     </label>
-                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
                                         Diperlukan Kerja (F1762):
                                         <select
                                             bind:value={form.detail_jawaban.f1762}
-                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold dark:border-slate-800 dark:bg-slate-900"
+                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                         >
                                             {#each [1, 2, 3, 4, 5] as val}<option value={val}>{val}</option>{/each}
                                         </select>
@@ -1102,20 +1102,20 @@
                                     >Keahlian berdasarkan bidang ilmu</span
                                 >
                                 <div class="flex items-center gap-4">
-                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
                                         Saat Lulus (F1763):
                                         <select
                                             bind:value={form.detail_jawaban.f1763}
-                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold dark:border-slate-800 dark:bg-slate-900"
+                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                         >
                                             {#each [1, 2, 3, 4, 5] as val}<option value={val}>{val}</option>{/each}
                                         </select>
                                     </label>
-                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
                                         Diperlukan Kerja (F1764):
                                         <select
                                             bind:value={form.detail_jawaban.f1764}
-                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold dark:border-slate-800 dark:bg-slate-900"
+                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                         >
                                             {#each [1, 2, 3, 4, 5] as val}<option value={val}>{val}</option>{/each}
                                         </select>
@@ -1129,20 +1129,20 @@
                             >
                                 <span class="w-52 font-bold text-slate-700 dark:text-slate-200">Bahasa Inggris</span>
                                 <div class="flex items-center gap-4">
-                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
                                         Saat Lulus (F1765):
                                         <select
                                             bind:value={form.detail_jawaban.f1765}
-                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold dark:border-slate-800 dark:bg-slate-900"
+                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                         >
                                             {#each [1, 2, 3, 4, 5] as val}<option value={val}>{val}</option>{/each}
                                         </select>
                                     </label>
-                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
                                         Diperlukan Kerja (F1766):
                                         <select
                                             bind:value={form.detail_jawaban.f1766}
-                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold dark:border-slate-800 dark:bg-slate-900"
+                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                         >
                                             {#each [1, 2, 3, 4, 5] as val}<option value={val}>{val}</option>{/each}
                                         </select>
@@ -1158,20 +1158,20 @@
                                     >Penggunaan Teknologi Informasi</span
                                 >
                                 <div class="flex items-center gap-4">
-                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
                                         Saat Lulus (F1767):
                                         <select
                                             bind:value={form.detail_jawaban.f1767}
-                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold dark:border-slate-800 dark:bg-slate-900"
+                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                         >
                                             {#each [1, 2, 3, 4, 5] as val}<option value={val}>{val}</option>{/each}
                                         </select>
                                     </label>
-                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
                                         Diperlukan Kerja (F1768):
                                         <select
                                             bind:value={form.detail_jawaban.f1768}
-                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold dark:border-slate-800 dark:bg-slate-900"
+                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                         >
                                             {#each [1, 2, 3, 4, 5] as val}<option value={val}>{val}</option>{/each}
                                         </select>
@@ -1185,20 +1185,20 @@
                             >
                                 <span class="w-52 font-bold text-slate-700 dark:text-slate-200">Komunikasi</span>
                                 <div class="flex items-center gap-4">
-                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
                                         Saat Lulus (F1769):
                                         <select
                                             bind:value={form.detail_jawaban.f1769}
-                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold dark:border-slate-800 dark:bg-slate-900"
+                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                         >
                                             {#each [1, 2, 3, 4, 5] as val}<option value={val}>{val}</option>{/each}
                                         </select>
                                     </label>
-                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
                                         Diperlukan Kerja (F1770):
                                         <select
                                             bind:value={form.detail_jawaban.f1770}
-                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold dark:border-slate-800 dark:bg-slate-900"
+                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                         >
                                             {#each [1, 2, 3, 4, 5] as val}<option value={val}>{val}</option>{/each}
                                         </select>
@@ -1212,20 +1212,20 @@
                             >
                                 <span class="w-52 font-bold text-slate-700 dark:text-slate-200">Kerja sama tim</span>
                                 <div class="flex items-center gap-4">
-                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
                                         Saat Lulus (F1771):
                                         <select
                                             bind:value={form.detail_jawaban.f1771}
-                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold dark:border-slate-800 dark:bg-slate-900"
+                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                         >
                                             {#each [1, 2, 3, 4, 5] as val}<option value={val}>{val}</option>{/each}
                                         </select>
                                     </label>
-                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
                                         Diperlukan Kerja (F1772):
                                         <select
                                             bind:value={form.detail_jawaban.f1772}
-                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold dark:border-slate-800 dark:bg-slate-900"
+                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                         >
                                             {#each [1, 2, 3, 4, 5] as val}<option value={val}>{val}</option>{/each}
                                         </select>
@@ -1239,20 +1239,20 @@
                             >
                                 <span class="w-52 font-bold text-slate-700 dark:text-slate-200">Pengembangan</span>
                                 <div class="flex items-center gap-4">
-                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
                                         Saat Lulus (F1773):
                                         <select
                                             bind:value={form.detail_jawaban.f1773}
-                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold dark:border-slate-800 dark:bg-slate-900"
+                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                         >
                                             {#each [1, 2, 3, 4, 5] as val}<option value={val}>{val}</option>{/each}
                                         </select>
                                     </label>
-                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                    <label class="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
                                         Diperlukan Kerja (F1774):
                                         <select
                                             bind:value={form.detail_jawaban.f1774}
-                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold dark:border-slate-800 dark:bg-slate-900"
+                                            class="h-8 rounded border border-slate-200 bg-white px-2 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                                         >
                                             {#each [1, 2, 3, 4, 5] as val}<option value={val}>{val}</option>{/each}
                                         </select>
